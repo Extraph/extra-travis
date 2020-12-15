@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace Ema.Ijoins.Api.Models
+namespace Ema.Ijoins.Api.EfModels
 {
     public partial class TbKlcFileImport
     {

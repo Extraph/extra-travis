@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
-namespace Ema.Ijoins.Api.Models
+namespace Ema.Ijoins.Api.EfModels
 {
     public partial class ema_databaseContext : DbContext
     {
