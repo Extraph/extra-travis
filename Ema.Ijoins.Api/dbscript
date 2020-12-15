@@ -1,0 +1,2 @@
+
+dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=5432;Database=ema_database;Username=ema_user;Password=magical_password" Npgsql.EntityFrameworkCore.PostgreSQL -o Models -f
