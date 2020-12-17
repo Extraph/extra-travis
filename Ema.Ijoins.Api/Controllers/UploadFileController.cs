@@ -91,11 +91,13 @@ namespace Ema.Ijoins.Api.Controllers
           Guidname = guid.ToString() + ext
         };
 
+        List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcel(pathGuid);
+
         return Ok(new
         {
           success = true,
           message = "",
-          data = attachFiles
+          data = tbKlcDatas
         });
       }
       catch (System.Exception e)
