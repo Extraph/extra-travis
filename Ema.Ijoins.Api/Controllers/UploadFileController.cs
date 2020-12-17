@@ -6,8 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
-// using amhd.Helpers;
-// using amhd.ModelsEntity;
+using Ema.Ijoins.Api.Helpers;
 using System.Net.Http.Headers;
 using Ema.Ijoins.Api.EfModels;
 
@@ -44,84 +43,83 @@ namespace Ema.Ijoins.Api.Controllers
     //}
 
 
-    //[HttpPost("UploadFile")]
-    //[DisableRequestSizeLimit]
-    //public async Task<IActionResult> UploadFile(IFormFile file)
-    //{
-    //  try
-    //  {
-    //    if (file == null || file.Length == 0)
-    //      return Content("file not selected");
+    [HttpPost("UploadFile")]
+    [DisableRequestSizeLimit]
+    public async Task<IActionResult> UploadFile(IFormFile file)
+    {
+      try
+      {
+        if (file == null || file.Length == 0)
+          return Content("file not selected");
 
-    //    var path = Path.Combine(
-    //                Directory.GetCurrentDirectory(), "FileUploaded", "Knowledge",
-    //                file.GetFilename());
-
-
-
-    //    using (var stream = new FileStream(path, FileMode.Create))
-    //    {
-    //      await file.CopyToAsync(stream);
-    //    }
-
-    //    //MerchantKnowledgeAttachFile attachFiles = new MerchantKnowledgeAttachFile
-    //    //{
-    //    //  Filename = file.GetFilename()
-    //    //};
-
-    //    return Ok(new
-    //    {
-    //      success = true,
-    //      message = "",
-    //      data = attachFiles
-    //    });
-    //    //return RedirectToAction("Files");
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
+        var path = Path.Combine(
+                    Directory.GetCurrentDirectory(), "FileUploaded", "KLC",
+                    file.GetFilename());
 
 
-    //[HttpPost("UploadFiles")]
-    //[DisableRequestSizeLimit]
-    //public async Task<IActionResult> UploadFiles(List<IFormFile> files)
-    //{
-    //  try
-    //  {
-    //    if (files == null || files.Count == 0)
-    //      return Content("files not selected");
 
-    //    foreach (var file in files)
-    //    {
-    //      var path = Path.Combine(
-    //              Directory.GetCurrentDirectory(), "FileUploaded",
-    //              file.GetFilename());
+        using (var stream = new FileStream(path, FileMode.Create))
+        {
+          await file.CopyToAsync(stream);
+        }
 
-    //      using (var stream = new FileStream(path, FileMode.Create))
-    //      {
-    //        await file.CopyToAsync(stream);
-    //      }
-    //    }
+        TbmKlcFileImport attachFiles = new TbmKlcFileImport
+        {
+          Filename = file.GetFilename()
+        };
 
-    //    return RedirectToAction("Files");
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
+        return Ok(new
+        {
+          success = true,
+          message = "",
+          data = attachFiles
+        });
+      }
+      catch (System.Exception e)
+      {
+        return Ok(new
+        {
+          success = false,
+          message = e.Message,
+          data = ""
+        });
+      }
+    }
+
+
+    [HttpPost("UploadFiles")]
+    [DisableRequestSizeLimit]
+    public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+    {
+      try
+      {
+        if (files == null || files.Count == 0)
+          return Content("files not selected");
+
+        foreach (var file in files)
+        {
+          var path = Path.Combine(
+                  Directory.GetCurrentDirectory(), "FileUploaded",
+                  file.GetFilename());
+
+          using (var stream = new FileStream(path, FileMode.Create))
+          {
+            await file.CopyToAsync(stream);
+          }
+        }
+
+        return RedirectToAction("Files");
+      }
+      catch (System.Exception e)
+      {
+        return Ok(new
+        {
+          success = false,
+          message = e.Message,
+          data = ""
+        });
+      }
+    }
 
 
 
