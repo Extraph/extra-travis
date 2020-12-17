@@ -28,5 +28,6 @@
 
   <ItemGroup>
     <Folder Include="FileUploaded\KLC\" />
+    <Folder Include="FileUploaded\Banner\" />
   </ItemGroup>
 </Project>

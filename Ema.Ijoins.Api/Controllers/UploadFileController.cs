@@ -25,47 +25,70 @@ namespace Ema.Ijoins.Api.Controllers
       _context = context;
     }
 
-    //[HttpGet]
-    //public IActionResult GetUploadFile()
-    //{
-    //  var model = new FilesViewModel();
-    //  foreach (var item in this.fileProvider.GetDirectoryContents("Knowledge"))
-    //  {
-    //    model.Files.Add(
-    //        new FileDetails { Name = item.Name, Path = item.PhysicalPath });
-    //  }
-    //  return Ok(new
-    //  {
-    //    success = true,
-    //    message = "",
-    //    data = model
-    //  });
-    //}
 
+    [HttpGet("GetKlc")]
+    public IActionResult GetKlc()
+    {
+      var model = new FilesViewModel();
+      foreach (var item in this.fileProvider.GetDirectoryContents("KLC"))
+      {
+        model.Files.Add(
+            new FileDetails { Name = item.Name, Path = item.PhysicalPath });
+      }
+      return Ok(new
+      {
+        success = true,
+        message = "",
+        data = model
+      });
+    }
+    [HttpGet("GetBanner")]
+    public IActionResult GetBanner()
+    {
+      var model = new FilesViewModel();
+      foreach (var item in this.fileProvider.GetDirectoryContents("Banner"))
+      {
+        model.Files.Add(
+            new FileDetails { Name = item.Name, Path = item.PhysicalPath });
+      }
+      return Ok(new
+      {
+        success = true,
+        message = "",
+        data = model
+      });
+    }
 
-    [HttpPost("UploadFile")]
+    [HttpPost("UploadFileKlc")]
     [DisableRequestSizeLimit]
-    public async Task<IActionResult> UploadFile(IFormFile file)
+    public async Task<IActionResult> UploadFileKlc(IFormFile file)
     {
       try
       {
         if (file == null || file.Length == 0)
           return Content("file not selected");
 
+        Guid guid = Guid.NewGuid();
+
         var path = Path.Combine(
                     Directory.GetCurrentDirectory(), "FileUploaded", "KLC",
                     file.GetFilename());
 
+        var ext = Path.GetExtension(path).ToLowerInvariant();
 
+        var pathGuid = Path.Combine(
+                  Directory.GetCurrentDirectory(), "FileUploaded", "KLC",
+                  guid.ToString() + ext);
 
-        using (var stream = new FileStream(path, FileMode.Create))
+        using (var stream = new FileStream(pathGuid, FileMode.Create))
         {
           await file.CopyToAsync(stream);
         }
 
         TbmKlcFileImport attachFiles = new TbmKlcFileImport
         {
-          Filename = file.GetFilename()
+          Filename = file.GetFilename(),
+          Guidname = guid.ToString() + ext
         };
 
         return Ok(new
@@ -86,29 +109,44 @@ namespace Ema.Ijoins.Api.Controllers
       }
     }
 
-
-    [HttpPost("UploadFiles")]
+    [HttpPost("UploadFileBanner")]
     [DisableRequestSizeLimit]
-    public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+    public async Task<IActionResult> UploadFileBanner(IFormFile file)
     {
       try
       {
-        if (files == null || files.Count == 0)
-          return Content("files not selected");
+        if (file == null || file.Length == 0)
+          return Content("file not selected");
 
-        foreach (var file in files)
+        Guid guid = Guid.NewGuid();
+
+        var path = Path.Combine(
+                    Directory.GetCurrentDirectory(), "FileUploaded", "Banner",
+                    file.GetFilename());
+
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+
+        var pathGuid = Path.Combine(
+                  Directory.GetCurrentDirectory(), "FileUploaded", "Banner",
+                  guid.ToString() + ext);
+
+        using (var stream = new FileStream(pathGuid, FileMode.Create))
         {
-          var path = Path.Combine(
-                  Directory.GetCurrentDirectory(), "FileUploaded",
-                  file.GetFilename());
-
-          using (var stream = new FileStream(path, FileMode.Create))
-          {
-            await file.CopyToAsync(stream);
-          }
+          await file.CopyToAsync(stream);
         }
 
-        return RedirectToAction("Files");
+        TbmKlcFileImport attachFiles = new TbmKlcFileImport
+        {
+          Filename = file.GetFilename(),
+          Guidname = guid.ToString() + ext
+        };
+
+        return Ok(new
+        {
+          success = true,
+          message = "",
+          data = attachFiles
+        });
       }
       catch (System.Exception e)
       {
@@ -121,243 +159,74 @@ namespace Ema.Ijoins.Api.Controllers
       }
     }
 
+    [HttpGet("DeleteBanner/{filename}")]
+    public IActionResult DeleteBanner(string filename)
+    {
+      try
+      {
+        if (filename == null)
+          return Content("filename not present");
 
+        var path = Path.Combine(
+                    Directory.GetCurrentDirectory(), "FileUploaded", "Banner",
+                    filename);
 
-    //[HttpPost("AttachFiles"), DisableRequestSizeLimit]
-    //public async Task<IActionResult> AttachFiles(List<IFormFile> files)
-    //{
-    //  try
-    //  {
-    //    if (files == null || files.Count == 0)
-    //      return Content("files not selected");
+        if (System.IO.File.Exists(path))
+        {
+          System.IO.File.Delete(path);
+        }
+        return Ok(new
+        {
+          success = true,
+          message = "Delete Success",
+          data = ""
+        });
+      }
+      catch (System.Exception e)
+      {
+        return Ok(new
+        {
+          success = false,
+          message = e.Message,
+          data = ""
+        });
+      }
+    }
 
-    //    List<MerchantEmailAttachFile> attachFiles = new List<MerchantEmailAttachFile>();
-    //    foreach (var file in files)
-    //    {
-    //      Guid guid = Guid.NewGuid();
+    [HttpGet("DeleteKlc/{filename}")]
+    public IActionResult DeleteKlc(string filename)
+    {
+      try
+      {
+        if (filename == null)
+          return Content("filename not present");
 
-    //      var path = Path.Combine(
-    //              Directory.GetCurrentDirectory(), "FileUploaded",
-    //              file.GetFilename());
+        var path = Path.Combine(
+                    Directory.GetCurrentDirectory(), "FileUploaded", "KLC",
+                    filename);
 
-    //      var ext = Path.GetExtension(path).ToLowerInvariant();
+        if (System.IO.File.Exists(path))
+        {
+          System.IO.File.Delete(path);
+        }
+        return Ok(new
+        {
+          success = true,
+          message = "Delete Success",
+          data = ""
+        });
+      }
+      catch (System.Exception e)
+      {
+        return Ok(new
+        {
+          success = false,
+          message = e.Message,
+          data = ""
+        });
+      }
+    }
 
-    //      var pathGuid = Path.Combine(
-    //              Directory.GetCurrentDirectory(), "FileUploaded",
-    //              guid.ToString() + ext);
-
-    //      using (var stream = new FileStream(pathGuid, FileMode.Create))
-    //      {
-    //        await file.CopyToAsync(stream);
-    //      }
-
-    //      attachFiles.Add(new MerchantEmailAttachFile
-    //      {
-    //        Filename = file.GetFilename(),
-    //        Guidname = guid.ToString() + ext
-    //      });
-    //    }
-
-    //    return Ok(new
-    //    {
-    //      success = true,
-    //      message = "",
-    //      data = attachFiles
-    //    });
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
-
-
-    //public IActionResult Files()
-    //{
-    //  var model = new FilesViewModel();
-    //  foreach (var item in this.fileProvider.GetDirectoryContents("Knowledge"))
-    //  {
-    //    model.Files.Add(
-    //        new FileDetails { Name = item.Name, Path = item.PhysicalPath });
-    //  }
-    //  return Ok(new
-    //  {
-    //    success = true,
-    //    message = "",
-    //    data = model
-    //  });
-    //}
-
-    //[HttpGet("DownloadKnowledge/{filename}")]
-    //public async Task<IActionResult> DownloadKnowledge(string filename)
-    //{
-    //  try
-    //  {
-    //    if (filename == null)
-    //      return Content("filename not present");
-
-    //    var path = Path.Combine(
-    //                   Directory.GetCurrentDirectory(),
-    //                   "FileUploaded", "Knowledge", filename);
-
-    //    var memory = new MemoryStream();
-    //    using (var stream = new FileStream(path, FileMode.Open))
-    //    {
-    //      await stream.CopyToAsync(memory);
-    //    }
-    //    memory.Position = 0;
-    //    return File(memory, GetContentType(path), Path.GetFileName(path));
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
-
-    //[HttpGet("DownloadFile/{filename}")]
-    //public async Task<IActionResult> Download(string filename)
-    //{
-    //  try
-    //  {
-    //    if (filename == null)
-    //      return Content("filename not present");
-
-    //    var path = Path.Combine(
-    //                   Directory.GetCurrentDirectory(),
-    //                   "FileUploaded", filename);
-
-    //    var memory = new MemoryStream();
-    //    using (var stream = new FileStream(path, FileMode.Open))
-    //    {
-    //      await stream.CopyToAsync(memory);
-    //    }
-    //    memory.Position = 0;
-    //    return File(memory, GetContentType(path), Path.GetFileName(path));
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
-
-    //[HttpGet("DeleteFileKnowledge/{filename}/{id}")]
-    //public async Task<IActionResult> DeleteKnowledge(string filename, int id)
-    //{
-    //  try
-    //  {
-    //    if (filename == null)
-    //      return Content("filename not present");
-
-    //    var path = Path.Combine(
-    //                Directory.GetCurrentDirectory(), "FileUploaded", "Knowledge",
-    //                filename);
-
-    //    if (System.IO.File.Exists(path))
-    //    {
-    //      System.IO.File.Delete(path);
-    //    }
-
-
-    //    var knowledgeAttachFile = await _context.MerchantKnowledgeAttachFile.FindAsync(id);
-    //    if (knowledgeAttachFile == null)
-    //    {
-    //      return NotFound();
-    //    }
-
-    //    _context.MerchantKnowledgeAttachFile.Remove(knowledgeAttachFile);
-    //    await _context.SaveChangesAsync();
-
-    //    return Ok(new
-    //    {
-    //      success = true,
-    //      message = "Delete Success",
-    //      data = ""
-    //    });
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
-
-    //[HttpGet("DeleteFile/{filename}")]
-    //public IActionResult Delete(string filename)
-    //{
-    //  try
-    //  {
-    //    if (filename == null)
-    //      return Content("filename not present");
-
-    //    var path = Path.Combine(
-    //                Directory.GetCurrentDirectory(), "FileUploaded",
-    //                filename);
-
-    //    if (System.IO.File.Exists(path))
-    //    {
-    //      System.IO.File.Delete(path);
-    //    }
-    //    return Ok(new
-    //    {
-    //      success = true,
-    //      message = "Delete Success",
-    //      data = ""
-    //    });
-    //  }
-    //  catch (System.Exception e)
-    //  {
-    //    return Ok(new
-    //    {
-    //      success = false,
-    //      message = e.Message,
-    //      data = ""
-    //    });
-    //  }
-    //}
-
-    //private string GetContentType(string path)
-    //{
-    //  var types = GetMimeTypes();
-    //  var ext = Path.GetExtension(path).ToLowerInvariant();
-    //  return types[ext];
-    //}
-
-    //private Dictionary<string, string> GetMimeTypes()
-    //{
-    //  return new Dictionary<string, string>
-    //        {
-    //            {".txt", "text/plain"},
-    //            {".pdf", "application/pdf"},
-    //            {".doc", "application/vnd.ms-word"},
-    //            {".docx", "application/vnd.ms-word"},
-    //            {".xls", "application/vnd.ms-excel"},
-    //            {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-    //            {".png", "image/png"},
-    //            {".jpg", "image/jpeg"},
-    //            {".jpeg", "image/jpeg"},
-    //            {".gif", "image/gif"},
-    //            {".csv", "text/csv"}
-    //        };
-    //}
 
   }
 }
