@@ -11,5 +11,6 @@ namespace Ema.Ijoins.Api.EfModels
         public string Filename { get; set; }
         public DateTime Createdatetime { get; set; }
         public string Status { get; set; }
+        public string Guidname { get; set; }
     }
 }

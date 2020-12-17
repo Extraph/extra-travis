@@ -222,6 +222,10 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("filename");
 
+                entity.Property(e => e.Guidname)
+                    .IsRequired()
+                    .HasColumnName("guidname");
+
                 entity.Property(e => e.Status)
                     .IsRequired()
                     .HasColumnName("status")
