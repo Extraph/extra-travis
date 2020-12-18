@@ -42,7 +42,6 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     // PUT: api/TbmKlcFileImports/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     public async Task<IActionResult> PutTbmKlcFileImport(int id, TbmKlcFileImport tbmKlcFileImport)
     {
@@ -73,7 +72,6 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     // POST: api/TbmKlcFileImports
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
     public async Task<ActionResult<TbmKlcFileImport>> PostTbmKlcFileImport(TbmKlcFileImport tbmKlcFileImport)
     {

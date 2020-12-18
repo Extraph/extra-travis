@@ -12,7 +12,7 @@ using Ema.Ijoins.Api.EfModels;
 
 namespace Ema.Ijoins.Api.Controllers
 {
-  [Route("[controller]")]
+  [Route("api/[controller]")]
   [ApiController]
   public class UploadFileController : ControllerBase
   {
@@ -97,7 +97,9 @@ namespace Ema.Ijoins.Api.Controllers
         {
           success = true,
           message = "",
-          data = tbKlcDatas
+          fileUploadInfo = attachFiles,
+          dataSuccess = tbKlcDatas,
+          dataFail = tbKlcDatas
         });
       }
       catch (System.Exception e)
@@ -105,8 +107,7 @@ namespace Ema.Ijoins.Api.Controllers
         return Ok(new
         {
           success = false,
-          message = e.Message,
-          data = ""
+          message = e.Message
         });
       }
     }

@@ -60,6 +60,12 @@ namespace Ema.Ijoins.Api
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ema.Ijoins.Api v1"));
       }
 
+      app.UseCors(x => x
+          .AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          );
+
       app.UseHttpsRedirection();
 
       app.UseRouting();
