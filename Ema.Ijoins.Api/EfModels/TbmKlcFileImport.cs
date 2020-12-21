@@ -7,10 +7,19 @@ namespace Ema.Ijoins.Api.EfModels
 {
     public partial class TbmKlcFileImport
     {
+        public TbmKlcFileImport()
+        {
+            TbKlcDataMasterHis = new HashSet<TbKlcDataMasterHi>();
+            TbKlcDataMasters = new HashSet<TbKlcDataMaster>();
+        }
+
         public int Id { get; set; }
         public string Filename { get; set; }
         public DateTime Createdatetime { get; set; }
         public string Status { get; set; }
         public string Guidname { get; set; }
+
+        public virtual ICollection<TbKlcDataMasterHi> TbKlcDataMasterHis { get; set; }
+        public virtual ICollection<TbKlcDataMaster> TbKlcDataMasters { get; set; }
     }
 }

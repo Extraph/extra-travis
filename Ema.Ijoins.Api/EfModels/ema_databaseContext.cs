@@ -36,11 +36,11 @@ namespace Ema.Ijoins.Api.EfModels
 
             modelBuilder.Entity<TbKlcDataMaster>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("TB_KLC_DATA_MASTER");
 
                 entity.HasIndex(e => e.FileId, "fki_fk_tbm_klc_file_import_id");
+
+                entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
 
@@ -115,7 +115,7 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.Venue).HasColumnName("venue");
 
                 entity.HasOne(d => d.File)
-                    .WithMany()
+                    .WithMany(p => p.TbKlcDataMasters)
                     .HasForeignKey(d => d.FileId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_tbm_klc_file_import_id");
@@ -123,11 +123,11 @@ namespace Ema.Ijoins.Api.EfModels
 
             modelBuilder.Entity<TbKlcDataMasterHi>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("TB_KLC_DATA_MASTER_HIS");
 
                 entity.HasIndex(e => e.FileId, "fki_fk_tbm_klc_file_import_id_his");
+
+                entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
 
@@ -202,7 +202,7 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.Venue).HasColumnName("venue");
 
                 entity.HasOne(d => d.File)
-                    .WithMany()
+                    .WithMany(p => p.TbKlcDataMasterHis)
                     .HasForeignKey(d => d.FileId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_tbm_klc_file_import_id_his");
@@ -229,7 +229,7 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.Status)
                     .IsRequired()
                     .HasColumnName("status")
-                    .HasComment("success, failed, notvalid\n");
+                    .HasComment("upload, import success, import failed, file not valid\n");
             });
 
             modelBuilder.HasSequence("TBM_KLC_FILE_IMPORT_id_seq").HasMax(2147483647);

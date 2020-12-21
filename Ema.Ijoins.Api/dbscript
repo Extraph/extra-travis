@@ -3,7 +3,7 @@ dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=5432;Database=ema_database;U
 
 
   [Course Master]
-  course_type (*required)
+	course_type (*required)
 	course_id (*required)
 	course_name (*required)	
 	course_name_th	

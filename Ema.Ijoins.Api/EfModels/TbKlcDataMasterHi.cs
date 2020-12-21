@@ -30,6 +30,7 @@ namespace Ema.Ijoins.Api.EfModels
         public string UserId { get; set; }
         public string RegistrationStatus { get; set; }
         public DateTime Createdatetime { get; set; }
+        public int Id { get; set; }
 
         public virtual TbmKlcFileImport File { get; set; }
     }

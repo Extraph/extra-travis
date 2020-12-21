@@ -80,26 +80,38 @@ namespace Ema.Ijoins.Api.Controllers
                   Directory.GetCurrentDirectory(), "FileUploaded", "KLC",
                   guid.ToString() + ext);
 
+        TbmKlcFileImport attachFiles;
         using (var stream = new FileStream(pathGuid, FileMode.Create))
         {
           await file.CopyToAsync(stream);
+
+          attachFiles = new TbmKlcFileImport
+          {
+            Filename = file.GetFilename(),
+            Guidname = guid.ToString() + ext,
+            Status = "upload"
+          };
+          _context.TbmKlcFileImports.Add(attachFiles);
+          await _context.SaveChangesAsync();
         }
 
-        TbmKlcFileImport attachFiles = new TbmKlcFileImport
-        {
-          Filename = file.GetFilename(),
-          Guidname = guid.ToString() + ext
-        };
+        List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcel(pathGuid, attachFiles);
+        _context.TbKlcDataMasters.RemoveRange(_context.TbKlcDataMasters.ToList());
+        await _context.SaveChangesAsync();
+        _context.TbKlcDataMasters.AddRange(tbKlcDatas);
+        await _context.SaveChangesAsync();
 
-        List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcel(pathGuid);
-
+        List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas);
+        
         return Ok(new
         {
           success = true,
           message = "",
-          fileUploadInfo = attachFiles,
-          dataSuccess = tbKlcDatas,
-          dataFail = tbKlcDatas
+          fileUploadId = attachFiles.Id,
+          totalNo = tbKlcDatas.Count,
+          validNo = tbKlcDatas.Count - tbKlcDatasInvalid.Count,
+          invalidNo = tbKlcDatasInvalid.Count,
+          dataInvalid = tbKlcDatasInvalid
         });
       }
       catch (System.Exception e)
