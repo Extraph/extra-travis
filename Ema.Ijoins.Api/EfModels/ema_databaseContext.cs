@@ -70,6 +70,8 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("end_date");
 
+                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
+
                 entity.Property(e => e.EndTime)
                     .IsRequired()
                     .HasColumnName("end_time");
@@ -101,6 +103,8 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.StartDate)
                     .IsRequired()
                     .HasColumnName("start_date");
+
+                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
 
                 entity.Property(e => e.StartTime)
                     .IsRequired()
@@ -157,6 +161,8 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("end_date");
 
+                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
+
                 entity.Property(e => e.EndTime)
                     .IsRequired()
                     .HasColumnName("end_time");
@@ -188,6 +194,8 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.StartDate)
                     .IsRequired()
                     .HasColumnName("start_date");
+
+                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
 
                 entity.Property(e => e.StartTime)
                     .IsRequired()
@@ -226,11 +234,21 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("guidname");
 
+                entity.Property(e => e.Importby)
+                    .IsRequired()
+                    .HasColumnName("importby");
+
                 entity.Property(e => e.Status)
                     .IsRequired()
                     .HasColumnName("status")
                     .HasComment("upload, import success, import failed, file not valid\n");
+
+                entity.Property(e => e.Totalrecords).HasColumnName("totalrecords");
             });
+
+            modelBuilder.HasSequence("TB_KLC_DATA_MASTER_HIS_id_seq").HasMax(2147483647);
+
+            modelBuilder.HasSequence("TB_KLC_DATA_MASTER_id_seq").HasMax(2147483647);
 
             modelBuilder.HasSequence("TBM_KLC_FILE_IMPORT_id_seq").HasMax(2147483647);
 

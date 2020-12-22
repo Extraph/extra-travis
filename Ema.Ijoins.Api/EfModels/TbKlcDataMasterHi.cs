@@ -7,6 +7,7 @@ namespace Ema.Ijoins.Api.EfModels
 {
     public partial class TbKlcDataMasterHi
     {
+        public int Id { get; set; }
         public int FileId { get; set; }
         public string CourseType { get; set; }
         public string CourseId { get; set; }
@@ -20,6 +21,8 @@ namespace Ema.Ijoins.Api.EfModels
         public string EndDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
+        public DateTime StartDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
         public string CourseOwnerEmail { get; set; }
         public string CourseOwnerContactNo { get; set; }
         public string Venue { get; set; }
@@ -30,7 +33,6 @@ namespace Ema.Ijoins.Api.EfModels
         public string UserId { get; set; }
         public string RegistrationStatus { get; set; }
         public DateTime Createdatetime { get; set; }
-        public int Id { get; set; }
 
         public virtual TbmKlcFileImport File { get; set; }
     }

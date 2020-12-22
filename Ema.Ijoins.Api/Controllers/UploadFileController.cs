@@ -89,24 +89,39 @@ namespace Ema.Ijoins.Api.Controllers
           {
             Filename = file.GetFilename(),
             Guidname = guid.ToString() + ext,
-            Status = "upload"
+            Status = "upload",
+            Importby = "รัฐวิชญ์"
           };
           _context.TbmKlcFileImports.Add(attachFiles);
           await _context.SaveChangesAsync();
         }
 
-        List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcel(pathGuid, attachFiles);
-        _context.TbKlcDataMasters.RemoveRange(_context.TbKlcDataMasters.ToList());
-        await _context.SaveChangesAsync();
-        _context.TbKlcDataMasters.AddRange(tbKlcDatas);
+        List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcelEPPlus(pathGuid, attachFiles);
+        List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas);
+
+        List<TbKlcDataMasterHi> klcDataMasterHi = Utility.MoveDataToHis(_context.TbKlcDataMasters.ToList());
+        _context.TbKlcDataMasterHis.AddRange(klcDataMasterHi);
         await _context.SaveChangesAsync();
 
-        List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas);
-        
+        _context.TbKlcDataMasters.RemoveRange(_context.TbKlcDataMasters.ToList());
+        await _context.SaveChangesAsync();
+
+
+        string strMessage = "";
+        try
+        {
+          _context.TbKlcDataMasters.AddRange(tbKlcDatas);
+          await _context.SaveChangesAsync();
+        }
+        catch (System.Exception e)
+        {
+          strMessage = e.InnerException.Message;
+        }
+
         return Ok(new
         {
           success = true,
-          message = "",
+          message = strMessage,
           fileUploadId = attachFiles.Id,
           totalNo = tbKlcDatas.Count,
           validNo = tbKlcDatas.Count - tbKlcDatasInvalid.Count,

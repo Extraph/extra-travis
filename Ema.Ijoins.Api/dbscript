@@ -1,29 +1,31 @@
 
+dotnet tool install --global dotnet-ef
+
 dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=5432;Database=ema_database;Username=ema_user;Password=magical_password" Npgsql.EntityFrameworkCore.PostgreSQL -o EfModels -f
 
 
-  [Course Master]
-	course_type (*required)
-	course_id (*required)
-	course_name (*required)	
-	course_name_th	
-	session_id (*required)	
-	session_name (*required)	
-	segment_no (*required)	
-	segment_name	
-	start_date (*required)	
-	end_date (*required)	
-	start_time (*required)	
-	end_time (*required)	
-	course_owner_email (*required)	
-	course_owner_contactNo
-	venue
-	instructor
-	course_credit_hours
-	passing_criteria_exception
-	user_company
-	user_id (*required)	
-	registration_status (*required)
+[Course Master] 
+course_type (*required)
+course_id (*required)
+course_name (*required)	
+course_name_th	
+session_id (*required)	
+session_name (*required)	
+segment_no (*required)	
+segment_name	
+start_date (*required)	
+end_date (*required)	
+start_time (*required)	
+end_time (*required)	
+course_owner_email (*required)	
+course_owner_contactNo
+venue
+instructor
+course_credit_hours
+passing_criteria_exception
+user_company
+user_id (*required)	
+registration_status (*required)
 
 
 -- SEQUENCE: public.TBM_KLC_FILE_IMPORT_id_seq
@@ -77,9 +79,11 @@ CREATE TABLE public."TBM_KLC_FILE_IMPORT"
 (
     id integer NOT NULL DEFAULT nextval('"TBM_KLC_FILE_IMPORT_id_seq"'::regclass),
     filename text COLLATE pg_catalog."default" NOT NULL,
-    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     status text COLLATE pg_catalog."default" NOT NULL,
     guidname text COLLATE pg_catalog."default" NOT NULL,
+    importby text COLLATE pg_catalog."default" NOT NULL,
+    totalrecords text COLLATE pg_catalog."default",
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_KLC_FILE_IMPORT_pkey" PRIMARY KEY (id)
 )
 
@@ -99,6 +103,7 @@ COMMENT ON COLUMN public."TBM_KLC_FILE_IMPORT".status
 
 CREATE TABLE public."TB_KLC_DATA_MASTER"
 (
+    id integer NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_id_seq"'::regclass),
     file_id integer NOT NULL,
     course_type text COLLATE pg_catalog."default",
     course_id text COLLATE pg_catalog."default" NOT NULL,
@@ -112,6 +117,8 @@ CREATE TABLE public."TB_KLC_DATA_MASTER"
     end_date text COLLATE pg_catalog."default" NOT NULL,
     start_time text COLLATE pg_catalog."default" NOT NULL,
     end_time text COLLATE pg_catalog."default" NOT NULL,
+    start_date_time timestamp without time zone NOT NULL,
+    end_date_time timestamp without time zone NOT NULL,
     course_owner_email text COLLATE pg_catalog."default" NOT NULL,
     "course_owner_contactNo" text COLLATE pg_catalog."default",
     venue text COLLATE pg_catalog."default",
@@ -122,7 +129,6 @@ CREATE TABLE public."TB_KLC_DATA_MASTER"
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    id integer NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_id_seq"'::regclass),
     CONSTRAINT "TB_KLC_DATA_MASTER_pkey" PRIMARY KEY (id),
     CONSTRAINT fk_tbm_klc_file_import_id FOREIGN KEY (file_id)
         REFERENCES public."TBM_KLC_FILE_IMPORT" (id) MATCH SIMPLE
@@ -150,6 +156,7 @@ CREATE INDEX fki_fk_tbm_klc_file_import_id
 
 CREATE TABLE public."TB_KLC_DATA_MASTER_HIS"
 (
+    id integer NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_HIS_id_seq"'::regclass),
     file_id integer NOT NULL,
     course_type text COLLATE pg_catalog."default",
     course_id text COLLATE pg_catalog."default" NOT NULL,
@@ -163,6 +170,8 @@ CREATE TABLE public."TB_KLC_DATA_MASTER_HIS"
     end_date text COLLATE pg_catalog."default" NOT NULL,
     start_time text COLLATE pg_catalog."default" NOT NULL,
     end_time text COLLATE pg_catalog."default" NOT NULL,
+    start_date_time timestamp without time zone NOT NULL,
+    end_date_time timestamp without time zone NOT NULL,
     course_owner_email text COLLATE pg_catalog."default" NOT NULL,
     "course_owner_contactNo" text COLLATE pg_catalog."default",
     venue text COLLATE pg_catalog."default",
@@ -173,7 +182,6 @@ CREATE TABLE public."TB_KLC_DATA_MASTER_HIS"
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    id integer NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_HIS_id_seq"'::regclass),
     CONSTRAINT "TB_KLC_DATA_MASTER_HIS_pkey" PRIMARY KEY (id),
     CONSTRAINT fk_tbm_klc_file_import_id_his FOREIGN KEY (file_id)
         REFERENCES public."TBM_KLC_FILE_IMPORT" (id) MATCH SIMPLE
