@@ -27,16 +27,6 @@ namespace Ema.Ijoins.Api.Helpers
         for (int row = 2; row <= totalRows; row++)
         {
 
-          //if (
-          //    (string.IsNullOrEmpty(worksheet.Cells[row, 9].Value?.ToString()) ||
-          //    string.IsNullOrEmpty(worksheet.Cells[row, 10].Value?.ToString()) ||
-          //    string.IsNullOrEmpty(worksheet.Cells[row, 11].Value?.ToString()) ||
-          //    string.IsNullOrEmpty(worksheet.Cells[row, 12].Value?.ToString()))
-          //    )
-          //{
-
-          //}
-
           DateTime StartDate = (DateTime)worksheet.Cells[row, 9].Value;
           DateTime EndDate = (DateTime)worksheet.Cells[row, 10].Value;
 
@@ -70,7 +60,7 @@ namespace Ema.Ijoins.Api.Helpers
             CourseCreditHours = worksheet.Cells[row, 17].Value?.ToString(),
             PassingCriteriaException = worksheet.Cells[row, 18].Value?.ToString(),
             UserCompany = worksheet.Cells[row, 19].Value?.ToString(),
-            UserId = worksheet.Cells[row, 20].Value?.ToString(),
+            UserId = worksheet.Cells[row, 20].Value?.ToString().PadLeft(8, '0'),
             RegistrationStatus = worksheet.Cells[row, 21].Value?.ToString(),
           });
         }

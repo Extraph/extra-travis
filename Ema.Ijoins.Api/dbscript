@@ -29,6 +29,10 @@ user_id (*required)
 registration_status (*required)
 
 
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
 -- SEQUENCE: public.TBM_KLC_FILE_IMPORT_id_seq
 
 -- DROP SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq";
@@ -43,20 +47,6 @@ CREATE SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq"
 ALTER SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq"
     OWNER TO ema_user;
 
--- SEQUENCE: public.TB_KLC_DATA_MASTER_HIS_id_seq
-
--- DROP SEQUENCE public."TB_KLC_DATA_MASTER_HIS_id_seq";
-
-CREATE SEQUENCE public."TB_KLC_DATA_MASTER_HIS_id_seq"
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE public."TB_KLC_DATA_MASTER_HIS_id_seq"
-    OWNER TO ema_user;
-
 -- SEQUENCE: public.TB_KLC_DATA_MASTER_id_seq
 
 -- DROP SEQUENCE public."TB_KLC_DATA_MASTER_id_seq";
@@ -65,10 +55,25 @@ CREATE SEQUENCE public."TB_KLC_DATA_MASTER_id_seq"
     INCREMENT 1
     START 1
     MINVALUE 1
-    MAXVALUE 2147483647
+    MAXVALUE 9223372036854775807
     CACHE 1;
 
 ALTER SEQUENCE public."TB_KLC_DATA_MASTER_id_seq"
+    OWNER TO ema_user;
+
+
+-- SEQUENCE: public.TBM_COURSE_TYPE_id_seq
+
+-- DROP SEQUENCE public."TBM_COURSE_TYPE_id_seq";
+
+CREATE SEQUENCE public."TBM_COURSE_TYPE_id_seq"
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public."TBM_COURSE_TYPE_id_seq"
     OWNER TO ema_user;
 
 
@@ -84,6 +89,7 @@ CREATE TABLE public."TBM_KLC_FILE_IMPORT"
     guidname text COLLATE pg_catalog."default" NOT NULL,
     importby text COLLATE pg_catalog."default" NOT NULL,
     totalrecords text COLLATE pg_catalog."default",
+	importmessage text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_KLC_FILE_IMPORT_pkey" PRIMARY KEY (id)
 )
@@ -94,8 +100,8 @@ ALTER TABLE public."TBM_KLC_FILE_IMPORT"
     OWNER to ema_user;
 
 COMMENT ON COLUMN public."TBM_KLC_FILE_IMPORT".status
-    IS 'upload, import success, import failed, file not valid
-';
+    IS 'upload success, import success, import failed';
+
 
 
 -- Table: public.TB_KLC_DATA_MASTER
@@ -104,7 +110,7 @@ COMMENT ON COLUMN public."TBM_KLC_FILE_IMPORT".status
 
 CREATE TABLE public."TB_KLC_DATA_MASTER"
 (
-    id integer NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_id_seq"'::regclass),
+    id bigint NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_id_seq"'::regclass),
     file_id integer NOT NULL,
     course_type text COLLATE pg_catalog."default",
     course_id text COLLATE pg_catalog."default" NOT NULL,
@@ -157,7 +163,7 @@ CREATE INDEX fki_fk_tbm_klc_file_import_id
 
 CREATE TABLE public."TB_KLC_DATA_MASTER_HIS"
 (
-    id integer NOT NULL DEFAULT nextval('"TB_KLC_DATA_MASTER_HIS_id_seq"'::regclass),
+    id bigint NOT NULL,
     file_id integer NOT NULL,
     course_type text COLLATE pg_catalog."default",
     course_id text COLLATE pg_catalog."default" NOT NULL,
@@ -203,3 +209,54 @@ CREATE INDEX fki_fk_tbm_klc_file_import_id_his
     (file_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
+-- Table: public.TBM_COURSE_TYPE
+
+-- DROP TABLE public."TBM_COURSE_TYPE";
+
+CREATE TABLE public."TBM_COURSE_TYPE"
+(
+    id integer NOT NULL DEFAULT nextval('"TBM_COURSE_TYPE_id_seq"'::regclass),
+    course_type text COLLATE pg_catalog."default" NOT NULL,
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_COURSE_TYPE_pkey" PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_COURSE_TYPE"
+    OWNER to ema_user;
+
+-- Table: public.TBM_COURSE
+
+-- DROP TABLE public."TBM_COURSE";
+
+CREATE TABLE public."TBM_COURSE"
+(
+    course_id integer NOT NULL,
+    course_name text COLLATE pg_catalog."default" NOT NULL,
+    course_name_th text COLLATE pg_catalog."default",
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_COURSE_pkey" PRIMARY KEY (course_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_COURSE"
+    OWNER to ema_user;    
+
+-- Table: public.TBM_SESSION
+
+-- DROP TABLE public."TBM_SESSION";
+
+CREATE TABLE public."TBM_SESSION"
+(
+    session_id integer NOT NULL,
+    session_name text COLLATE pg_catalog."default",
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_SESSION_pkey" PRIMARY KEY (session_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_SESSION"
+    OWNER to ema_user;    

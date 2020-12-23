@@ -89,7 +89,7 @@ namespace Ema.Ijoins.Api.Controllers
           {
             Filename = file.GetFilename(),
             Guidname = guid.ToString() + ext,
-            Status = "upload",
+            Status = "upload success",
             Importby = "รัฐวิชญ์"
           };
           _context.TbmKlcFileImports.Add(attachFiles);
