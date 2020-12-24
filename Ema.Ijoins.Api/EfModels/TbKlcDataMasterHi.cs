@@ -7,7 +7,7 @@ namespace Ema.Ijoins.Api.EfModels
 {
     public partial class TbKlcDataMasterHi
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int FileId { get; set; }
         public string CourseType { get; set; }
         public string CourseId { get; set; }

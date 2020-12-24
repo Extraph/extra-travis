@@ -63,8 +63,11 @@ namespace Ema.Ijoins.Api.Controllers
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadFileKlc(IFormFile file)
     {
+      using var transaction = _context.Database.BeginTransaction();
+
       try
       {
+
         if (file == null || file.Length == 0)
           return Content("file not selected");
 
@@ -87,13 +90,14 @@ namespace Ema.Ijoins.Api.Controllers
 
           attachFiles = new TbmKlcFileImport
           {
-            Filename = file.GetFilename(),
-            Guidname = guid.ToString() + ext,
+            FileName = file.GetFilename(),
+            GuidName = guid.ToString() + ext,
             Status = "upload success",
-            Importby = "รัฐวิชญ์"
+            ImportBy = "รัฐวิชญ์"
           };
           _context.TbmKlcFileImports.Add(attachFiles);
           await _context.SaveChangesAsync();
+          await transaction.CreateSavepointAsync("UploadFileSuccess");
         }
 
         List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcelEPPlus(pathGuid, attachFiles);
@@ -116,7 +120,10 @@ namespace Ema.Ijoins.Api.Controllers
         catch (System.Exception e)
         {
           strMessage = e.InnerException.Message;
+          await transaction.RollbackToSavepointAsync("UploadFileSuccess");
         }
+
+        await transaction.CommitAsync();
 
         return Ok(new
         {
@@ -131,6 +138,7 @@ namespace Ema.Ijoins.Api.Controllers
       }
       catch (System.Exception e)
       {
+        await transaction.RollbackToSavepointAsync("UploadFileSuccess");
         return Ok(new
         {
           success = false,
@@ -138,6 +146,35 @@ namespace Ema.Ijoins.Api.Controllers
         });
       }
     }
+
+    [HttpPost("ImportKlcData")]
+    public async Task<IActionResult> ImportKlcData(TbmKlcFileImport tbmKlcFileImport)
+    {
+      using var transaction = _context.Database.BeginTransaction();
+
+      try
+      {
+
+
+        await transaction.CommitAsync();
+
+        return Ok(new
+        {
+          success = true,
+          message = ""
+        });
+      }
+      catch (System.Exception e)
+      {
+        await transaction.RollbackAsync();
+        return Ok(new
+        {
+          success = false,
+          message = e.Message
+        });
+      }
+    }
+
 
     [HttpPost("UploadFileBanner")]
     [DisableRequestSizeLimit]
@@ -167,8 +204,8 @@ namespace Ema.Ijoins.Api.Controllers
 
         TbmKlcFileImport attachFiles = new TbmKlcFileImport
         {
-          Filename = file.GetFilename(),
-          Guidname = guid.ToString() + ext
+          FileName = file.GetFilename(),
+          GuidName = guid.ToString() + ext
         };
 
         return Ok(new

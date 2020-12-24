@@ -14,11 +14,12 @@ namespace Ema.Ijoins.Api.EfModels
         }
 
         public int Id { get; set; }
-        public string Filename { get; set; }
+        public string FileName { get; set; }
         public string Status { get; set; }
-        public string Guidname { get; set; }
-        public string Importby { get; set; }
-        public string Totalrecords { get; set; }
+        public string GuidName { get; set; }
+        public string ImportBy { get; set; }
+        public string ImportTotalrecords { get; set; }
+        public string ImportMessage { get; set; }
         public DateTime Createdatetime { get; set; }
 
         public virtual ICollection<TbKlcDataMasterHi> TbKlcDataMasterHis { get; set; }
