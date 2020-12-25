@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
 using System.Net.Http.Headers;
@@ -26,39 +27,7 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
 
-    [HttpGet("GetKlc")]
-    public IActionResult GetKlc()
-    {
-      var model = new FilesViewModel();
-      foreach (var item in this.fileProvider.GetDirectoryContents("KLC"))
-      {
-        model.Files.Add(
-            new FileDetails { Name = item.Name, Path = item.PhysicalPath });
-      }
-      return Ok(new
-      {
-        success = true,
-        message = "",
-        data = model
-      });
-    }
-    [HttpGet("GetBanner")]
-    public IActionResult GetBanner()
-    {
-      var model = new FilesViewModel();
-      foreach (var item in this.fileProvider.GetDirectoryContents("Banner"))
-      {
-        model.Files.Add(
-            new FileDetails { Name = item.Name, Path = item.PhysicalPath });
-      }
-      return Ok(new
-      {
-        success = true,
-        message = "",
-        data = model
-      });
-    }
-
+    
     [HttpPost("UploadFileKlc")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadFileKlc(IFormFile file)
@@ -129,11 +98,11 @@ namespace Ema.Ijoins.Api.Controllers
         {
           success = true,
           message = strMessage,
+          dataInvalid = tbKlcDatasInvalid,
           fileUploadId = attachFiles.Id,
           totalNo = tbKlcDatas.Count,
           validNo = tbKlcDatas.Count - tbKlcDatasInvalid.Count,
-          invalidNo = tbKlcDatasInvalid.Count,
-          dataInvalid = tbKlcDatasInvalid
+          invalidNo = tbKlcDatasInvalid.Count
         });
       }
       catch (System.Exception e)
@@ -154,14 +123,14 @@ namespace Ema.Ijoins.Api.Controllers
 
       try
       {
-
+        IEnumerable<TbmKlcFileImport> tbmKlcFileImports = await _context.TbmKlcFileImports.OrderByDescending(o => o.Createdatetime).ToListAsync();
 
         await transaction.CommitAsync();
-
         return Ok(new
         {
           success = true,
-          message = ""
+          message = "",
+          dataList = tbmKlcFileImports
         });
       }
       catch (System.Exception e)
@@ -175,6 +144,39 @@ namespace Ema.Ijoins.Api.Controllers
       }
     }
 
+    [HttpGet("GetKlc")]
+    public IActionResult GetKlc()
+    {
+      var model = new FilesViewModel();
+      foreach (var item in this.fileProvider.GetDirectoryContents("KLC"))
+      {
+        model.Files.Add(
+            new FileDetails { Name = item.Name, Path = item.PhysicalPath });
+      }
+      return Ok(new
+      {
+        success = true,
+        message = "",
+        data = model
+      });
+    }
+    
+    [HttpGet("GetBanner")]
+    public IActionResult GetBanner()
+    {
+      var model = new FilesViewModel();
+      foreach (var item in this.fileProvider.GetDirectoryContents("Banner"))
+      {
+        model.Files.Add(
+            new FileDetails { Name = item.Name, Path = item.PhysicalPath });
+      }
+      return Ok(new
+      {
+        success = true,
+        message = "",
+        data = model
+      });
+    }
 
     [HttpPost("UploadFileBanner")]
     [DisableRequestSizeLimit]

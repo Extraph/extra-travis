@@ -1,60 +1,62 @@
-	INSERT INTO public."TBM_COURSE_TYPE"(course_type)
-	SELECT course_type FROM public."TB_KLC_DATA_MASTER" group by course_type;
-	--select * from public."TBM_COURSE_TYPE";
-	--delete  from public."TBM_COURSE_TYPE";
-	
-	INSERT INTO public."TBM_COURSE"(course_id, course_name, course_name_th)
-	SELECT CAST (course_id AS INTEGER), course_name, course_name_th FROM public."TB_KLC_DATA_MASTER" group by course_id, course_name, course_name_th;
-	--select * from public."TBM_COURSE";
-	
-	INSERT INTO public."TBM_SESSION"(session_id, session_name)
-	SELECT CAST (session_id AS INTEGER), session_name FROM public."TB_KLC_DATA_MASTER" group by session_id, session_name;
-	--select * from public."TBM_SESSION";
-	
-	INSERT INTO public."TBM_SEGMENT"(
-	start_date_time, end_date_time, session_id, session_name, course_id, course_name, course_name_th, course_owner_email, "course_owner_contactNo", venue, instructor, course_credit_hours, passing_criteria_exception)
-	SELECT 
-		start_date_time, 
-		end_date_time, 
-		CAST (session_id AS INTEGER), 
-		session_name, 
-		CAST (course_id AS INTEGER), 
-		course_name, 
-		course_name_th, 
-		course_owner_email, 
-		"course_owner_contactNo", 
-		venue, 
-		instructor, 
-		course_credit_hours, 
-		passing_criteria_exception 
-	FROM public."TB_KLC_DATA_MASTER" 
-	group by start_date_time, 
-		end_date_time, 
-		session_id, 
-		session_name, 
-		course_id, 
-		course_name, 
-		course_name_th, 
-		course_owner_email, 
-		"course_owner_contactNo", 
-		venue, 
-		instructor, 
-		course_credit_hours, 
-		passing_criteria_exception;
-	--select * from public."TBM_SEGMENT";
+INSERT INTO public."TBM_COURSE_TYPE"(course_type)
+SELECT course_type FROM public."TB_KLC_DATA_MASTER" group by course_type;
+--select * from public."TBM_COURSE_TYPE";
+--delete  from public."TBM_COURSE_TYPE";
 
-	INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status)
-	SELECT registration_status FROM public."TB_KLC_DATA_MASTER" group by registration_status;
-	--select * from public."TBM_REGISTRATION_STATUS";
+INSERT INTO public."TBM_COURSE"(course_id, course_name, course_name_th)
+SELECT CAST (course_id AS INTEGER), course_name, course_name_th FROM public."TB_KLC_DATA_MASTER" group by course_id, course_name, course_name_th;
+--select * from public."TBM_COURSE";
+
+INSERT INTO public."TBM_SESSION"(session_id, session_name)
+SELECT CAST (session_id AS INTEGER), session_name FROM public."TB_KLC_DATA_MASTER" group by session_id, session_name;
+--select * from public."TBM_SESSION";
+
+INSERT INTO public."TBM_SEGMENT"(
+start_date_time, end_date_time, session_id, session_name, course_id, course_name, course_name_th, course_owner_email, "course_owner_contactNo", venue, instructor, course_credit_hours, passing_criteria_exception)
+SELECT 
+	start_date_time, 
+	end_date_time, 
+	CAST (session_id AS INTEGER), 
+	session_name, 
+	CAST (course_id AS INTEGER), 
+	course_name, 
+	course_name_th, 
+	course_owner_email, 
+	"course_owner_contactNo", 
+	venue, 
+	instructor, 
+	course_credit_hours, 
+	passing_criteria_exception 
+FROM public."TB_KLC_DATA_MASTER" 
+group by start_date_time, 
+	end_date_time, 
+	session_id, 
+	session_name, 
+	course_id, 
+	course_name, 
+	course_name_th, 
+	course_owner_email, 
+	"course_owner_contactNo", 
+	venue, 
+	instructor, 
+	course_credit_hours, 
+	passing_criteria_exception;
+--select * from public."TBM_SEGMENT";
+
+INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status)
+SELECT registration_status FROM public."TB_KLC_DATA_MASTER" group by registration_status;
+--select * from public."TBM_REGISTRATION_STATUS";
 
 
 
 
 INSERT INTO public."TBT_IJOIN_SCAN_QR"(
-	id, file_id, course_type_id, course_id, session_id, start_date_time, end_date_time, user_id, registration_status
+	id, file_id, course_type_id, course_id, session_id, 
+	start_date_time, end_date_time, user_id, registration_status
 	)
 select 
-	kdm.id, kdm.file_id, ct.id, CAST (kdm.course_id AS INTEGER), CAST (kdm.session_id AS INTEGER), kdm.start_date_time, kdm.end_date_time, kdm.user_id, kdm.registration_status
+	kdm.id, kdm.file_id, ct.id, CAST (kdm.course_id AS INTEGER), CAST (kdm.session_id AS INTEGER), 
+	kdm.start_date_time, kdm.end_date_time, kdm.user_id, kdm.registration_status
 from public."TB_KLC_DATA_MASTER" kdm inner join public."TBM_COURSE_TYPE" ct on kdm.course_type = ct.course_type
 group by 
 	kdm.id, kdm.file_id, ct.id, kdm.course_id, kdm.session_id, kdm.start_date_time, kdm.end_date_time, kdm.user_id, kdm.registration_status
