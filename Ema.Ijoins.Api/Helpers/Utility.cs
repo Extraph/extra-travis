@@ -201,5 +201,32 @@ namespace Ema.Ijoins.Api.Helpers
       return dataHis;
     }
 
+    public static List<TbtIjoinScanQrHi> MoveDataIJoinToHis(List<TbtIjoinScanQr> lists)
+    {
+      List<TbtIjoinScanQrHi> dataHis = new List<TbtIjoinScanQrHi>();
+
+      foreach (TbtIjoinScanQr data in lists)
+      {
+        dataHis.Add(new TbtIjoinScanQrHi
+        {
+          Id = data.Id,
+          FileId = data.FileId,
+          CourseTypeId = data.CourseTypeId,
+          CourseId = data.CourseId,
+          SessionId = data.SessionId,
+          StartDateTime = data.StartDateTime,
+          EndDateTime = data.EndDateTime,
+          UserId = data.UserId,
+          RegistrationStatus = data.RegistrationStatus,
+          CheckInDateTime = data.CheckInDateTime,
+          CheckOutDateTime = data.CheckOutDateTime,
+          Createdatetime = data.Createdatetime,
+          Updatedatetime = data.Updatedatetime,
+          UpdateBy = data.UpdateBy,
+        });
+      }
+      return dataHis;
+    }
+
   }
 }
