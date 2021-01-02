@@ -24,22 +24,15 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TbmSegment>>> GetTbmSegments()
     {
-      return await _context.TbmSegments.ToListAsync();
+      return await _context.TbmSegments.OrderBy(o => o.StartDateTime).ToListAsync();
       //return await _context.TbmSegments.Where(w => w.StartDateTime >= DateTime.Now).OrderBy(o => o.StartDateTime).ToListAsync();
     }
 
     // GET: api/TbmSegments/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<TbmSegment>> GetTbmSegment(DateTime id)
+    [HttpGet("{SessionId}")]
+    public async Task<ActionResult<IEnumerable<TbmSegment>>> GetTbmSegment(string SessionId)
     {
-      var tbmSegment = await _context.TbmSegments.FindAsync(id);
-
-      if (tbmSegment == null)
-      {
-        return NotFound();
-      }
-
-      return tbmSegment;
+      return await _context.TbmSegments.Where(w => w.SessionId.ToString().Contains(SessionId)).OrderBy(o => o.StartDateTime).ToListAsync();
     }
 
     // PUT: api/TbmSegments/5
