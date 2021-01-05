@@ -286,7 +286,7 @@ namespace Ema.Ijoins.Api.Controllers
     }
     private bool TbmCourseTypeExists(string CourseType)
     {
-      return _context.TbmCourseTypes.Any(e => e.CourseType == CourseType);
+      return _context.TbmCourseTypes.Any(e => e.CourseType.ToLower() == CourseType.ToLower());
     }
     private bool TbmCourseExists(string CourseId)
     {

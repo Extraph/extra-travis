@@ -26,6 +26,7 @@ namespace Ema.Ijoins.Api.EfModels
         public virtual DbSet<TbmSegment> TbmSegments { get; set; }
         public virtual DbSet<TbmSession> TbmSessions { get; set; }
         public virtual DbSet<TbtIjoinScanQr> TbtIjoinScanQrs { get; set; }
+        public virtual DbSet<TbtIjoinScanQrAddMore> TbtIjoinScanQrAddMores { get; set; }
         public virtual DbSet<TbtIjoinScanQrHi> TbtIjoinScanQrHis { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -251,10 +252,9 @@ namespace Ema.Ijoins.Api.EfModels
             {
                 entity.ToTable("TBM_COURSE_TYPE");
 
-                entity.HasIndex(e => e.CourseType, "uni_course_type")
-                    .IsUnique();
-
                 entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CourseId).HasColumnName("course_id");
 
                 entity.Property(e => e.CourseType)
                     .IsRequired()
@@ -300,9 +300,6 @@ namespace Ema.Ijoins.Api.EfModels
             modelBuilder.Entity<TbmRegistrationStatus>(entity =>
             {
                 entity.ToTable("TBM_REGISTRATION_STATUS");
-
-                entity.HasIndex(e => e.RegistrationStatus, "uni_registration_status")
-                    .IsUnique();
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
@@ -439,6 +436,56 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasConstraintName("fk_TBM_SESSION_session_id");
             });
 
+            modelBuilder.Entity<TbtIjoinScanQrAddMore>(entity =>
+            {
+                entity.HasKey(e => new { e.CourseId, e.SessionId, e.StartDateTime, e.EndDateTime, e.UserId })
+                    .HasName("TBT_IJOIN_SCAN_QR_ADD_MORE_pkey");
+
+                entity.ToTable("TBT_IJOIN_SCAN_QR_ADD_MORE");
+
+                entity.Property(e => e.CourseId).HasColumnName("course_id");
+
+                entity.Property(e => e.SessionId).HasColumnName("session_id");
+
+                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
+
+                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.CheckInDateTime).HasColumnName("check_in_date_time");
+
+                entity.Property(e => e.CheckOutDateTime).HasColumnName("check_out_date_time");
+
+                entity.Property(e => e.Createdatetime)
+                    .HasColumnName("createdatetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+
+                entity.Property(e => e.RegistrationStatus)
+                    .IsRequired()
+                    .HasColumnName("registration_status");
+
+                entity.Property(e => e.Updatedatetime)
+                    .HasColumnName("updatedatetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.HasOne(d => d.Course)
+                    .WithMany(p => p.TbtIjoinScanQrAddMores)
+                    .HasForeignKey(d => d.CourseId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_COURSE_course_id_addmore");
+
+                entity.HasOne(d => d.Session)
+                    .WithMany(p => p.TbtIjoinScanQrAddMores)
+                    .HasForeignKey(d => d.SessionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_SESSION_session_id_addmore");
+            });
+
             modelBuilder.Entity<TbtIjoinScanQrHi>(entity =>
             {
                 entity.HasKey(e => new { e.CourseId, e.SessionId, e.StartDateTime, e.EndDateTime, e.UserId })
@@ -512,6 +559,8 @@ namespace Ema.Ijoins.Api.EfModels
             modelBuilder.HasSequence("TBM_KLC_FILE_IMPORT_id_seq").HasMax(2147483647);
 
             modelBuilder.HasSequence("TBM_REGISTRATION_STATUS_id_seq").HasMax(2147483647);
+
+            modelBuilder.HasSequence("TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq");
 
             OnModelCreatingPartial(modelBuilder);
         }
