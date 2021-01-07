@@ -92,18 +92,18 @@ ALTER SEQUENCE public."TBM_REGISTRATION_STATUS_id_seq"
     OWNER TO ema_user;
 
 
--- SEQUENCE: public.TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq
+-- SEQUENCE: public.TBT_IJOIN_SCAN_QR_id_seq
 
--- DROP SEQUENCE public."TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq";
+-- DROP SEQUENCE public."TBT_IJOIN_SCAN_QR_id_seq";
 
-CREATE SEQUENCE public."TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq"
+CREATE SEQUENCE public."TBT_IJOIN_SCAN_QR_id_seq"
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 9223372036854775807
     CACHE 1;
 
-ALTER SEQUENCE public."TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq"
+ALTER SEQUENCE public."TBT_IJOIN_SCAN_QR_id_seq"
     OWNER TO ema_user;
 
 
@@ -348,7 +348,7 @@ ALTER TABLE public."TBM_REGISTRATION_STATUS"
 
 CREATE TABLE public."TBT_IJOIN_SCAN_QR"
 (
-    id bigint NOT NULL,
+    id bigint NOT NULL DEFAULT nextval('"TBT_IJOIN_SCAN_QR_id_seq"'::regclass),
     file_id integer NOT NULL,
     course_type_id integer NOT NULL,
     course_id integer NOT NULL,
@@ -478,32 +478,3 @@ CREATE INDEX "fki_fk_TBM_SESSION_session_id_his"
 
 
 
--- Table: public.TBT_IJOIN_SCAN_QR_ADD_MORE
-
--- DROP TABLE public."TBT_IJOIN_SCAN_QR_ADD_MORE";
-
-CREATE TABLE public."TBT_IJOIN_SCAN_QR_ADD_MORE"
-(
-	id bigint NOT NULL DEFAULT nextval('"TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq"'::regclass),
-    course_id integer NOT NULL,
-    session_id integer NOT NULL,
-    start_date_time timestamp without time zone NOT NULL,
-    end_date_time timestamp without time zone NOT NULL,
-    user_id text COLLATE pg_catalog."default" NOT NULL,
-    registration_status text COLLATE pg_catalog."default" NOT NULL,
-    check_in_date_time timestamp without time zone,
-    check_out_date_time timestamp without time zone,
-    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    updatedatetime timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT "TBT_IJOIN_SCAN_QR_ADD_MORE_pkey" PRIMARY KEY (course_id, session_id, start_date_time, end_date_time, user_id),
-    CONSTRAINT "fk_TBM_COURSE_course_id_addmore" FOREIGN KEY (course_id)
-        REFERENCES public."TBM_COURSE" (course_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT "fk_TBM_SESSION_session_id_addmore" FOREIGN KEY (session_id)
-        REFERENCES public."TBM_SESSION" (session_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-
-TABLESPACE pg_default;
