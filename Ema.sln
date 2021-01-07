@@ -3,23 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.808.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.ContentData.Api", "Ema.ContentData.Api\Ema.ContentData.Api.csproj", "{4B5FD63F-628F-4E84-B97B-F39018B44060}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.ContentData.Api", "Ema.ContentData.Api\Ema.ContentData.Api.csproj", "{4B5FD63F-628F-4E84-B97B-F39018B44060}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4865B309-7FC2-489F-B4BA-464F87D0508B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.ContentData.Api.Tests", "Ema.ContentData.Api.Tests\Ema.ContentData.Api.Tests.csproj", "{2203428C-646F-49BF-A6FF-FB068FD5CA7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.ContentData.Api.Tests", "Ema.ContentData.Api.Tests\Ema.ContentData.Api.Tests.csproj", "{2203428C-646F-49BF-A6FF-FB068FD5CA7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.ContentData.EntityFrameworkCore", "Ema.ContentData.EntityFrameworkCore\Ema.ContentData.EntityFrameworkCore.csproj", "{E59FF78D-40C6-4203-BA9D-3BB52C626546}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.ContentData.EntityFrameworkCore", "Ema.ContentData.EntityFrameworkCore\Ema.ContentData.EntityFrameworkCore.csproj", "{E59FF78D-40C6-4203-BA9D-3BB52C626546}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.Ijoins.Api", "Ema.Ijoins.Api\Ema.Ijoins.Api.csproj", "{FB74423C-B771-4478-83F0-0E14A5AFFB0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.Ijoins.Api", "Ema.Ijoins.Api\Ema.Ijoins.Api.csproj", "{FB74423C-B771-4478-83F0-0E14A5AFFB0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.HrServices.Api", "Ema.HrServices.Api\Ema.HrServices.Api.csproj", "{6A5979D9-D3B2-42A8-87C8-7BB72CDAF0A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.HrServices.Api", "Ema.HrServices.Api\Ema.HrServices.Api.csproj", "{6A5979D9-D3B2-42A8-87C8-7BB72CDAF0A9}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{39050D6B-8406-4AC0-845C-B711CB132024}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.ContentData.Domain", "Ema.ContentData.Domain\Ema.ContentData.Domain.csproj", "{3DEC8171-6740-4297-BABF-87008C3EA0B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.ContentData.Domain", "Ema.ContentData.Domain\Ema.ContentData.Domain.csproj", "{3DEC8171-6740-4297-BABF-87008C3EA0B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.IjoinsChkInOut.Api", "Ema.IjoinsChkInOut.Api\Ema.IjoinsChkInOut.Api.csproj", "{72E8D1EE-A035-4120-B618-06369E550EE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,12 +57,13 @@ Global
 		{3DEC8171-6740-4297-BABF-87008C3EA0B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DEC8171-6740-4297-BABF-87008C3EA0B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DEC8171-6740-4297-BABF-87008C3EA0B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72E8D1EE-A035-4120-B618-06369E550EE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72E8D1EE-A035-4120-B618-06369E550EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72E8D1EE-A035-4120-B618-06369E550EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72E8D1EE-A035-4120-B618-06369E550EE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {6D0FE000-2E4A-4B10-9E44-A897CC7C3B79}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4B5FD63F-628F-4E84-B97B-F39018B44060} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
@@ -69,5 +72,9 @@ Global
 		{FB74423C-B771-4478-83F0-0E14A5AFFB0D} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
 		{6A5979D9-D3B2-42A8-87C8-7BB72CDAF0A9} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
 		{3DEC8171-6740-4297-BABF-87008C3EA0B0} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
+		{72E8D1EE-A035-4120-B618-06369E550EE6} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6D0FE000-2E4A-4B10-9E44-A897CC7C3B79}
 	EndGlobalSection
 EndGlobal
