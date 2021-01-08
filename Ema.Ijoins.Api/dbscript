@@ -1,32 +1,32 @@
 
-dotnet tool install --global dotnet-ef
+--dotnet tool install --global dotnet-ef
 
-dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=5432;Database=ema_database;Username=ema_user;Password=magical_password" Npgsql.EntityFrameworkCore.PostgreSQL -o EfModels -f
+--dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=5432;Database=ema_database;Username=ema_user;Password=magical_password" Npgsql.EntityFrameworkCore.PostgreSQL -o EfModels -f
 
-ALTER DATABASE ema_database SET timezone TO 'Asia/Bangkok';
+--ALTER DATABASE ema_database SET timezone TO 'Asia/Bangkok';
 
-[Course Master] 
-course_type (*required)
-course_id (*required)
-course_name (*required)	
-course_name_th	
-session_id (*required)	
-session_name (*required)	
-segment_no (*required)	
-segment_name	
-start_date (*required)	
-end_date (*required)	
-start_time (*required)	
-end_time (*required)	
-course_owner_email (*required)	
-course_owner_contactNo
-venue
-instructor
-course_credit_hours
-passing_criteria_exception
-user_company
-user_id (*required)	
-registration_status (*required)
+--[Course Master] 
+--course_type (*required)
+--course_id (*required)
+--course_name (*required)	
+--course_name_th	
+--session_id (*required)	
+--session_name (*required)	
+--segment_no (*required)	
+--segment_name	
+--start_date (*required)	
+--end_date (*required)	
+--start_time (*required)	
+--end_time (*required)	
+--course_owner_email (*required)	
+--course_owner_contactNo
+--venue
+--instructor
+--course_credit_hours
+--passing_criteria_exception
+--user_company
+--user_id (*required)	
+--registration_status (*required)
 
 
 ------------------------------------------------------------------------------------
@@ -92,18 +92,18 @@ ALTER SEQUENCE public."TBM_REGISTRATION_STATUS_id_seq"
     OWNER TO ema_user;
 
 
--- SEQUENCE: public.TBT_IJOIN_SCAN_QR_id_seq
+-- SEQUENCE: public.TBM_SEGMENT_id_seq
 
--- DROP SEQUENCE public."TBT_IJOIN_SCAN_QR_id_seq";
+-- DROP SEQUENCE public."TBM_SEGMENT_id_seq";
 
-CREATE SEQUENCE public."TBT_IJOIN_SCAN_QR_id_seq"
+CREATE SEQUENCE public."TBM_SEGMENT_id_seq"
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 9223372036854775807
     CACHE 1;
 
-ALTER SEQUENCE public."TBT_IJOIN_SCAN_QR_id_seq"
+ALTER SEQUENCE public."TBM_SEGMENT_id_seq"
     OWNER TO ema_user;
 
 
@@ -298,33 +298,6 @@ ALTER TABLE public."TBM_SESSION"
     OWNER to ema_user;    
 
 
--- Table: public.TBM_SEGMENT
-
--- DROP TABLE public."TBM_SEGMENT";
-
-CREATE TABLE public."TBM_SEGMENT"
-(
-    start_date_time timestamp without time zone NOT NULL,
-    end_date_time timestamp without time zone NOT NULL,
-    session_id integer NOT NULL,
-    session_name text COLLATE pg_catalog."default",
-    course_id integer NOT NULL,
-    course_name text COLLATE pg_catalog."default",
-    course_name_th text COLLATE pg_catalog."default",
-    course_owner_email text COLLATE pg_catalog."default" NOT NULL,
-    "course_owner_contactNo" text COLLATE pg_catalog."default",
-    venue text COLLATE pg_catalog."default",
-    instructor text COLLATE pg_catalog."default",
-    course_credit_hours text COLLATE pg_catalog."default",
-    passing_criteria_exception text COLLATE pg_catalog."default",
-    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT "TBM_SEGMENT_pkey" PRIMARY KEY (start_date_time, end_date_time, session_id, course_id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE public."TBM_SEGMENT"
-    OWNER to ema_user;
 
 
 CREATE TABLE public."TBM_REGISTRATION_STATUS"
@@ -342,33 +315,41 @@ ALTER TABLE public."TBM_REGISTRATION_STATUS"
 
 
 
--- Table: public.TBT_IJOIN_SCAN_QR
+-- Table: public.TBM_SEGMENT
 
--- DROP TABLE public."TBT_IJOIN_SCAN_QR";
+-- DROP TABLE public."TBM_SEGMENT";
 
-CREATE TABLE public."TBT_IJOIN_SCAN_QR"
+CREATE TABLE public."TBM_SEGMENT"
 (
-    id bigint NOT NULL DEFAULT nextval('"TBT_IJOIN_SCAN_QR_id_seq"'::regclass),
+    id integer NOT NULL DEFAULT nextval('"TBM_SEGMENT_id_seq"'::regclass),
     file_id integer NOT NULL,
     course_type_id integer NOT NULL,
-    course_id integer NOT NULL,
-    session_id integer NOT NULL,
     start_date_time timestamp without time zone NOT NULL,
     end_date_time timestamp without time zone NOT NULL,
-    user_id text COLLATE pg_catalog."default" NOT NULL,
-    registration_status text COLLATE pg_catalog."default" NOT NULL,
-    check_in_date_time timestamp without time zone,
-    check_out_date_time timestamp without time zone,
+    session_id integer NOT NULL,
+    session_name text COLLATE pg_catalog."default",
+    course_id integer NOT NULL,
+    course_name text COLLATE pg_catalog."default",
+    course_name_th text COLLATE pg_catalog."default",
+    course_owner_email text COLLATE pg_catalog."default" NOT NULL,
+    "course_owner_contactNo" text COLLATE pg_catalog."default",
+    venue text COLLATE pg_catalog."default",
+    instructor text COLLATE pg_catalog."default",
+    course_credit_hours text COLLATE pg_catalog."default",
+    passing_criteria_exception text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    updatedatetime timestamp without time zone NOT NULL DEFAULT now(),
-    update_by text COLLATE pg_catalog."default",
-    CONSTRAINT "TBT_IJOIN_SCAN_QR_pkey" PRIMARY KEY (course_id, session_id, start_date_time, end_date_time, user_id),
+    CONSTRAINT "TBM_SEGMENT_pkey" PRIMARY KEY (id),
+    CONSTRAINT "uni_TBM_SEGMENT" UNIQUE (start_date_time, end_date_time, session_id, course_id),
     CONSTRAINT "fk_TBM_COURSE_TYPE_id" FOREIGN KEY (course_type_id)
         REFERENCES public."TBM_COURSE_TYPE" (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT "fk_TBM_COURSE_course_id" FOREIGN KEY (course_id)
         REFERENCES public."TBM_COURSE" (course_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "fk_TBM_KLC_FILE_IMPORT_id" FOREIGN KEY (file_id)
+        REFERENCES public."TBM_KLC_FILE_IMPORT" (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT "fk_TBM_SESSION_session_id" FOREIGN KEY (session_id)
@@ -379,14 +360,14 @@ CREATE TABLE public."TBT_IJOIN_SCAN_QR"
 
 TABLESPACE pg_default;
 
-ALTER TABLE public."TBT_IJOIN_SCAN_QR"
+ALTER TABLE public."TBM_SEGMENT"
     OWNER to ema_user;
 -- Index: fki_fk_TBM_COURSE_TYPE_id
 
 -- DROP INDEX public."fki_fk_TBM_COURSE_TYPE_id";
 
 CREATE INDEX "fki_fk_TBM_COURSE_TYPE_id"
-    ON public."TBT_IJOIN_SCAN_QR" USING btree
+    ON public."TBM_SEGMENT" USING btree
     (course_type_id ASC NULLS LAST)
     TABLESPACE pg_default;
 -- Index: fki_fk_TBM_COURSE_course_id
@@ -394,87 +375,102 @@ CREATE INDEX "fki_fk_TBM_COURSE_TYPE_id"
 -- DROP INDEX public."fki_fk_TBM_COURSE_course_id";
 
 CREATE INDEX "fki_fk_TBM_COURSE_course_id"
-    ON public."TBT_IJOIN_SCAN_QR" USING btree
+    ON public."TBM_SEGMENT" USING btree
     (course_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: fki_fk_TBM_KLC_FILE_IMPORT_id
+
+-- DROP INDEX public."fki_fk_TBM_KLC_FILE_IMPORT_id";
+
+CREATE INDEX "fki_fk_TBM_KLC_FILE_IMPORT_id"
+    ON public."TBM_SEGMENT" USING btree
+    (file_id ASC NULLS LAST)
     TABLESPACE pg_default;
 -- Index: fki_fk_TBM_SESSION_session_id
 
 -- DROP INDEX public."fki_fk_TBM_SESSION_session_id";
 
 CREATE INDEX "fki_fk_TBM_SESSION_session_id"
-    ON public."TBT_IJOIN_SCAN_QR" USING btree
+    ON public."TBM_SEGMENT" USING btree
     (session_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
 
 
+-- Table: public.TBM_SEGMENT_USER
 
--- Table: public.TBT_IJOIN_SCAN_QR_HIS
+-- DROP TABLE public."TBM_SEGMENT_USER";
 
--- DROP TABLE public."TBT_IJOIN_SCAN_QR_HIS";
-
-CREATE TABLE public."TBT_IJOIN_SCAN_QR_HIS"
+CREATE TABLE public."TBM_SEGMENT_USER"
 (
-    id bigint NOT NULL,
-    file_id integer NOT NULL,
-    course_type_id integer NOT NULL,
-    course_id integer NOT NULL,
-    session_id integer NOT NULL,
-    start_date_time timestamp without time zone NOT NULL,
-    end_date_time timestamp without time zone NOT NULL,
+    segment_id integer NOT NULL,
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
-    check_in_date_time timestamp without time zone,
-    check_out_date_time timestamp without time zone,
-    createdatetime timestamp without time zone NOT NULL,
-    updatedatetime timestamp without time zone NOT NULL,
-    update_by text COLLATE pg_catalog."default",
-    createhisdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT "TBT_IJOIN_SCAN_QR_HIS_pkey" PRIMARY KEY (course_id, session_id, start_date_time, end_date_time, user_id),
-    CONSTRAINT "fk_TBM_COURSE_TYPE_id_his" FOREIGN KEY (course_type_id)
-        REFERENCES public."TBM_COURSE_TYPE" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT "fk_TBM_COURSE_course_id_his" FOREIGN KEY (course_id)
-        REFERENCES public."TBM_COURSE" (course_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT "fk_TBM_SESSION_session_id_his" FOREIGN KEY (session_id)
-        REFERENCES public."TBM_SESSION" (session_id) MATCH SIMPLE
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_SEGMENT_USER_pkey" PRIMARY KEY (segment_id, user_id),
+    CONSTRAINT "fk_TBM_SEGMENT_id" FOREIGN KEY (segment_id)
+        REFERENCES public."TBM_SEGMENT" (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE public."TBT_IJOIN_SCAN_QR_HIS"
+ALTER TABLE public."TBM_SEGMENT_USER"
     OWNER to ema_user;
--- Index: fki_fk_TBM_COURSE_TYPE_id_his
+-- Index: fki_TBM_SEGMENT_USER_user_id
 
--- DROP INDEX public."fki_fk_TBM_COURSE_TYPE_id_his";
+-- DROP INDEX public."fki_TBM_SEGMENT_USER_user_id";
 
-CREATE INDEX "fki_fk_TBM_COURSE_TYPE_id_his"
-    ON public."TBT_IJOIN_SCAN_QR_HIS" USING btree
-    (course_type_id ASC NULLS LAST)
+CREATE INDEX "fki_TBM_SEGMENT_USER_user_id"
+    ON public."TBM_SEGMENT_USER" USING btree
+    (user_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
--- Index: fki_fk_TBM_COURSE_course_id_his
+-- Index: fki_fk_TBM_SEGMENT_id
 
--- DROP INDEX public."fki_fk_TBM_COURSE_course_id_his";
+-- DROP INDEX public."fki_fk_TBM_SEGMENT_id";
 
-CREATE INDEX "fki_fk_TBM_COURSE_course_id_his"
-    ON public."TBT_IJOIN_SCAN_QR_HIS" USING btree
-    (course_id ASC NULLS LAST)
-    TABLESPACE pg_default;
--- Index: fki_fk_TBM_SESSION_session_id_his
-
--- DROP INDEX public."fki_fk_TBM_SESSION_session_id_his";
-
-CREATE INDEX "fki_fk_TBM_SESSION_session_id_his"
-    ON public."TBT_IJOIN_SCAN_QR_HIS" USING btree
-    (session_id ASC NULLS LAST)
+CREATE INDEX "fki_fk_TBM_SEGMENT_id"
+    ON public."TBM_SEGMENT_USER" USING btree
+    (segment_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
 
 
+-- Table: public.TBM_SEGMENT_USER_HIS
 
+-- DROP TABLE public."TBM_SEGMENT_USER_HIS";
 
+CREATE TABLE public."TBM_SEGMENT_USER_HIS"
+(
+    segment_id integer NOT NULL,
+    user_id text COLLATE pg_catalog."default" NOT NULL,
+    registration_status text COLLATE pg_catalog."default" NOT NULL,
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_SEGMENT_USER_HIS_pkey" PRIMARY KEY (segment_id, user_id),
+    CONSTRAINT "fk_TBM_SEGMENT_HIS_id" FOREIGN KEY (segment_id)
+        REFERENCES public."TBM_SEGMENT" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_SEGMENT_USER_HIS"
+    OWNER to ema_user;
+-- Index: fki_TBM_SEGMENT_USER_HIS_user_id
+
+-- DROP INDEX public."fki_TBM_SEGMENT_USER_HIS_user_id";
+
+CREATE INDEX "fki_TBM_SEGMENT_USER_HIS_user_id"
+    ON public."TBM_SEGMENT_USER_HIS" USING btree
+    (user_id COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: fki_fk_TBM_SEGMENT_HIS_id
+
+-- DROP INDEX public."fki_fk_TBM_SEGMENT_HIS_id";
+
+CREATE INDEX "fki_fk_TBM_SEGMENT_HIS_id"
+    ON public."TBM_SEGMENT_USER_HIS" USING btree
+    (segment_id ASC NULLS LAST)
+    TABLESPACE pg_default;        
