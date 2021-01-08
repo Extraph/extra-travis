@@ -9,8 +9,7 @@ namespace Ema.Ijoins.Api.EfModels
     {
         public TbmCourseType()
         {
-            TbtIjoinScanQrHis = new HashSet<TbtIjoinScanQrHi>();
-            TbtIjoinScanQrs = new HashSet<TbtIjoinScanQr>();
+            TbmSegments = new HashSet<TbmSegment>();
         }
 
         public int Id { get; set; }
@@ -18,7 +17,6 @@ namespace Ema.Ijoins.Api.EfModels
         public int CourseId { get; set; }
         public DateTime Createdatetime { get; set; }
 
-        public virtual ICollection<TbtIjoinScanQrHi> TbtIjoinScanQrHis { get; set; }
-        public virtual ICollection<TbtIjoinScanQr> TbtIjoinScanQrs { get; set; }
+        public virtual ICollection<TbmSegment> TbmSegments { get; set; }
     }
 }

@@ -24,10 +24,9 @@ namespace Ema.Ijoins.Api.EfModels
         public virtual DbSet<TbmKlcFileImport> TbmKlcFileImports { get; set; }
         public virtual DbSet<TbmRegistrationStatus> TbmRegistrationStatuses { get; set; }
         public virtual DbSet<TbmSegment> TbmSegments { get; set; }
+        public virtual DbSet<TbmSegmentUser> TbmSegmentUsers { get; set; }
+        public virtual DbSet<TbmSegmentUserHi> TbmSegmentUserHis { get; set; }
         public virtual DbSet<TbmSession> TbmSessions { get; set; }
-        public virtual DbSet<TbtIjoinScanQr> TbtIjoinScanQrs { get; set; }
-        public virtual DbSet<TbtIjoinScanQrAddMore> TbtIjoinScanQrAddMores { get; set; }
-        public virtual DbSet<TbtIjoinScanQrHi> TbtIjoinScanQrHis { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -314,20 +313,24 @@ namespace Ema.Ijoins.Api.EfModels
 
             modelBuilder.Entity<TbmSegment>(entity =>
             {
-                entity.HasKey(e => new { e.StartDateTime, e.EndDateTime, e.SessionId, e.CourseId })
-                    .HasName("TBM_SEGMENT_pkey");
-
                 entity.ToTable("TBM_SEGMENT");
 
-                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
+                entity.HasIndex(e => e.CourseTypeId, "fki_fk_TBM_COURSE_TYPE_id");
 
-                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
+                entity.HasIndex(e => e.CourseId, "fki_fk_TBM_COURSE_course_id");
 
-                entity.Property(e => e.SessionId).HasColumnName("session_id");
+                entity.HasIndex(e => e.FileId, "fki_fk_TBM_KLC_FILE_IMPORT_id");
 
-                entity.Property(e => e.CourseId).HasColumnName("course_id");
+                entity.HasIndex(e => e.SessionId, "fki_fk_TBM_SESSION_session_id");
+
+                entity.HasIndex(e => new { e.StartDateTime, e.EndDateTime, e.SessionId, e.CourseId }, "uni_TBM_SEGMENT")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
+
+                entity.Property(e => e.CourseId).HasColumnName("course_id");
 
                 entity.Property(e => e.CourseName).HasColumnName("course_name");
 
@@ -339,17 +342,111 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("course_owner_email");
 
+                entity.Property(e => e.CourseTypeId).HasColumnName("course_type_id");
+
                 entity.Property(e => e.Createdatetime)
                     .HasColumnName("createdatetime")
                     .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
+
+                entity.Property(e => e.FileId).HasColumnName("file_id");
 
                 entity.Property(e => e.Instructor).HasColumnName("instructor");
 
                 entity.Property(e => e.PassingCriteriaException).HasColumnName("passing_criteria_exception");
 
+                entity.Property(e => e.SessionId).HasColumnName("session_id");
+
                 entity.Property(e => e.SessionName).HasColumnName("session_name");
 
+                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
+
                 entity.Property(e => e.Venue).HasColumnName("venue");
+
+                entity.HasOne(d => d.Course)
+                    .WithMany(p => p.TbmSegments)
+                    .HasForeignKey(d => d.CourseId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_COURSE_course_id");
+
+                entity.HasOne(d => d.CourseType)
+                    .WithMany(p => p.TbmSegments)
+                    .HasForeignKey(d => d.CourseTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_COURSE_TYPE_id");
+
+                entity.HasOne(d => d.File)
+                    .WithMany(p => p.TbmSegments)
+                    .HasForeignKey(d => d.FileId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_KLC_FILE_IMPORT_id");
+
+                entity.HasOne(d => d.Session)
+                    .WithMany(p => p.TbmSegments)
+                    .HasForeignKey(d => d.SessionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_SESSION_session_id");
+            });
+
+            modelBuilder.Entity<TbmSegmentUser>(entity =>
+            {
+                entity.HasKey(e => new { e.SegmentId, e.UserId })
+                    .HasName("TBM_SEGMENT_USER_pkey");
+
+                entity.ToTable("TBM_SEGMENT_USER");
+
+                entity.HasIndex(e => e.UserId, "fki_TBM_SEGMENT_USER_user_id");
+
+                entity.HasIndex(e => e.SegmentId, "fki_fk_TBM_SEGMENT_id");
+
+                entity.Property(e => e.SegmentId).HasColumnName("segment_id");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.Createdatetime)
+                    .HasColumnName("createdatetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.RegistrationStatus)
+                    .IsRequired()
+                    .HasColumnName("registration_status");
+
+                entity.HasOne(d => d.Segment)
+                    .WithMany(p => p.TbmSegmentUsers)
+                    .HasForeignKey(d => d.SegmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_SEGMENT_id");
+            });
+
+            modelBuilder.Entity<TbmSegmentUserHi>(entity =>
+            {
+                entity.HasKey(e => new { e.SegmentId, e.UserId })
+                    .HasName("TBM_SEGMENT_USER_HIS_pkey");
+
+                entity.ToTable("TBM_SEGMENT_USER_HIS");
+
+                entity.HasIndex(e => e.UserId, "fki_TBM_SEGMENT_USER_HIS_user_id");
+
+                entity.HasIndex(e => e.SegmentId, "fki_fk_TBM_SEGMENT_HIS_id");
+
+                entity.Property(e => e.SegmentId).HasColumnName("segment_id");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.Createdatetime)
+                    .HasColumnName("createdatetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.RegistrationStatus)
+                    .IsRequired()
+                    .HasColumnName("registration_status");
+
+                entity.HasOne(d => d.Segment)
+                    .WithMany(p => p.TbmSegmentUserHis)
+                    .HasForeignKey(d => d.SegmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_TBM_SEGMENT_HIS_id");
             });
 
             modelBuilder.Entity<TbmSession>(entity =>
@@ -370,188 +467,6 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.SessionName).HasColumnName("session_name");
             });
 
-            modelBuilder.Entity<TbtIjoinScanQr>(entity =>
-            {
-                entity.HasKey(e => new { e.CourseId, e.SessionId, e.StartDateTime, e.EndDateTime, e.UserId })
-                    .HasName("TBT_IJOIN_SCAN_QR_pkey");
-
-                entity.ToTable("TBT_IJOIN_SCAN_QR");
-
-                entity.HasIndex(e => e.CourseTypeId, "fki_fk_TBM_COURSE_TYPE_id");
-
-                entity.HasIndex(e => e.CourseId, "fki_fk_TBM_COURSE_course_id");
-
-                entity.HasIndex(e => e.SessionId, "fki_fk_TBM_SESSION_session_id");
-
-                entity.Property(e => e.CourseId).HasColumnName("course_id");
-
-                entity.Property(e => e.SessionId).HasColumnName("session_id");
-
-                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
-
-                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
-
-                entity.Property(e => e.UserId).HasColumnName("user_id");
-
-                entity.Property(e => e.CheckInDateTime).HasColumnName("check_in_date_time");
-
-                entity.Property(e => e.CheckOutDateTime).HasColumnName("check_out_date_time");
-
-                entity.Property(e => e.CourseTypeId).HasColumnName("course_type_id");
-
-                entity.Property(e => e.Createdatetime)
-                    .HasColumnName("createdatetime")
-                    .HasDefaultValueSql("now()");
-
-                entity.Property(e => e.FileId).HasColumnName("file_id");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.RegistrationStatus)
-                    .IsRequired()
-                    .HasColumnName("registration_status");
-
-                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
-
-                entity.Property(e => e.Updatedatetime)
-                    .HasColumnName("updatedatetime")
-                    .HasDefaultValueSql("now()");
-
-                entity.HasOne(d => d.Course)
-                    .WithMany(p => p.TbtIjoinScanQrs)
-                    .HasForeignKey(d => d.CourseId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_COURSE_course_id");
-
-                entity.HasOne(d => d.CourseType)
-                    .WithMany(p => p.TbtIjoinScanQrs)
-                    .HasForeignKey(d => d.CourseTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_COURSE_TYPE_id");
-
-                entity.HasOne(d => d.Session)
-                    .WithMany(p => p.TbtIjoinScanQrs)
-                    .HasForeignKey(d => d.SessionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_SESSION_session_id");
-            });
-
-            modelBuilder.Entity<TbtIjoinScanQrAddMore>(entity =>
-            {
-                entity.HasKey(e => new { e.CourseId, e.SessionId, e.StartDateTime, e.EndDateTime, e.UserId })
-                    .HasName("TBT_IJOIN_SCAN_QR_ADD_MORE_pkey");
-
-                entity.ToTable("TBT_IJOIN_SCAN_QR_ADD_MORE");
-
-                entity.Property(e => e.CourseId).HasColumnName("course_id");
-
-                entity.Property(e => e.SessionId).HasColumnName("session_id");
-
-                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
-
-                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
-
-                entity.Property(e => e.UserId).HasColumnName("user_id");
-
-                entity.Property(e => e.CheckInDateTime).HasColumnName("check_in_date_time");
-
-                entity.Property(e => e.CheckOutDateTime).HasColumnName("check_out_date_time");
-
-                entity.Property(e => e.Createdatetime)
-                    .HasColumnName("createdatetime")
-                    .HasDefaultValueSql("now()");
-
-                entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("id");
-
-                entity.Property(e => e.RegistrationStatus)
-                    .IsRequired()
-                    .HasColumnName("registration_status");
-
-                entity.Property(e => e.Updatedatetime)
-                    .HasColumnName("updatedatetime")
-                    .HasDefaultValueSql("now()");
-
-                entity.HasOne(d => d.Course)
-                    .WithMany(p => p.TbtIjoinScanQrAddMores)
-                    .HasForeignKey(d => d.CourseId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_COURSE_course_id_addmore");
-
-                entity.HasOne(d => d.Session)
-                    .WithMany(p => p.TbtIjoinScanQrAddMores)
-                    .HasForeignKey(d => d.SessionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_SESSION_session_id_addmore");
-            });
-
-            modelBuilder.Entity<TbtIjoinScanQrHi>(entity =>
-            {
-                entity.HasKey(e => new { e.CourseId, e.SessionId, e.StartDateTime, e.EndDateTime, e.UserId })
-                    .HasName("TBT_IJOIN_SCAN_QR_HIS_pkey");
-
-                entity.ToTable("TBT_IJOIN_SCAN_QR_HIS");
-
-                entity.HasIndex(e => e.CourseTypeId, "fki_fk_TBM_COURSE_TYPE_id_his");
-
-                entity.HasIndex(e => e.CourseId, "fki_fk_TBM_COURSE_course_id_his");
-
-                entity.HasIndex(e => e.SessionId, "fki_fk_TBM_SESSION_session_id_his");
-
-                entity.Property(e => e.CourseId).HasColumnName("course_id");
-
-                entity.Property(e => e.SessionId).HasColumnName("session_id");
-
-                entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
-
-                entity.Property(e => e.EndDateTime).HasColumnName("end_date_time");
-
-                entity.Property(e => e.UserId).HasColumnName("user_id");
-
-                entity.Property(e => e.CheckInDateTime).HasColumnName("check_in_date_time");
-
-                entity.Property(e => e.CheckOutDateTime).HasColumnName("check_out_date_time");
-
-                entity.Property(e => e.CourseTypeId).HasColumnName("course_type_id");
-
-                entity.Property(e => e.Createdatetime).HasColumnName("createdatetime");
-
-                entity.Property(e => e.Createhisdatetime)
-                    .HasColumnName("createhisdatetime")
-                    .HasDefaultValueSql("now()");
-
-                entity.Property(e => e.FileId).HasColumnName("file_id");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.RegistrationStatus)
-                    .IsRequired()
-                    .HasColumnName("registration_status");
-
-                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
-
-                entity.Property(e => e.Updatedatetime).HasColumnName("updatedatetime");
-
-                entity.HasOne(d => d.Course)
-                    .WithMany(p => p.TbtIjoinScanQrHis)
-                    .HasForeignKey(d => d.CourseId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_COURSE_course_id_his");
-
-                entity.HasOne(d => d.CourseType)
-                    .WithMany(p => p.TbtIjoinScanQrHis)
-                    .HasForeignKey(d => d.CourseTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_COURSE_TYPE_id_his");
-
-                entity.HasOne(d => d.Session)
-                    .WithMany(p => p.TbtIjoinScanQrHis)
-                    .HasForeignKey(d => d.SessionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_TBM_SESSION_session_id_his");
-            });
-
             modelBuilder.HasSequence("TB_KLC_DATA_MASTER_id_seq");
 
             modelBuilder.HasSequence("TBM_COURSE_TYPE_id_seq").HasMax(2147483647);
@@ -560,7 +475,7 @@ namespace Ema.Ijoins.Api.EfModels
 
             modelBuilder.HasSequence("TBM_REGISTRATION_STATUS_id_seq").HasMax(2147483647);
 
-            modelBuilder.HasSequence("TBT_IJOIN_SCAN_QR_ADD_MORE_id_seq");
+            modelBuilder.HasSequence("TBM_SEGMENT_id_seq");
 
             OnModelCreatingPartial(modelBuilder);
         }

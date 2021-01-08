@@ -129,6 +129,7 @@ namespace Ema.Ijoins.Api.Controllers
         foreach (TbKlcDataMaster klcDataMaster in tbKlcDataMasters)
         {
           int CourseTypeId;
+          int SegmentRunId;
           if (!TbmCourseTypeExists(klcDataMaster.CourseType))
           {
             TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType };
@@ -160,6 +161,8 @@ namespace Ema.Ijoins.Api.Controllers
           {
             TbmSegment tbmSegment = new TbmSegment
             {
+              FileId = klcDataMaster.FileId,
+              CourseTypeId = CourseTypeId,
               StartDateTime = klcDataMaster.StartDateTime,
               EndDateTime = klcDataMaster.EndDateTime,
               SessionId = int.Parse(klcDataMaster.SessionId),
@@ -176,6 +179,19 @@ namespace Ema.Ijoins.Api.Controllers
             };
             _context.TbmSegments.Add(tbmSegment);
             await _context.SaveChangesAsync();
+            SegmentRunId = tbmSegment.Id;
+          }
+          else
+          {
+            TbmSegment tbmSegment = await _context.TbmSegments.Where(
+              w =>
+              w.StartDateTime == klcDataMaster.StartDateTime &&
+              w.EndDateTime == klcDataMaster.EndDateTime &&
+              w.SessionId == int.Parse(klcDataMaster.SessionId) &&
+              w.CourseId == int.Parse(klcDataMaster.CourseId)
+            )
+              .FirstOrDefaultAsync();
+            SegmentRunId = tbmSegment.Id;
           }
 
           if (!TbmRegistrationStatusExists(klcDataMaster.RegistrationStatus))
@@ -185,38 +201,22 @@ namespace Ema.Ijoins.Api.Controllers
             await _context.SaveChangesAsync();
           }
 
-          if (!TbtIjoinScanQrExists(klcDataMaster.StartDateTime, klcDataMaster.EndDateTime, klcDataMaster.SessionId, klcDataMaster.CourseId, klcDataMaster.UserId))
+          if (!TbmSegmentUserExists(SegmentRunId, klcDataMaster.UserId))
           {
-            TbtIjoinScanQr tbtIjoinScanQr = new TbtIjoinScanQr
+            TbmSegmentUser tbmSegmentUser = new TbmSegmentUser
             {
-              Id = klcDataMaster.Id,
-              FileId = klcDataMaster.FileId,
-              CourseTypeId = CourseTypeId,
-              CourseId = int.Parse(klcDataMaster.CourseId),
-              SessionId = int.Parse(klcDataMaster.SessionId),
-              StartDateTime = klcDataMaster.StartDateTime,
-              EndDateTime = klcDataMaster.EndDateTime,
+              SegmentId = SegmentRunId,
               UserId = klcDataMaster.UserId,
               RegistrationStatus = klcDataMaster.RegistrationStatus
             };
-            _context.TbtIjoinScanQrs.Add(tbtIjoinScanQr);
+            _context.TbmSegmentUsers.Add(tbmSegmentUser);
             await _context.SaveChangesAsync();
           }
           else
           {
-            TbtIjoinScanQr tbtIjoinScanQrOld = await _context.TbtIjoinScanQrs.Where(
-              w =>
-              w.StartDateTime == klcDataMaster.StartDateTime
-              && w.EndDateTime == klcDataMaster.EndDateTime
-              && w.SessionId == int.Parse(klcDataMaster.SessionId)
-              && w.CourseId == int.Parse(klcDataMaster.CourseId)
-              && w.UserId == klcDataMaster.UserId
-            ).FirstOrDefaultAsync();
-            tbtIjoinScanQrOld.Id = klcDataMaster.Id;
-            tbtIjoinScanQrOld.FileId = klcDataMaster.FileId;
-            tbtIjoinScanQrOld.RegistrationStatus = klcDataMaster.RegistrationStatus;
-            tbtIjoinScanQrOld.Updatedatetime = DateTime.Now;
-            _context.Entry(tbtIjoinScanQrOld).State = EntityState.Modified;
+            TbmSegmentUser tbmSegmentUser = await _context.TbmSegmentUsers.Where(w => w.SegmentId == SegmentRunId && w.UserId == klcDataMaster.UserId).FirstOrDefaultAsync();
+            tbmSegmentUser.RegistrationStatus = klcDataMaster.RegistrationStatus;
+            _context.Entry(tbmSegmentUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
           }
         }
@@ -309,14 +309,11 @@ namespace Ema.Ijoins.Api.Controllers
     {
       return _context.TbmRegistrationStatuses.Any(e => e.RegistrationStatus == RegistrationStatus);
     }
-    private bool TbtIjoinScanQrExists(DateTime StartDateTime, DateTime EndDateTime, string SessionId, string CourseId, string UserId)
+    private bool TbmSegmentUserExists(int SegmentId, string UserId)
     {
-      return _context.TbtIjoinScanQrs.Any(
+      return _context.TbmSegmentUsers.Any(
         e =>
-         e.CourseId == int.Parse(CourseId)
-      && e.SessionId == int.Parse(SessionId)
-      && e.StartDateTime == StartDateTime
-      && e.EndDateTime == EndDateTime
+         e.SegmentId == SegmentId
       && e.UserId == UserId
       );
     }
