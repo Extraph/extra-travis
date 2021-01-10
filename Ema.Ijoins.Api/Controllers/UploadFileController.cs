@@ -246,7 +246,7 @@ namespace Ema.Ijoins.Api.Controllers
         await transaction.CommitAsync();
 
         var tbmKlcFileImports = await _context.TbmKlcFileImports.OrderByDescending(o => o.Createdatetime).ToListAsync();
-        tbmKlcFileImports.ForEach(w => { w.TbKlcDataMasters = null; w.TbKlcDataMasterHis = null; });
+        tbmKlcFileImports.ForEach(w => { w.TbKlcDataMasters = null; w.TbKlcDataMasterHis = null; w.TbmSegments = null; });
 
         return Ok(new
         {
