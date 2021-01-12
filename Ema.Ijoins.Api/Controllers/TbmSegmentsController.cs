@@ -29,18 +29,18 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     // GET: api/TbmSegments/5
-    [HttpGet("{SessionId}")]
-    public async Task<ActionResult<IEnumerable<TbmSegment>>> GetTbmSegment(string SessionId)
+    [HttpGet("{CourseId}")]
+    public async Task<ActionResult<IEnumerable<TbmSegment>>> GetTbmSegment(string CourseId)
     {
-      return await _context.TbmSegments.Where(w => w.SessionId.ToString().Contains(SessionId)).OrderBy(o => o.StartDateTime).ToListAsync();
+      return await _context.TbmSegments.Where(w => w.CourseId.ToString().Contains(CourseId)).OrderBy(o => o.StartDateTime).ToListAsync();
     }
 
     // PUT: api/TbmSegments/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutTbmSegment(DateTime id, TbmSegment tbmSegment)
+    public async Task<IActionResult> PutTbmSegment(int id, TbmSegment tbmSegment)
     {
-      if (id != tbmSegment.StartDateTime)
+      if (id != tbmSegment.Id)
       {
         return BadRequest();
       }
@@ -78,7 +78,7 @@ namespace Ema.Ijoins.Api.Controllers
       }
       catch (DbUpdateException)
       {
-        if (TbmSegmentExists(tbmSegment.StartDateTime))
+        if (TbmSegmentExists(tbmSegment.Id))
         {
           return Conflict();
         }
@@ -88,12 +88,12 @@ namespace Ema.Ijoins.Api.Controllers
         }
       }
 
-      return CreatedAtAction("GetTbmSegment", new { id = tbmSegment.StartDateTime }, tbmSegment);
+      return CreatedAtAction("GetTbmSegment", new { id = tbmSegment.Id }, tbmSegment);
     }
 
     // DELETE: api/TbmSegments/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTbmSegment(DateTime id)
+    public async Task<IActionResult> DeleteTbmSegment(int id)
     {
       var tbmSegment = await _context.TbmSegments.FindAsync(id);
       if (tbmSegment == null)
@@ -107,9 +107,9 @@ namespace Ema.Ijoins.Api.Controllers
       return NoContent();
     }
 
-    private bool TbmSegmentExists(DateTime id)
+    private bool TbmSegmentExists(int id)
     {
-      return _context.TbmSegments.Any(e => e.StartDateTime == id);
+      return _context.TbmSegments.Any(e => e.Id == id);
     }
   }
 }
