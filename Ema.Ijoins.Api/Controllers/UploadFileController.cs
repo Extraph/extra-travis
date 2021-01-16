@@ -145,14 +145,14 @@ namespace Ema.Ijoins.Api.Controllers
 
           if (!TbmCourseExists(klcDataMaster.CourseId))
           {
-            TbmCourse tbmCourse = new TbmCourse { CourseId = int.Parse(klcDataMaster.CourseId), CourseName = klcDataMaster.CourseName, CourseNameTh = klcDataMaster.CourseNameTh };
+            TbmCourse tbmCourse = new TbmCourse { CourseId = klcDataMaster.CourseId, CourseName = klcDataMaster.CourseName, CourseNameTh = klcDataMaster.CourseNameTh };
             _context.TbmCourses.Add(tbmCourse);
             await _context.SaveChangesAsync();
           }
 
           if (!TbmSessionExists(klcDataMaster.SessionId))
           {
-            TbmSession tbmSession = new TbmSession { SessionId = int.Parse(klcDataMaster.SessionId), SessionName = klcDataMaster.SessionName };
+            TbmSession tbmSession = new TbmSession { SessionId = klcDataMaster.SessionId, SessionName = klcDataMaster.SessionName };
             _context.TbmSessions.Add(tbmSession);
             await _context.SaveChangesAsync();
           }
@@ -165,9 +165,9 @@ namespace Ema.Ijoins.Api.Controllers
               CourseTypeId = CourseTypeId,
               StartDateTime = klcDataMaster.StartDateTime,
               EndDateTime = klcDataMaster.EndDateTime,
-              SessionId = int.Parse(klcDataMaster.SessionId),
+              SessionId = klcDataMaster.SessionId,
               SessionName = klcDataMaster.SessionName,
-              CourseId = int.Parse(klcDataMaster.CourseId),
+              CourseId = klcDataMaster.CourseId,
               CourseName = klcDataMaster.CourseName,
               CourseNameTh = klcDataMaster.CourseNameTh,
               CourseOwnerEmail = klcDataMaster.CourseOwnerEmail,
@@ -187,8 +187,8 @@ namespace Ema.Ijoins.Api.Controllers
               w =>
               w.StartDateTime == klcDataMaster.StartDateTime &&
               w.EndDateTime == klcDataMaster.EndDateTime &&
-              w.SessionId == int.Parse(klcDataMaster.SessionId) &&
-              w.CourseId == int.Parse(klcDataMaster.CourseId)
+              w.SessionId == klcDataMaster.SessionId &&
+              w.CourseId == klcDataMaster.CourseId
             )
               .FirstOrDefaultAsync();
             SegmentRunId = tbmSegment.Id;
@@ -290,19 +290,19 @@ namespace Ema.Ijoins.Api.Controllers
     }
     private bool TbmCourseExists(string CourseId)
     {
-      return _context.TbmCourses.Any(e => e.CourseId == int.Parse(CourseId));
+      return _context.TbmCourses.Any(e => e.CourseId == CourseId);
     }
     private bool TbmSessionExists(string SessionId)
     {
-      return _context.TbmSessions.Any(e => e.SessionId == int.Parse(SessionId));
+      return _context.TbmSessions.Any(e => e.SessionId == SessionId);
     }
     private bool TbmSegmentExists(DateTime StartDateTime, DateTime EndDateTime, string SessionId, string CourseId)
     {
       return _context.TbmSegments.Any(
         e => e.StartDateTime == StartDateTime
       && e.EndDateTime == EndDateTime
-      && e.SessionId == int.Parse(SessionId)
-      && e.CourseId == int.Parse(CourseId)
+      && e.SessionId == SessionId
+      && e.CourseId == CourseId
       );
     }
     private bool TbmRegistrationStatusExists(String RegistrationStatus)

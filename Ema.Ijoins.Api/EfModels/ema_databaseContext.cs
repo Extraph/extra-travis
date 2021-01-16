@@ -232,9 +232,7 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.ToTable("TBM_COURSE");
 
-                entity.Property(e => e.CourseId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("course_id");
+                entity.Property(e => e.CourseId).HasColumnName("course_id");
 
                 entity.Property(e => e.CourseName)
                     .IsRequired()
@@ -253,7 +251,9 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.CourseId).HasColumnName("course_id");
+                entity.Property(e => e.CourseId)
+                    .IsRequired()
+                    .HasColumnName("course_id");
 
                 entity.Property(e => e.CourseType)
                     .IsRequired()
@@ -330,7 +330,9 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
 
-                entity.Property(e => e.CourseId).HasColumnName("course_id");
+                entity.Property(e => e.CourseId)
+                    .IsRequired()
+                    .HasColumnName("course_id");
 
                 entity.Property(e => e.CourseName).HasColumnName("course_name");
 
@@ -356,7 +358,9 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.PassingCriteriaException).HasColumnName("passing_criteria_exception");
 
-                entity.Property(e => e.SessionId).HasColumnName("session_id");
+                entity.Property(e => e.SessionId)
+                    .IsRequired()
+                    .HasColumnName("session_id");
 
                 entity.Property(e => e.SessionName).HasColumnName("session_name");
 
@@ -456,9 +460,7 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.ToTable("TBM_SESSION");
 
-                entity.Property(e => e.SessionId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("session_id");
+                entity.Property(e => e.SessionId).HasColumnName("session_id");
 
                 entity.Property(e => e.Createdatetime)
                     .HasColumnName("createdatetime")

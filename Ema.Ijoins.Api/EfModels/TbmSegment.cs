@@ -18,9 +18,9 @@ namespace Ema.Ijoins.Api.EfModels
         public int CourseTypeId { get; set; }
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
-        public int SessionId { get; set; }
+        public string SessionId { get; set; }
         public string SessionName { get; set; }
-        public int CourseId { get; set; }
+        public string CourseId { get; set; }
         public string CourseName { get; set; }
         public string CourseNameTh { get; set; }
         public string CourseOwnerEmail { get; set; }

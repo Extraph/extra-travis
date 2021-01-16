@@ -14,7 +14,7 @@ namespace Ema.Ijoins.Api.EfModels
 
         public int Id { get; set; }
         public string CourseType { get; set; }
-        public int CourseId { get; set; }
+        public string CourseId { get; set; }
         public DateTime Createdatetime { get; set; }
 
         public virtual ICollection<TbmSegment> TbmSegments { get; set; }

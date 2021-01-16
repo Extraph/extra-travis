@@ -12,7 +12,7 @@ namespace Ema.Ijoins.Api.EfModels
             TbmSegments = new HashSet<TbmSegment>();
         }
 
-        public int SessionId { get; set; }
+        public string SessionId { get; set; }
         public string SessionName { get; set; }
         public DateTime Createdatetime { get; set; }
 
