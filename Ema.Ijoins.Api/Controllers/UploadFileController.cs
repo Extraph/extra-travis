@@ -132,7 +132,7 @@ namespace Ema.Ijoins.Api.Controllers
           int SegmentRunId;
           if (!TbmCourseTypeExists(klcDataMaster.CourseType))
           {
-            TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType };
+            TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType, CourseId = klcDataMaster.CourseId };
             _context.TbmCourseTypes.Add(tbmCourseType);
             await _context.SaveChangesAsync();
             CourseTypeId = tbmCourseType.Id;

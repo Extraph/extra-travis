@@ -66,8 +66,6 @@ namespace Ema.Ijoins.Api
           .AllowAnyHeader()
           );
 
-      app.UseHttpsRedirection();
-
       app.UseRouting();
 
       app.UseAuthorization();
