@@ -252,7 +252,7 @@ CREATE TABLE public."TBM_COURSE_TYPE"
 (
     id integer NOT NULL DEFAULT nextval('"TBM_COURSE_TYPE_id_seq"'::regclass),
     course_type text COLLATE pg_catalog."default" NOT NULL,
-    course_id integer NOT NULL,
+    course_id text COLLATE pg_catalog."default" NOT NULL,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_COURSE_TYPE_pkey" PRIMARY KEY (id)
 )
@@ -268,7 +268,7 @@ ALTER TABLE public."TBM_COURSE_TYPE"
 
 CREATE TABLE public."TBM_COURSE"
 (
-    course_id integer NOT NULL,
+    course_id text COLLATE pg_catalog."default" NOT NULL,
     course_name text COLLATE pg_catalog."default" NOT NULL,
     course_name_th text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
@@ -286,7 +286,7 @@ ALTER TABLE public."TBM_COURSE"
 
 CREATE TABLE public."TBM_SESSION"
 (
-    session_id integer NOT NULL,
+    session_id text COLLATE pg_catalog."default" NOT NULL,
     session_name text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_SESSION_pkey" PRIMARY KEY (session_id)
@@ -326,9 +326,9 @@ CREATE TABLE public."TBM_SEGMENT"
     course_type_id integer NOT NULL,
     start_date_time timestamp without time zone NOT NULL,
     end_date_time timestamp without time zone NOT NULL,
-    session_id integer NOT NULL,
+    session_id text COLLATE pg_catalog."default" NOT NULL,
     session_name text COLLATE pg_catalog."default",
-    course_id integer NOT NULL,
+    course_id text COLLATE pg_catalog."default" NOT NULL,
     course_name text COLLATE pg_catalog."default",
     course_name_th text COLLATE pg_catalog."default",
     course_owner_email text COLLATE pg_catalog."default" NOT NULL,
