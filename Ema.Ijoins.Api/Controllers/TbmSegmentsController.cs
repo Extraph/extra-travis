@@ -32,7 +32,7 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpGet("{CourseId}")]
     public async Task<ActionResult<IEnumerable<TbmSegment>>> GetTbmSegment(string CourseId)
     {
-      return await _context.TbmSegments.Where(w => w.CourseId.ToString().Contains(CourseId)).OrderBy(o => o.StartDateTime).ToListAsync();
+      return await _context.TbmSegments.Where(w => w.CourseId.Contains(CourseId)).OrderBy(o => o.StartDateTime).ToListAsync();
     }
 
     // PUT: api/TbmSegments/5

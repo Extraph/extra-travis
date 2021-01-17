@@ -70,5 +70,54 @@ namespace Ema.Ijoins.Api.Controllers
       });
     }
 
+
+    [HttpPost("SearchUsers")]
+    public async Task<IActionResult> SearchUsers(TbmSegmentUser tbmSegmentUser)
+    {
+      var tbmSegmentUsers = await _context.TbmSegmentUsers.Where(w => w.SegmentId == tbmSegmentUser.SegmentId && w.UserId.Contains(tbmSegmentUser.UserId)).ToListAsync();
+      if (tbmSegmentUsers == null)
+      {
+        return NotFound();
+      }
+      List<UsersChecking> usersCheckings = _userService.Get().Where(w => w.SegmentId == tbmSegmentUser.SegmentId).OrderByDescending(o => o.Createdatetime).ToList();
+
+      List<UsersChecking> usersCheckIn = usersCheckings.Where(w => w.CheckingStatus == "Check-In").ToList();
+
+      List<UsersChecking> usersCheckOut = usersCheckings.Where(w => w.CheckingStatus == "Check-Out").ToList();
+
+      var query = from users in tbmSegmentUsers
+                  join usersCheck in usersCheckings on users.UserId equals usersCheck.UserId into gj
+                  from subUsers in gj.DefaultIfEmpty()
+                  select new { users.SegmentId, users.UserId, Createdatetime = subUsers?.Createdatetime ?? users.Createdatetime, RegistrationStatus = subUsers?.CheckingStatus ?? users.RegistrationStatus };
+
+
+      var results =
+        from gb in query
+        group gb by gb.UserId into newGroup
+        orderby newGroup.Key
+        select newGroup.FirstOrDefault();
+
+      var resultsCheckIn =
+        from gb in usersCheckIn
+        group gb by gb.UserId into newGroup
+        orderby newGroup.Key
+        select newGroup.FirstOrDefault();
+
+      var resultsCheckOut =
+        from gb in usersCheckOut
+        group gb by gb.UserId into newGroup
+        orderby newGroup.Key
+        select newGroup.FirstOrDefault();
+
+
+      return Ok(new
+      {
+        data = results.OrderByDescending(o => o.Createdatetime).ToList(),
+        checkInNumber = resultsCheckIn.ToList().Count,
+        checkOutNumber = resultsCheckOut.ToList().Count
+      });
+
+
+    }
   }
 }
