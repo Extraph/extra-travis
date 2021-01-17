@@ -34,11 +34,9 @@ namespace Ema.Ijoins.Api.Controllers
       }
       List<UsersChecking> usersCheckings = _userService.Get().Where(w => w.SegmentId == segmentId).OrderByDescending(o => o.Createdatetime).ToList();
 
-      //foreach(TbmSegmentUser segmentUser in tbmSegmentUsers)
-      //{
-      //  segmentUser.RegistrationStatus
-      //}
+      List<UsersChecking> usersCheckIn = usersCheckings.Where(w => w.CheckingStatus == "Check-In").ToList();
 
+      List<UsersChecking> usersCheckOut = usersCheckings.Where(w => w.CheckingStatus == "Check-Out").ToList();
 
       var query = from users in tbmSegmentUsers
                   join usersCheck in usersCheckings on users.UserId equals usersCheck.UserId into gj
@@ -51,9 +49,25 @@ namespace Ema.Ijoins.Api.Controllers
         orderby newGroup.Key
         select newGroup.FirstOrDefault();
 
-      
+      var resultsCheckIn =
+        from gb in usersCheckIn
+        group gb by gb.UserId into newGroup
+        orderby newGroup.Key
+        select newGroup.FirstOrDefault();
 
-      return Ok(results.OrderByDescending(o => o.Createdatetime).ToList());
+      var resultsCheckOut =
+        from gb in usersCheckOut
+        group gb by gb.UserId into newGroup
+        orderby newGroup.Key
+        select newGroup.FirstOrDefault();
+
+
+      return Ok(new
+      {
+        data = results.OrderByDescending(o => o.Createdatetime).ToList(),
+        checkInNumber = resultsCheckIn.ToList().Count,
+        checkOutNumber = resultsCheckOut.ToList().Count
+      });
     }
 
   }
