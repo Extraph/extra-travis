@@ -21,6 +21,7 @@ namespace Ema.IjoinsChkInOut.Api
             .ConfigureWebHostDefaults(webBuilder =>
             {
               webBuilder.UseStartup<Startup>();
+              webBuilder.UseUrls("http://localhost:5050", "https://localhost:5051");
             });
   }
 }
