@@ -7,7 +7,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
 {
   public class IjoinsService
   {
-    private readonly IMongoCollection<Book> _books;
+    private readonly IMongoCollection<UsersChecking> _users;
 
 
     public IjoinsService(IIjoinsDatabaseSettings settings)
@@ -15,30 +15,29 @@ namespace Ema.IjoinsChkInOut.Api.Services
       var client = new MongoClient(settings.ConnectionString);
       var database = client.GetDatabase(settings.DatabaseName);
 
-      _books = database.GetCollection<Book>(settings.IjoinsCollectionName);
+      _users = database.GetCollection<UsersChecking>(settings.IjoinsCollectionName);
     }
 
 
-    public List<Book> Get() =>
-        _books.Find(book => true).ToList();
+    public List<UsersChecking> Get() => _users.Find(user => true).ToList();
 
-    public Book Get(string id) =>
-        _books.Find<Book>(book => book.Id == id).FirstOrDefault();
+    public UsersChecking Get(string id) =>
+        _users.Find<UsersChecking>(user => user.Id == id).FirstOrDefault();
 
-    public Book Create(Book book)
+    public UsersChecking Create(UsersChecking user)
     {
-      _books.InsertOne(book);
-      return book;
+      _users.InsertOne(user);
+      return user;
     }
 
-    public void Update(string id, Book bookIn) =>
-        _books.ReplaceOne(book => book.Id == id, bookIn);
+    public void Update(string id, UsersChecking userIn) =>
+        _users.ReplaceOne(user => user.Id == id, userIn);
 
-    public void Remove(Book bookIn) =>
-        _books.DeleteOne(book => book.Id == bookIn.Id);
+    public void Remove(UsersChecking userIn) =>
+        _users.DeleteOne(user => user.Id == userIn.Id);
 
     public void Remove(string id) =>
-        _books.DeleteOne(book => book.Id == id);
+        _users.DeleteOne(user => user.Id == id);
   }
 }
 

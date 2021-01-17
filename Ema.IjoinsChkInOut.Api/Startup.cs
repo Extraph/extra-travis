@@ -13,8 +13,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 using Ema.IjoinsChkInOut.Api.Models;
 using Ema.IjoinsChkInOut.Api.Services;
+using Ema.IjoinsChkInOut.Api.EfModels;
 
 namespace Ema.IjoinsChkInOut.Api
 {
@@ -36,6 +38,8 @@ namespace Ema.IjoinsChkInOut.Api
 
       services.AddSingleton<IIjoinsDatabaseSettings>(sp =>
           sp.GetRequiredService<IOptions<IjoinsDatabaseSettings>>().Value);
+
+      services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
 
       services.AddSingleton<IjoinsService>();
 

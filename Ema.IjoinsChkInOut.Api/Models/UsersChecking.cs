@@ -7,24 +7,14 @@ using Newtonsoft.Json;
 
 namespace Ema.IjoinsChkInOut.Api.Models
 {
-  public class Book
+  public class UsersChecking
   {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
-
-    #region snippet_BookNameProperty
-    [BsonElement("Name")]
-    [JsonProperty("Name")]
-    public string BookName { get; set; }
-    #endregion
-
-    public decimal Price { get; set; }
-
-    public string Category { get; set; }
-
-    public string Author { get; set; }
-
+    public int SegmentId { get; set; }
+    public string UserId { get; set; }
+    public string CheckingStatus { get; set; }
     public DateTime Createdatetime { get; set; }
   }
 }
