@@ -174,6 +174,8 @@ namespace Ema.Ijoins.Api.Controllers
               CourseOwnerContactNo = klcDataMaster.CourseOwnerContactNo,
               Venue = klcDataMaster.Venue,
               Instructor = klcDataMaster.Instructor,
+              CourseCreditHoursInit = klcDataMaster.CourseCreditHours,
+              PassingCriteriaExceptionInit = klcDataMaster.PassingCriteriaException,
               CourseCreditHours = klcDataMaster.CourseCreditHours,
               PassingCriteriaException = klcDataMaster.PassingCriteriaException
             };

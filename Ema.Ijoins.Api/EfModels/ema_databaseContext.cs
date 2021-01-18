@@ -330,6 +330,8 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
 
+                entity.Property(e => e.CourseCreditHoursInit).HasColumnName("course_credit_hours_init");
+
                 entity.Property(e => e.CourseId)
                     .IsRequired()
                     .HasColumnName("course_id");
@@ -357,6 +359,8 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.Instructor).HasColumnName("instructor");
 
                 entity.Property(e => e.PassingCriteriaException).HasColumnName("passing_criteria_exception");
+
+                entity.Property(e => e.PassingCriteriaExceptionInit).HasColumnName("passing_criteria_exception_init");
 
                 entity.Property(e => e.SessionId)
                     .IsRequired()

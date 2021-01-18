@@ -335,6 +335,8 @@ CREATE TABLE public."TBM_SEGMENT"
     "course_owner_contactNo" text COLLATE pg_catalog."default",
     venue text COLLATE pg_catalog."default",
     instructor text COLLATE pg_catalog."default",
+    course_credit_hours_init text COLLATE pg_catalog."default",
+    passing_criteria_exception_init text COLLATE pg_catalog."default",
     course_credit_hours text COLLATE pg_catalog."default",
     passing_criteria_exception text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),

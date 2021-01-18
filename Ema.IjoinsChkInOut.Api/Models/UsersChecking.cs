@@ -15,6 +15,7 @@ namespace Ema.IjoinsChkInOut.Api.Models
     public int SegmentId { get; set; }
     public string UserId { get; set; }
     public string CheckingStatus { get; set; }
+    public string Createby { get; set; }
     public DateTime Createdatetime { get; set; }
   }
 }

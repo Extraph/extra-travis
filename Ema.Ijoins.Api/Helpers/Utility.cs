@@ -61,7 +61,7 @@ namespace Ema.Ijoins.Api.Helpers
             PassingCriteriaException = worksheet.Cells[row, 18].Value?.ToString(),
             UserCompany = worksheet.Cells[row, 19].Value?.ToString(),
             UserId = worksheet.Cells[row, 20].Value?.ToString().PadLeft(8, '0'),
-            RegistrationStatus = worksheet.Cells[row, 21].Value?.ToString(),
+            RegistrationStatus = worksheet.Cells[row, 21].Value?.ToString() == "Active Enrollment" ? "Enrolled" : worksheet.Cells[row, 21].Value?.ToString(),
           });
         }
 

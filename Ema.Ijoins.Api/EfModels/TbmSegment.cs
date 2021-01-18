@@ -27,6 +27,8 @@ namespace Ema.Ijoins.Api.EfModels
         public string CourseOwnerContactNo { get; set; }
         public string Venue { get; set; }
         public string Instructor { get; set; }
+        public string CourseCreditHoursInit { get; set; }
+        public string PassingCriteriaExceptionInit { get; set; }
         public string CourseCreditHours { get; set; }
         public string PassingCriteriaException { get; set; }
         public DateTime Createdatetime { get; set; }
