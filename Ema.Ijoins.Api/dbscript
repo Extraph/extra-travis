@@ -300,18 +300,30 @@ ALTER TABLE public."TBM_SESSION"
 
 
 
+-- Table: public.TBM_REGISTRATION_STATUS
+
+-- DROP TABLE public."TBM_REGISTRATION_STATUS";
+
 CREATE TABLE public."TBM_REGISTRATION_STATUS"
 (
     id integer NOT NULL DEFAULT nextval('"TBM_REGISTRATION_STATUS_id_seq"'::regclass),
     registration_status text COLLATE pg_catalog."default" NOT NULL,
-	createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT "TBM_REGISTRATION_STATUS_pkey" PRIMARY KEY (id)
+    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_REGISTRATION_STATUS_pkey" PRIMARY KEY (id),
+    CONSTRAINT "uni_TBM_REGISTRATION_STATUS" UNIQUE (registration_status)
 )
 
 TABLESPACE pg_default;
 
 ALTER TABLE public."TBM_REGISTRATION_STATUS"
-    OWNER to ema_user;        
+    OWNER to ema_user;
+
+    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Enrolled');
+    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Cancelled'); 
+    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Waitlist');
+    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Check-In');
+    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Check-Out');
+
 
 
 
