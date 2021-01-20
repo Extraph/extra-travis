@@ -356,6 +356,8 @@ CREATE TABLE public."TBM_SEGMENT"
     passing_criteria_exception text COLLATE pg_catalog."default",
     is_cancel char(1) NOT NULL DEFAULT '0',
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    update_by text COLLATE pg_catalog."default",
+    update_datetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_SEGMENT_pkey" PRIMARY KEY (id),
     CONSTRAINT "uni_TBM_SEGMENT" UNIQUE (start_date_time, end_date_time, session_id, course_id),
     CONSTRAINT "fk_TBM_COURSE_TYPE_id" FOREIGN KEY (course_type_id)
@@ -425,6 +427,8 @@ CREATE TABLE public."TBM_SEGMENT_USER"
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    update_by text COLLATE pg_catalog."default",
+    update_datetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_SEGMENT_USER_pkey" PRIMARY KEY (segment_id, user_id),
     CONSTRAINT "fk_TBM_SEGMENT_id" FOREIGN KEY (segment_id)
         REFERENCES public."TBM_SEGMENT" (id) MATCH SIMPLE
@@ -465,6 +469,8 @@ CREATE TABLE public."TBM_SEGMENT_USER_HIS"
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    update_by text COLLATE pg_catalog."default",
+    update_datetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_SEGMENT_USER_HIS_pkey" PRIMARY KEY (segment_id, user_id),
     CONSTRAINT "fk_TBM_SEGMENT_HIS_id" FOREIGN KEY (segment_id)
         REFERENCES public."TBM_SEGMENT" (id) MATCH SIMPLE

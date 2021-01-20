@@ -384,6 +384,12 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
 
                 entity.Property(e => e.StartDateTime).HasColumnName("start_date_time");
 
+                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
+
+                entity.Property(e => e.UpdateDatetime)
+                    .HasColumnName("update_datetime")
+                    .HasDefaultValueSql("now()");
+
                 entity.Property(e => e.Venue).HasColumnName("venue");
 
                 entity.HasOne(d => d.Course)
@@ -434,6 +440,12 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
                     .IsRequired()
                     .HasColumnName("registration_status");
 
+                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
+
+                entity.Property(e => e.UpdateDatetime)
+                    .HasColumnName("update_datetime")
+                    .HasDefaultValueSql("now()");
+
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.TbmSegmentUsers)
                     .HasForeignKey(d => d.SegmentId)
@@ -463,6 +475,12 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
                 entity.Property(e => e.RegistrationStatus)
                     .IsRequired()
                     .HasColumnName("registration_status");
+
+                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
+
+                entity.Property(e => e.UpdateDatetime)
+                    .HasColumnName("update_datetime")
+                    .HasDefaultValueSql("now()");
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.TbmSegmentUserHis)

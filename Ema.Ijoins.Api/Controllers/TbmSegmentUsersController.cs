@@ -64,7 +64,7 @@ namespace Ema.Ijoins.Api.Controllers
       {
         return BadRequest();
       }
-
+      tbmSegmentUser.UpdateDatetime = DateTime.Now;
       _context.Entry(tbmSegmentUser).State = EntityState.Modified;
 
       try

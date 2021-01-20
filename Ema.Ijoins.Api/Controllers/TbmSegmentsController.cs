@@ -38,7 +38,7 @@ namespace Ema.Ijoins.Api.Controllers
       && w.StartDateTime >= StartDay
       ).OrderBy(o => o.StartDateTime).ToListAsync();
 
-      
+
       return CreateQrPrint(tbmSegments);
     }
     [HttpGet("{Id}")]
@@ -151,7 +151,7 @@ namespace Ema.Ijoins.Api.Controllers
         && (
            w.CourseId.Contains(tbmSegment.CourseId)
         || w.CourseName.Contains(tbmSegment.CourseId)
-        || w.CourseName.Contains(tbmSegment.CourseId.ToLower()) 
+        || w.CourseName.Contains(tbmSegment.CourseId.ToLower())
         || w.CourseName.Contains(tbmSegment.CourseId.ToUpper())
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
@@ -179,7 +179,7 @@ namespace Ema.Ijoins.Api.Controllers
         && (
            w.CourseId.Contains(tbmSegment.CourseId)
         || w.CourseName.Contains(tbmSegment.CourseId)
-        || w.CourseName.Contains(tbmSegment.CourseId.ToLower()) 
+        || w.CourseName.Contains(tbmSegment.CourseId.ToLower())
         || w.CourseName.Contains(tbmSegment.CourseId.ToUpper())
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
@@ -200,7 +200,7 @@ namespace Ema.Ijoins.Api.Controllers
       {
         return BadRequest();
       }
-
+      tbmSegment.UpdateDatetime = DateTime.Now;
       _context.Entry(tbmSegment).State = EntityState.Modified;
 
       try

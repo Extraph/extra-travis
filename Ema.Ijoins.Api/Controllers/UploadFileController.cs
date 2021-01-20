@@ -80,6 +80,28 @@ namespace Ema.Ijoins.Api.Controllers
         await _context.SaveChangesAsync();
 
 
+        List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.StartDateTime <= DateTime.Now.AddDays(-1)).ToListAsync();
+        tbmSegments.ForEach(ts =>
+        {
+          List<TbmSegmentUserHi> tbmSegmentUserHis = new List<TbmSegmentUserHi>();
+          _context.TbmSegmentUsers.Where(w => w.SegmentId == ts.Id).ToList().ForEach(tsu =>
+          {
+            tbmSegmentUserHis.Add(new TbmSegmentUserHi
+            {
+              SegmentId = tsu.SegmentId,
+              UserId = tsu.UserId,
+              RegistrationStatus = tsu.RegistrationStatus,
+              Createdatetime = tsu.Createdatetime,
+              UpdateBy = tsu.UpdateBy,
+              UpdateDatetime = tsu.UpdateDatetime
+            });
+          });
+          _context.TbmSegmentUserHis.AddRange(tbmSegmentUserHis);
+          _context.TbmSegmentUsers.RemoveRange(_context.TbmSegmentUsers.Where(w => w.SegmentId == ts.Id).ToList());
+        });
+        await _context.SaveChangesAsync();
+
+
         string strMessage = "";
         try
         {
@@ -128,11 +150,10 @@ namespace Ema.Ijoins.Api.Controllers
 
         if (tbmKlcFileImport.ImportType == "Upload session and participants")
         {
-          List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.StartDateTime >= DateTime.Now).ToListAsync();
-
-          tbmSegments.ForEach(ts =>
+          List<TbmSegment> tbmSegmentsForclear = await _context.TbmSegments.Where(w => w.StartDateTime >= DateTime.Now).ToListAsync();
+          tbmSegmentsForclear.ForEach(ts =>
           {
-            _context.TbmSegmentUsers.RemoveRange(_context.TbmSegmentUsers.Where(w => w.SegmentId >= ts.Id).ToList());
+            _context.TbmSegmentUsers.RemoveRange(_context.TbmSegmentUsers.Where(w => w.SegmentId == ts.Id).ToList());
           });
           await _context.SaveChangesAsync();
         }
@@ -282,13 +303,6 @@ namespace Ema.Ijoins.Api.Controllers
         _context.TbKlcDataMasters.RemoveRange(tbKlcDataMasters.ToList());
         await _context.SaveChangesAsync();
 
-
-
-        //IEnumerable<TbtIjoinScanQr> tbtIjoinScanQrs = await _context.TbtIjoinScanQrs.Where(w => w.EndDateTime < DateTime.Now.AddDays(-7)).ToListAsync();
-        //_context.TbtIjoinScanQrHis.AddRange(Utility.MoveDataIJoinToHis(tbtIjoinScanQrs.ToList()));
-        //await _context.SaveChangesAsync();
-        //_context.TbtIjoinScanQrs.RemoveRange(tbtIjoinScanQrs.ToList());
-        //await _context.SaveChangesAsync();
 
 
         await transaction.CommitAsync();
