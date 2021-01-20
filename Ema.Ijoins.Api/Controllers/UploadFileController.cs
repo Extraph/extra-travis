@@ -125,6 +125,21 @@ namespace Ema.Ijoins.Api.Controllers
       {
         await transaction.CreateSavepointAsync("BeginImport");
 
+
+        if (tbmKlcFileImport.ImportType == "Upload session and participants")
+        {
+          List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.StartDateTime >= DateTime.Now).ToListAsync();
+
+          tbmSegments.ForEach(ts =>
+          {
+            _context.TbmSegmentUsers.RemoveRange(_context.TbmSegmentUsers.Where(w => w.SegmentId >= ts.Id).ToList());
+          });
+          await _context.SaveChangesAsync();
+        }
+
+
+
+
         IEnumerable<TbKlcDataMaster> tbKlcDataMasters = await _context.TbKlcDataMasters.Where(w => w.FileId == tbmKlcFileImport.Id).ToListAsync();
         foreach (TbKlcDataMaster klcDataMaster in tbKlcDataMasters)
         {
@@ -149,11 +164,26 @@ namespace Ema.Ijoins.Api.Controllers
             _context.TbmCourses.Add(tbmCourse);
             await _context.SaveChangesAsync();
           }
+          else
+          {
+            TbmCourse tbmCourse = await _context.TbmCourses.Where(w => w.CourseId == klcDataMaster.CourseId).FirstOrDefaultAsync();
+            tbmCourse.CourseName = klcDataMaster.CourseName;
+            tbmCourse.CourseNameTh = klcDataMaster.CourseNameTh;
+            _context.Entry(tbmCourse).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+          }
 
           if (!TbmSessionExists(klcDataMaster.SessionId))
           {
             TbmSession tbmSession = new TbmSession { SessionId = klcDataMaster.SessionId, SessionName = klcDataMaster.SessionName };
             _context.TbmSessions.Add(tbmSession);
+            await _context.SaveChangesAsync();
+          }
+          else
+          {
+            TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == klcDataMaster.SessionId).FirstOrDefaultAsync();
+            tbmSession.SessionName = klcDataMaster.SessionName;
+            _context.Entry(tbmSession).State = EntityState.Modified;
             await _context.SaveChangesAsync();
           }
 
@@ -194,6 +224,21 @@ namespace Ema.Ijoins.Api.Controllers
             )
               .FirstOrDefaultAsync();
             SegmentRunId = tbmSegment.Id;
+
+            tbmSegment.SessionName = klcDataMaster.SessionName;
+            tbmSegment.CourseName = klcDataMaster.CourseName;
+            tbmSegment.CourseNameTh = klcDataMaster.CourseNameTh;
+            tbmSegment.CourseOwnerEmail = klcDataMaster.CourseOwnerEmail;
+            tbmSegment.CourseOwnerContactNo = klcDataMaster.CourseOwnerContactNo;
+            tbmSegment.Venue = klcDataMaster.Venue;
+            tbmSegment.Instructor = klcDataMaster.Instructor;
+            tbmSegment.CourseCreditHoursInit = klcDataMaster.CourseCreditHours;
+            tbmSegment.PassingCriteriaExceptionInit = klcDataMaster.PassingCriteriaException;
+            tbmSegment.CourseCreditHours = klcDataMaster.CourseCreditHours;
+            tbmSegment.PassingCriteriaException = klcDataMaster.PassingCriteriaException;
+            tbmSegment.IsCancel = '0';
+            _context.Entry(tbmSegment).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
           }
 
           if (!TbmRegistrationStatusExists(klcDataMaster.RegistrationStatus))
@@ -226,6 +271,7 @@ namespace Ema.Ijoins.Api.Controllers
         var klcFileImport = await _context.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
         klcFileImport.ImportTotalrecords = tbKlcDataMasters.Count().ToString();
         klcFileImport.Status = "import success";
+        klcFileImport.ImportType = tbmKlcFileImport.ImportType;
         _context.Entry(klcFileImport).State = EntityState.Modified;
         await _context.SaveChangesAsync();
 

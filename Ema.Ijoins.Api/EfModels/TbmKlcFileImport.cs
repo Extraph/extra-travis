@@ -19,6 +19,7 @@ namespace Ema.Ijoins.Api.EfModels
         public string Status { get; set; }
         public string GuidName { get; set; }
         public string ImportBy { get; set; }
+        public string ImportType { get; set; }
         public string ImportTotalrecords { get; set; }
         public string ImportMessage { get; set; }
         public DateTime Createdatetime { get; set; }

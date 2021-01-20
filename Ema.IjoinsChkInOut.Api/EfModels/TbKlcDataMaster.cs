@@ -32,6 +32,7 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
         public string UserCompany { get; set; }
         public string UserId { get; set; }
         public string RegistrationStatus { get; set; }
+        public string InvalidMessage { get; set; }
         public DateTime Createdatetime { get; set; }
 
         public virtual TbmKlcFileImport File { get; set; }

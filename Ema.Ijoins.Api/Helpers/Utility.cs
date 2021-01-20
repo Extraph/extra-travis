@@ -6,6 +6,7 @@ using ExcelDataReader;
 using System.Data;
 using System.IO;
 using OfficeOpenXml;
+using System.Globalization;
 
 namespace Ema.Ijoins.Api.Helpers
 {
@@ -47,10 +48,13 @@ namespace Ema.Ijoins.Api.Helpers
             SessionName = worksheet.Cells[row, 6].Value?.ToString(),
             SegmentNo = worksheet.Cells[row, 7].Value?.ToString(),
             SegmentName = worksheet.Cells[row, 8].Value?.ToString(),
-            StartDate = worksheet.Cells[row, 9].Value?.ToString(),
-            EndDate = worksheet.Cells[row, 10].Value?.ToString(),
-            StartTime = worksheet.Cells[row, 11].Value?.ToString(),
-            EndTime = worksheet.Cells[row, 12].Value?.ToString(),
+
+            StartDate = StartDate.ToString("dd-MM-yyyy"),
+            EndDate = EndDate.ToString("dd-MM-yyyy"),
+
+            StartTime = StartTime.ToString("hh tt:mm"),
+            EndTime = EndTime.ToString("hh tt:mm"),
+
             StartDateTime = StartDateTime,
             EndDateTime = EndDateTime,
             CourseOwnerEmail = worksheet.Cells[row, 13].Value?.ToString(),
@@ -114,24 +118,15 @@ namespace Ema.Ijoins.Api.Helpers
     }
     public static List<TbKlcDataMaster> ValidateData(List<TbKlcDataMaster> tbKlcDatas)
     {
+
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+
       List<TbKlcDataMaster> datasInvalid = new List<TbKlcDataMaster>();
 
       foreach (TbKlcDataMaster data in tbKlcDatas)
       {
-
-        if (string.IsNullOrEmpty(data.CourseType) ||
-        string.IsNullOrEmpty(data.CourseId) ||
-        string.IsNullOrEmpty(data.CourseName) ||
-        string.IsNullOrEmpty(data.SessionId) ||
-        string.IsNullOrEmpty(data.SessionName) ||
-        string.IsNullOrEmpty(data.SegmentNo) ||
-        string.IsNullOrEmpty(data.StartDate) ||
-        string.IsNullOrEmpty(data.EndDate) ||
-        string.IsNullOrEmpty(data.StartTime) ||
-        string.IsNullOrEmpty(data.EndTime) ||
-        string.IsNullOrEmpty(data.CourseOwnerEmail) ||
-        string.IsNullOrEmpty(data.UserId) ||
-        string.IsNullOrEmpty(data.RegistrationStatus))
+        if (string.IsNullOrEmpty(data.CourseId))
         {
           datasInvalid.Add(new TbKlcDataMaster
           {
@@ -158,9 +153,391 @@ namespace Ema.Ijoins.Api.Helpers
             UserCompany = data.UserCompany,
             UserId = data.UserId,
             RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Course ID(*required)"
           });
         }
-
+        else if (
+        string.IsNullOrEmpty(data.CourseName)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Course Name(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.SessionId)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Session ID(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.SessionName)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Session Name(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.SegmentNo)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Segment No.(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.StartDate)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Start Date(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.EndDate)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "End Date(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.StartTime)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Start Time(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.EndTime)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "End Time(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.CourseOwnerEmail)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Course Owner Email(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.UserId)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "User ID(*required)"
+          });
+        }
+        else if (
+        string.IsNullOrEmpty(data.RegistrationStatus)
+        )
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Registration Status(*required)"
+          });
+        }
+        else if (data.StartDateTime <= StartDay)
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Session Start Datetime must greater than today."
+          });
+        }
       }
       return datasInvalid;
     }
@@ -196,6 +573,7 @@ namespace Ema.Ijoins.Api.Helpers
           UserCompany = data.UserCompany,
           UserId = data.UserId,
           RegistrationStatus = data.RegistrationStatus,
+          InvalidMessage = data.InvalidMessage
         });
       }
       return dataHis;
@@ -228,5 +606,70 @@ namespace Ema.Ijoins.Api.Helpers
     //  return dataHis;
     //}
 
+    public static DateTime AddBusinessDays(DateTime date, int days)
+    {
+      if (days < 0)
+      {
+        throw new ArgumentException("days cannot be negative", "days");
+      }
+
+      if (days == 0) return date;
+
+      if (date.DayOfWeek == DayOfWeek.Saturday)
+      {
+        date = date.AddDays(2);
+        days -= 1;
+      }
+      else if (date.DayOfWeek == DayOfWeek.Sunday)
+      {
+        date = date.AddDays(1);
+        days -= 1;
+      }
+
+      date = date.AddDays(days / 5 * 7);
+      int extraDays = days % 5;
+
+      if ((int)date.DayOfWeek + extraDays > 5)
+      {
+        extraDays += 2;
+      }
+
+      return date.AddDays(extraDays);
+
+    }
+
+    public static int GetBusinessDays(DateTime start, DateTime end)
+    {
+      if (start.DayOfWeek == DayOfWeek.Saturday)
+      {
+        start = start.AddDays(2);
+      }
+      else if (start.DayOfWeek == DayOfWeek.Sunday)
+      {
+        start = start.AddDays(1);
+      }
+
+      if (end.DayOfWeek == DayOfWeek.Saturday)
+      {
+        end = end.AddDays(-1);
+      }
+      else if (end.DayOfWeek == DayOfWeek.Sunday)
+      {
+        end = end.AddDays(-2);
+      }
+
+      int diff = (int)end.Subtract(start).TotalDays;
+
+      int result = diff / 7 * 5 + diff % 7;
+
+      if (end.DayOfWeek < start.DayOfWeek)
+      {
+        return result - 2;
+      }
+      else
+      {
+        return result;
+      }
+    }
   }
 }

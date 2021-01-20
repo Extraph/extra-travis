@@ -87,6 +87,8 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
 
                 entity.Property(e => e.Instructor).HasColumnName("instructor");
 
+                entity.Property(e => e.InvalidMessage).HasColumnName("invalid_message");
+
                 entity.Property(e => e.PassingCriteriaException).HasColumnName("passing_criteria_exception");
 
                 entity.Property(e => e.RegistrationStatus)
@@ -179,6 +181,8 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
                 entity.Property(e => e.FileId).HasColumnName("file_id");
 
                 entity.Property(e => e.Instructor).HasColumnName("instructor");
+
+                entity.Property(e => e.InvalidMessage).HasColumnName("invalid_message");
 
                 entity.Property(e => e.PassingCriteriaException).HasColumnName("passing_criteria_exception");
 
@@ -290,6 +294,8 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
 
                 entity.Property(e => e.ImportTotalrecords).HasColumnName("import_totalrecords");
 
+                entity.Property(e => e.ImportType).HasColumnName("import_type");
+
                 entity.Property(e => e.Status)
                     .IsRequired()
                     .HasColumnName("status")
@@ -299,6 +305,9 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
             modelBuilder.Entity<TbmRegistrationStatus>(entity =>
             {
                 entity.ToTable("TBM_REGISTRATION_STATUS");
+
+                entity.HasIndex(e => e.RegistrationStatus, "uni_TBM_REGISTRATION_STATUS")
+                    .IsUnique();
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
@@ -330,6 +339,8 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
 
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
 
+                entity.Property(e => e.CourseCreditHoursInit).HasColumnName("course_credit_hours_init");
+
                 entity.Property(e => e.CourseId)
                     .IsRequired()
                     .HasColumnName("course_id");
@@ -356,7 +367,14 @@ namespace Ema.IjoinsChkInOut.Api.EfModels
 
                 entity.Property(e => e.Instructor).HasColumnName("instructor");
 
+                entity.Property(e => e.IsCancel)
+                    .HasMaxLength(1)
+                    .HasColumnName("is_cancel")
+                    .HasDefaultValueSql("'0'::bpchar");
+
                 entity.Property(e => e.PassingCriteriaException).HasColumnName("passing_criteria_exception");
+
+                entity.Property(e => e.PassingCriteriaExceptionInit).HasColumnName("passing_criteria_exception_init");
 
                 entity.Property(e => e.SessionId)
                     .IsRequired()

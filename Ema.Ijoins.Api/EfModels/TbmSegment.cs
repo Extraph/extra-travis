@@ -31,6 +31,7 @@ namespace Ema.Ijoins.Api.EfModels
         public string PassingCriteriaExceptionInit { get; set; }
         public string CourseCreditHours { get; set; }
         public string PassingCriteriaException { get; set; }
+        public char IsCancel { get; set; }
         public DateTime Createdatetime { get; set; }
 
         public virtual TbmCourse Course { get; set; }

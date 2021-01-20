@@ -123,6 +123,7 @@ CREATE TABLE public."TBM_KLC_FILE_IMPORT"
     status text COLLATE pg_catalog."default" NOT NULL,
     guid_name text COLLATE pg_catalog."default" NOT NULL,
     import_by text COLLATE pg_catalog."default" NOT NULL,
+    import_type text COLLATE pg_catalog."default",
     import_totalrecords text COLLATE pg_catalog."default",
     import_message text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
@@ -170,6 +171,7 @@ CREATE TABLE public."TB_KLC_DATA_MASTER"
     user_company text COLLATE pg_catalog."default",
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
+    invalid_message text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TB_KLC_DATA_MASTER_pkey" PRIMARY KEY (id),
     CONSTRAINT fk_tbm_klc_file_import_id FOREIGN KEY (file_id)
@@ -223,6 +225,7 @@ CREATE TABLE public."TB_KLC_DATA_MASTER_HIS"
     user_company text COLLATE pg_catalog."default",
     user_id text COLLATE pg_catalog."default" NOT NULL,
     registration_status text COLLATE pg_catalog."default" NOT NULL,
+    invalid_message text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TB_KLC_DATA_MASTER_HIS_pkey" PRIMARY KEY (id),
     CONSTRAINT fk_tbm_klc_file_import_id_his FOREIGN KEY (file_id)
@@ -319,8 +322,8 @@ ALTER TABLE public."TBM_REGISTRATION_STATUS"
     OWNER to ema_user;
 
     INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Enrolled');
-    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Cancelled'); 
     INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Waitlist');
+    INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Cancelled'); 
     INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Check-In');
     INSERT INTO public."TBM_REGISTRATION_STATUS"(registration_status) VALUES ('Check-Out');
 
@@ -351,6 +354,7 @@ CREATE TABLE public."TBM_SEGMENT"
     passing_criteria_exception_init text COLLATE pg_catalog."default",
     course_credit_hours text COLLATE pg_catalog."default",
     passing_criteria_exception text COLLATE pg_catalog."default",
+    is_cancel char(1) NOT NULL DEFAULT '0',
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_SEGMENT_pkey" PRIMARY KEY (id),
     CONSTRAINT "uni_TBM_SEGMENT" UNIQUE (start_date_time, end_date_time, session_id, course_id),
