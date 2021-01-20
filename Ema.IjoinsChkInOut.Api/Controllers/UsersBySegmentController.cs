@@ -41,7 +41,7 @@ namespace Ema.Ijoins.Api.Controllers
       var query = from users in tbmSegmentUsers
                   join usersCheck in usersCheckings on users.UserId equals usersCheck.UserId into gj
                   from subUsers in gj.DefaultIfEmpty()
-                  select new { users.SegmentId, users.UserId, Createdatetime = subUsers?.Createdatetime ?? users.Createdatetime, RegistrationStatus = subUsers?.CheckingStatus ?? users.RegistrationStatus };
+                  select new { users.SegmentId, users.UserId, Createdatetime = subUsers?.Createdatetime ?? users.Createdatetime, RegistrationStatus = users.RegistrationStatus };
 
       var results =
         from gb in query
@@ -88,7 +88,7 @@ namespace Ema.Ijoins.Api.Controllers
       var query = from users in tbmSegmentUsers
                   join usersCheck in usersCheckings on users.UserId equals usersCheck.UserId into gj
                   from subUsers in gj.DefaultIfEmpty()
-                  select new { users.SegmentId, users.UserId, Createdatetime = subUsers?.Createdatetime ?? users.Createdatetime, RegistrationStatus = subUsers?.CheckingStatus ?? users.RegistrationStatus };
+                  select new { users.SegmentId, users.UserId, Createdatetime = subUsers?.Createdatetime ?? users.Createdatetime, RegistrationStatus = users.RegistrationStatus };
 
 
       var results =
