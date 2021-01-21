@@ -5,15 +5,15 @@ using System.Collections.Generic;
 
 namespace Ema.IjoinsChkInOut.Api.EfModels
 {
-    public partial class TbmSegmentUser
+    public partial class TbmSessionUserHi
     {
-        public int SegmentId { get; set; }
+        public string SessionId { get; set; }
         public string UserId { get; set; }
         public string RegistrationStatus { get; set; }
         public DateTime Createdatetime { get; set; }
         public string UpdateBy { get; set; }
         public DateTime UpdateDatetime { get; set; }
 
-        public virtual TbmSegment Segment { get; set; }
+        public virtual TbmSession Session { get; set; }
     }
 }

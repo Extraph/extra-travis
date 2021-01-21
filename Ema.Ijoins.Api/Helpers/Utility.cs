@@ -121,6 +121,7 @@ namespace Ema.Ijoins.Api.Helpers
 
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
 
       List<TbKlcDataMaster> datasInvalid = new List<TbKlcDataMaster>();
 
@@ -508,36 +509,36 @@ namespace Ema.Ijoins.Api.Helpers
             InvalidMessage = "Registration Status(*required)"
           });
         }
-        else if (data.StartDateTime <= StartDay)
-        {
-          datasInvalid.Add(new TbKlcDataMaster
-          {
-            Id = data.Id,
-            FileId = data.FileId,
-            CourseType = data.CourseType,
-            CourseId = data.CourseId,
-            CourseName = data.CourseName,
-            CourseNameTh = data.CourseNameTh,
-            SessionId = data.SessionId,
-            SessionName = data.SessionName,
-            SegmentNo = data.SegmentNo,
-            SegmentName = data.SegmentName,
-            StartDate = data.StartDate,
-            EndDate = data.EndDate,
-            StartTime = data.StartTime,
-            EndTime = data.EndTime,
-            CourseOwnerEmail = data.CourseOwnerEmail,
-            CourseOwnerContactNo = data.CourseOwnerContactNo,
-            Venue = data.Venue,
-            Instructor = data.Instructor,
-            CourseCreditHours = data.CourseCreditHours,
-            PassingCriteriaException = data.PassingCriteriaException,
-            UserCompany = data.UserCompany,
-            UserId = data.UserId,
-            RegistrationStatus = data.RegistrationStatus,
-            InvalidMessage = "Session Start Datetime must greater than today."
-          });
-        }
+        //else if (data.EndDateTime <= StartDay)
+        //{
+        //  datasInvalid.Add(new TbKlcDataMaster
+        //  {
+        //    Id = data.Id,
+        //    FileId = data.FileId,
+        //    CourseType = data.CourseType,
+        //    CourseId = data.CourseId,
+        //    CourseName = data.CourseName,
+        //    CourseNameTh = data.CourseNameTh,
+        //    SessionId = data.SessionId,
+        //    SessionName = data.SessionName,
+        //    SegmentNo = data.SegmentNo,
+        //    SegmentName = data.SegmentName,
+        //    StartDate = data.StartDate,
+        //    EndDate = data.EndDate,
+        //    StartTime = data.StartTime,
+        //    EndTime = data.EndTime,
+        //    CourseOwnerEmail = data.CourseOwnerEmail,
+        //    CourseOwnerContactNo = data.CourseOwnerContactNo,
+        //    Venue = data.Venue,
+        //    Instructor = data.Instructor,
+        //    CourseCreditHours = data.CourseCreditHours,
+        //    PassingCriteriaException = data.PassingCriteriaException,
+        //    UserCompany = data.UserCompany,
+        //    UserId = data.UserId,
+        //    RegistrationStatus = data.RegistrationStatus,
+        //    InvalidMessage = "Session Start Datetime must greater than today."
+        //  });
+        //}
       }
       return datasInvalid;
     }
