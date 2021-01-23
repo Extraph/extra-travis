@@ -27,12 +27,25 @@ namespace Ema.Ijoins.Api.Helpers
 
         for (int row = 2; row <= totalRows; row++)
         {
+          bool isEmpty = true;
+          for (int col = 1; col <= 21; col++)
+          {
+            if (!string.IsNullOrWhiteSpace(worksheet.Cells[row, col].Value?.ToString()))
+            {
+              isEmpty = false;
+            }
+          }
+          if (isEmpty) continue;
 
-          DateTime StartDate = (DateTime)worksheet.Cells[row, 9].Value;
-          DateTime EndDate = (DateTime)worksheet.Cells[row, 10].Value;
 
-          DateTime StartTime = (DateTime)worksheet.Cells[row, 11].Value;
-          DateTime EndTime = (DateTime)worksheet.Cells[row, 12].Value;
+          //ค้าง Validate Data
+
+          _ = DateTime.TryParse(worksheet.Cells[row, 9].Value?.ToString(), out DateTime StartDate);
+          _ = DateTime.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out DateTime EndDate);
+
+          _ = DateTime.TryParse(worksheet.Cells[row, 11].Value?.ToString(), out DateTime StartTime);
+          _ = DateTime.TryParse(worksheet.Cells[row, 12].Value?.ToString(), out DateTime EndTime);
+
 
           DateTime.TryParseExact(StartDate.ToString("yyyyMMdd") + " " + StartTime.ToString("HH:mm:ss"), "yyyyMMdd HH:mm:ss", enUS, DateTimeStyles.None, out DateTime StartDateTime);
           DateTime.TryParseExact(EndDate.ToString("yyyyMMdd") + " " + EndTime.ToString("HH:mm:ss"), "yyyyMMdd HH:mm:ss", enUS, DateTimeStyles.None, out DateTime EndDateTime);
@@ -49,11 +62,11 @@ namespace Ema.Ijoins.Api.Helpers
             SegmentNo = worksheet.Cells[row, 7].Value?.ToString(),
             SegmentName = worksheet.Cells[row, 8].Value?.ToString(),
 
-            StartDate = StartDate.ToString("dd-MM-yyyy"),
-            EndDate = EndDate.ToString("dd-MM-yyyy"),
+            StartDate = worksheet.Cells[row, 9].Value?.ToString(),
+            EndDate = worksheet.Cells[row, 10].Value?.ToString(),
 
-            StartTime = StartTime.ToString("hh tt:mm"),
-            EndTime = EndTime.ToString("hh tt:mm"),
+            StartTime = worksheet.Cells[row, 11].Value?.ToString(),
+            EndTime = worksheet.Cells[row, 12].Value?.ToString(),
 
             StartDateTime = StartDateTime,
             EndDateTime = EndDateTime,
@@ -120,14 +133,192 @@ namespace Ema.Ijoins.Api.Helpers
     {
 
       CultureInfo enUS = new CultureInfo("en-US");
-      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
-      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
 
       List<TbKlcDataMaster> datasInvalid = new List<TbKlcDataMaster>();
 
       foreach (TbKlcDataMaster data in tbKlcDatas)
       {
-        if (string.IsNullOrEmpty(data.CourseId))
+        if (!DateTime.TryParse(data.StartDate, out DateTime StartDate))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid Start Date => " + data.StartDate
+          });
+        }
+        else if (!DateTime.TryParse(data.EndDate, out DateTime EndDate))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid End Date => " + data.EndDate
+          });
+        }
+        else if (!DateTime.TryParse(data.StartTime, out DateTime StartTime))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid Start Time => " + data.StartTime
+          });
+        }
+        else if (!DateTime.TryParse(data.EndTime, out DateTime EndTime))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid End Time => " + data.EndTime
+          });
+        }
+        else if (!int.TryParse(data.CourseCreditHours, out int CourseCreditHours))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid Course Credit Hours => " + data.CourseCreditHours
+          });
+        }
+        else if (!float.TryParse(data.PassingCriteriaException, out float PassingCriteriaException))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid Passing Criteria Exception => " + data.PassingCriteriaException
+          });
+        }
+        else if (string.IsNullOrEmpty(data.CourseId))
         {
           datasInvalid.Add(new TbKlcDataMaster
           {

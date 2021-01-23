@@ -508,3 +508,35 @@ CREATE INDEX "fki_fk_TBM_SESSION_HIS_id"
     ON public."TBM_SESSION_USER_HIS" USING btree
     (session_id ASC NULLS LAST)
     TABLESPACE pg_default;        
+
+
+
+
+-- View: public.v_Segment_Gen_Qr
+
+-- DROP VIEW public."v_Segment_Gen_Qr";
+
+CREATE OR REPLACE VIEW public."v_Segment_Gen_Qr"
+ AS
+ SELECT ss.course_id,
+    ss.course_name,
+    ss.course_name_th,
+    ss.session_id,
+    ss.session_name,
+    ss.venue,
+    to_timestamp(((to_char(sg.intervalday, 'YYYY-MM-DD'::text) || ' '::text) || to_char(sg.start_date_time, 'HH24:MI:SS'::text)), 'YYYY-MM-DD HH24:MI:SS'::text) AS start_date_time,
+    to_timestamp(((to_char(sg.intervalday, 'YYYY-MM-DD'::text) || ' '::text) || to_char(sg.end_date_time, 'HH24:MI:SS'::text)), 'YYYY-MM-DD HH24:MI:SS'::text) AS end_date_time
+   FROM (( SELECT "TBM_SEGMENT".session_id,
+            "TBM_SEGMENT".start_date,
+            "TBM_SEGMENT".end_date,
+            min("TBM_SEGMENT".start_date_time) AS start_date_time,
+            max("TBM_SEGMENT".end_date_time) AS end_date_time,
+            generate_series(((min("TBM_SEGMENT".start_date_time))::date)::timestamp with time zone, ((max("TBM_SEGMENT".end_date_time))::date)::timestamp with time zone, '1 day'::interval) AS intervalday
+           FROM "TBM_SEGMENT"
+          GROUP BY "TBM_SEGMENT".session_id, "TBM_SEGMENT".start_date, "TBM_SEGMENT".end_date
+          ORDER BY "TBM_SEGMENT".session_id, (min("TBM_SEGMENT".start_date_time))) sg
+     JOIN "TBM_SESSION" ss ON ((sg.session_id = ss.session_id)));
+
+ALTER TABLE public."v_Segment_Gen_Qr"
+    OWNER TO ema_user;
+

@@ -61,3 +61,53 @@ from public."TB_KLC_DATA_MASTER" kdm inner join public."TBM_COURSE_TYPE" ct on k
 group by 
 	kdm.id, kdm.file_id, ct.id, kdm.course_id, kdm.session_id, kdm.start_date_time, kdm.end_date_time, kdm.user_id, kdm.registration_status
 ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------Select For View Segment--------------------------------
+
+select 
+		ss.course_id,
+		ss.course_name,
+		ss.course_name_th,
+		ss.session_id,
+		ss.session_name,
+		ss.venue,
+		TO_TIMESTAMP
+		(
+			to_char(sg.intervalday, 'YYYY-MM-DD') || ' ' ||
+			to_char(sg.start_date_time, 'HH24:MI:SS')
+			, 'YYYY-MM-DD HH24:MI:SS'
+		) start_date_time,
+		TO_TIMESTAMP
+		(
+			to_char(sg.intervalday, 'YYYY-MM-DD') || ' ' ||
+			to_char(sg.end_date_time, 'HH24:MI:SS')
+			, 'YYYY-MM-DD HH24:MI:SS'
+		) end_date_time
+from
+(
+	SELECT 
+		session_id,
+		start_date,
+		end_date,
+		min(start_date_time) start_date_time,
+		max(end_date_time) end_date_time,
+		generate_series(min(start_date_time)::date, max(end_date_time)::date, '1 day'::interval) intervalday
+	FROM public."TBM_SEGMENT"
+	group by session_id,start_date,end_date
+	order by session_id,start_date_time
+) sg inner join public."TBM_SESSION" SS on sg.session_id = ss.session_id
+;	
+

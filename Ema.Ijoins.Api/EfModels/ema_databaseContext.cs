@@ -27,6 +27,7 @@ namespace Ema.Ijoins.Api.EfModels
         public virtual DbSet<TbmSession> TbmSessions { get; set; }
         public virtual DbSet<TbmSessionUser> TbmSessionUsers { get; set; }
         public virtual DbSet<TbmSessionUserHi> TbmSessionUserHis { get; set; }
+        public virtual DbSet<VSegmentGenQr> VSegmentGenQrs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -454,7 +455,7 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.HasIndex(e => e.SessionId, "fki_fk_TBM_SESSION_id");
 
-                entity.HasIndex(e => new { e.SessionId, e.UserId }, "idx_TBM_SESSION_USER_session_course_id");
+                entity.HasIndex(e => new { e.UserId, e.SessionId }, "idx_TBM_SESSION_USER_session_user_id");
 
                 entity.Property(e => e.SessionId).HasColumnName("session_id");
 
@@ -515,6 +516,33 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasForeignKey(d => d.SessionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_TBM_SESSION_HIS_id");
+            });
+
+            modelBuilder.Entity<VSegmentGenQr>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToTable("v_Segment_Gen_Qr");
+
+                entity.Property(e => e.CourseId).HasColumnName("course_id");
+
+                entity.Property(e => e.CourseName).HasColumnName("course_name");
+
+                entity.Property(e => e.CourseNameTh).HasColumnName("course_name_th");
+
+                entity.Property(e => e.EndDateTime)
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("end_date_time");
+
+                entity.Property(e => e.SessionId).HasColumnName("session_id");
+
+                entity.Property(e => e.SessionName).HasColumnName("session_name");
+
+                entity.Property(e => e.StartDateTime)
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("start_date_time");
+
+                entity.Property(e => e.Venue).HasColumnName("venue");
             });
 
             modelBuilder.HasSequence("TB_KLC_DATA_MASTER_id_seq");
