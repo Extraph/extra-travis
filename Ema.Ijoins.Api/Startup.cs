@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Http.Features;
+using Ema.Ijoins.Api.Services;
 
 namespace Ema.Ijoins.Api
 {
@@ -40,6 +41,8 @@ namespace Ema.Ijoins.Api
       services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
 
       services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "FileUploaded")));
+
+      services.AddScoped<IIjoinsService, IjoinsService>();
 
       services.Configure<FormOptions>(options =>
       {

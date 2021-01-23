@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.Services;
 
 namespace Ema.Ijoins.Api.Controllers
 {
@@ -18,11 +19,13 @@ namespace Ema.Ijoins.Api.Controllers
   {
     private readonly IFileProvider _fileProvider;
     private readonly ema_databaseContext _context;
+    private readonly IIjoinsService _ijoinsService;
 
-    public UploadFileController(IFileProvider fileProvider, ema_databaseContext context)
+    public UploadFileController(IFileProvider fileProvider, ema_databaseContext context, IIjoinsService ijoinsService)
     {
       _fileProvider = fileProvider;
       _context = context;
+      _ijoinsService = ijoinsService;
     }
 
 
