@@ -18,6 +18,8 @@ namespace Ema.Ijoins.Api.Services
     Task<object> UploadFileKlc(IFormFile file);
     Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
     Task<IEnumerable<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
+    Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession);
+    Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession);
   }
 
   public class IjoinsService : IIjoinsService
@@ -389,7 +391,6 @@ namespace Ema.Ijoins.Api.Services
     }
 
 
-
     public async Task<IEnumerable<ModelSessionsQR>> GetSessions(TbmSession tbmSession)
     {
       CultureInfo enUS = new CultureInfo("en-US");
@@ -438,6 +439,46 @@ namespace Ema.Ijoins.Api.Services
 
 
       return segmentsQRs;
+    }
+
+    public async Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession)
+    {
+      //CultureInfo enUS = new CultureInfo("en-US");
+      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+
+      return await _context.TbmSessions.Where(
+        w =>
+        w.IsCancel == '0'
+        && w.StartDateTime <= DateTime.Now 
+        && w.EndDateTime >= DateTime.Now
+        && (
+           w.CourseId.Contains(tbmSession.CourseId)
+        || w.CourseName.Contains(tbmSession.CourseId)
+        || w.CourseName.Contains(tbmSession.CourseId.ToLower())
+        || w.CourseName.Contains(tbmSession.CourseId.ToUpper())
+        )
+        ).OrderBy(o => o.StartDateTime).ToListAsync();
+    }
+
+    public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession)
+    {
+      //CultureInfo enUS = new CultureInfo("en-US");
+      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+      DateTime nextSevenDate = DateTime.Now.AddDays(7);
+
+      return await _context.TbmSessions.Where(
+        w =>
+        w.IsCancel == '0'
+        && (w.EndDateTime >= DateTime.Now && w.EndDateTime <= nextSevenDate)
+        && (
+           w.CourseId.Contains(tbmSession.CourseId)
+        || w.CourseName.Contains(tbmSession.CourseId)
+        || w.CourseName.Contains(tbmSession.CourseId.ToLower())
+        || w.CourseName.Contains(tbmSession.CourseId.ToUpper())
+        )
+        ).OrderBy(o => o.StartDateTime).ToListAsync();
     }
 
 

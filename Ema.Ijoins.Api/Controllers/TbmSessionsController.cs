@@ -37,6 +37,34 @@ namespace Ema.Ijoins.Api.Controllers
       return tbmSessions.ToList();
     }
 
+    [HttpPost("ToDayClass")]
+    public async Task<ActionResult<IEnumerable<TbmSession>>> ToDayClass(TbmSession tbmSession)
+    {
+      var tbmSessions = await _ijoinsService.GetToDayClass(tbmSession);
+
+      if (tbmSessions == null)
+      {
+        return NotFound();
+      }
+
+      return tbmSessions;
+    }
+
+    [HttpPost("SevenDayClass")]
+    public async Task<ActionResult<IEnumerable<TbmSession>>> SevenDayClass(TbmSession tbmSession)
+    {
+      var tbmSessions = await _ijoinsService.GetSevenDayClass(tbmSession);
+
+      if (tbmSessions == null)
+      {
+        return NotFound();
+      }
+
+      return tbmSessions;
+    }
+
+
+
     [HttpPut("{id}")]
     public async Task<IActionResult> PutTbmSession(string id, TbmSession tbmSession)
     {
