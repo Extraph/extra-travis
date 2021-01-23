@@ -7,11 +7,13 @@ namespace Ema.Ijoins.Api.EfModels
 {
     public partial class TbmSegment
     {
-        public int Id { get; set; }
-        public string CourseId { get; set; }
         public string SessionId { get; set; }
         public string SegmentNo { get; set; }
         public string SegmentName { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
         public DateTime Createdatetime { get; set; }

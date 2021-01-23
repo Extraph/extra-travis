@@ -542,8 +542,7 @@ namespace Ema.Ijoins.Api.Helpers
       }
       return datasInvalid;
     }
-
-    public static List<TbKlcDataMasterHi> MoveDataToHis(List<TbKlcDataMaster> tbKlcDatas)
+    public static List<TbKlcDataMasterHi> MoveDataKlcUploadToHis(List<TbKlcDataMaster> tbKlcDatas)
     {
       List<TbKlcDataMasterHi> dataHis = new List<TbKlcDataMasterHi>();
 
@@ -565,6 +564,8 @@ namespace Ema.Ijoins.Api.Helpers
           EndDate = data.EndDate,
           StartTime = data.StartTime,
           EndTime = data.EndTime,
+          StartDateTime = data.StartDateTime,
+          EndDateTime = data.EndDateTime,
           CourseOwnerEmail = data.CourseOwnerEmail,
           CourseOwnerContactNo = data.CourseOwnerContactNo,
           Venue = data.Venue,
@@ -579,34 +580,6 @@ namespace Ema.Ijoins.Api.Helpers
       }
       return dataHis;
     }
-
-    //public static List<TbtIjoinScanQrHi> MoveDataIJoinToHis(List<TbtIjoinScanQr> lists)
-    //{
-    //  List<TbtIjoinScanQrHi> dataHis = new List<TbtIjoinScanQrHi>();
-
-    //  foreach (TbtIjoinScanQr data in lists)
-    //  {
-    //    dataHis.Add(new TbtIjoinScanQrHi
-    //    {
-    //      Id = data.Id,
-    //      FileId = data.FileId,
-    //      CourseTypeId = data.CourseTypeId,
-    //      CourseId = data.CourseId,
-    //      SessionId = data.SessionId,
-    //      StartDateTime = data.StartDateTime,
-    //      EndDateTime = data.EndDateTime,
-    //      UserId = data.UserId,
-    //      RegistrationStatus = data.RegistrationStatus,
-    //      CheckInDateTime = data.CheckInDateTime,
-    //      CheckOutDateTime = data.CheckOutDateTime,
-    //      Createdatetime = data.Createdatetime,
-    //      Updatedatetime = data.Updatedatetime,
-    //      UpdateBy = data.UpdateBy,
-    //    });
-    //  }
-    //  return dataHis;
-    //}
-
     public static DateTime AddBusinessDays(DateTime date, int days)
     {
       if (days < 0)
@@ -638,7 +611,6 @@ namespace Ema.Ijoins.Api.Helpers
       return date.AddDays(extraDays);
 
     }
-
     public static int GetBusinessDays(DateTime start, DateTime end)
     {
       if (start.DayOfWeek == DayOfWeek.Saturday)

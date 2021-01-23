@@ -36,6 +36,7 @@ namespace Ema.Ijoins.Api.EfModels
         public string UpdateBy { get; set; }
         public DateTime UpdateDatetime { get; set; }
 
+        public virtual TbmKlcFileImport File { get; set; }
         public virtual ICollection<TbmSegment> TbmSegments { get; set; }
         public virtual ICollection<TbmSessionUserHi> TbmSessionUserHis { get; set; }
         public virtual ICollection<TbmSessionUser> TbmSessionUsers { get; set; }

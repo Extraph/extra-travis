@@ -1,3 +1,5 @@
+ --DROP VIEW public."v_Group_Segment_For_Qr";
+ 
  DROP TABLE public."TBM_SESSION_USER";
  DROP TABLE public."TBM_SESSION_USER_HIS";
  DROP TABLE public."TBM_REGISTRATION_STATUS";

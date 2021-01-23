@@ -16,6 +16,11 @@ namespace Ema.IjoinsChkInOut.Api.Services
       var database = client.GetDatabase(settings.DatabaseName);
 
       _users = database.GetCollection<UsersChecking>(settings.IjoinsCollectionName);
+
+      var indexKeysSessionId = Builders<UsersChecking>.IndexKeys.Ascending(user => user.SessionId);
+      _users.Indexes.CreateOne(new CreateIndexModel<UsersChecking>(indexKeysSessionId));
+      var indexKeysUserId = Builders<UsersChecking>.IndexKeys.Ascending(user => user.UserId);
+      _users.Indexes.CreateOne(new CreateIndexModel<UsersChecking>(indexKeysUserId));
     }
 
 
@@ -23,6 +28,11 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
     public UsersChecking Get(string id) =>
         _users.Find<UsersChecking>(user => user.Id == id).FirstOrDefault();
+
+    public List<UsersChecking> GetUserCheckIn(string SessionId, string UserId) => 
+      _users.Find<UsersChecking>(user => user.SessionId == SessionId && user.UserId == UserId && user.CheckingStatus == "Check-In").ToList();
+    public List<UsersChecking> GetUserCheckOut(string SessionId, string UserId) =>
+      _users.Find<UsersChecking>(user => user.SessionId == SessionId && user.UserId == UserId && user.CheckingStatus == "Check-Out").ToList();
 
     public UsersChecking Create(UsersChecking user)
     {

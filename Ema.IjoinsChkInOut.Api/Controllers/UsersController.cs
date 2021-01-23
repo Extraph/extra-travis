@@ -39,7 +39,7 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
       user.Createdatetime = DateTime.Now;
       _userService.Create(user);
 
-      return CreatedAtRoute("GetBook", new { id = user.Id.ToString() }, user);
+      return CreatedAtRoute("GetUser", new { id = user.Id.ToString() }, user);
     }
 
     [HttpPut("{id:length(24)}")]

@@ -312,6 +312,8 @@ ALTER TABLE public."TBM_REGISTRATION_STATUS"
 
 
 
+
+
 -- Table: public.TBM_SESSION
 
 -- DROP TABLE public."TBM_SESSION";
@@ -335,27 +337,46 @@ CREATE TABLE public."TBM_SESSION"
     passing_criteria_exception_init text COLLATE pg_catalog."default",
     course_credit_hours text COLLATE pg_catalog."default",
     passing_criteria_exception text COLLATE pg_catalog."default",
-    is_cancel char(1) NOT NULL DEFAULT '0',
+    is_cancel character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT '0'::bpchar,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     update_by text COLLATE pg_catalog."default",
     update_datetime timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT "TBM_SESSION_pkey" PRIMARY KEY (session_id)
+    CONSTRAINT "TBM_SESSION_pkey" PRIMARY KEY (session_id),
+    CONSTRAINT "fk_SESSION_TO_TBM_KLC_FILE_IMPORT_id" FOREIGN KEY (file_id)
+        REFERENCES public."TBM_KLC_FILE_IMPORT" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 )
 
 TABLESPACE pg_default;
 
 ALTER TABLE public."TBM_SESSION"
-    OWNER to ema_user;  
+    OWNER to ema_user;
+-- Index: fki_fk_SESSION_TO_TBM_KLC_FILE_IMPORT_id
+
+-- DROP INDEX public."fki_fk_SESSION_TO_TBM_KLC_FILE_IMPORT_id";
+
+CREATE INDEX "fki_fk_SESSION_TO_TBM_KLC_FILE_IMPORT_id"
+    ON public."TBM_SESSION" USING btree
+    (file_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_TBM_SESSION_course_id
+
+-- DROP INDEX public."idx_TBM_SESSION_course_id";
+
+CREATE INDEX "idx_TBM_SESSION_course_id"
+    ON public."TBM_SESSION" USING btree
+    (course_id COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_TBM_SESSION_session_id
+
+-- DROP INDEX public."idx_TBM_SESSION_session_id";
 
 CREATE INDEX "idx_TBM_SESSION_session_id"
     ON public."TBM_SESSION" USING btree
     (session_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
 
-CREATE INDEX "idx_TBM_SESSION_course_id"
-    ON public."TBM_SESSION" USING btree
-    (course_id COLLATE pg_catalog."default" ASC NULLS LAST)
-    TABLESPACE pg_default;
 
 
 
@@ -367,16 +388,17 @@ CREATE INDEX "idx_TBM_SESSION_course_id"
 
 CREATE TABLE public."TBM_SEGMENT"
 (
-    id integer NOT NULL DEFAULT nextval('"TBM_SEGMENT_id_seq"'::regclass),
-    course_id text COLLATE pg_catalog."default" NOT NULL,
     session_id text COLLATE pg_catalog."default" NOT NULL,
     segment_no text COLLATE pg_catalog."default" NOT NULL,
     segment_name text COLLATE pg_catalog."default",
+    start_date text COLLATE pg_catalog."default" NOT NULL,
+    end_date text COLLATE pg_catalog."default" NOT NULL,
+    start_time text COLLATE pg_catalog."default" NOT NULL,
+    end_time text COLLATE pg_catalog."default" NOT NULL,
     start_date_time timestamp without time zone NOT NULL,
     end_date_time timestamp without time zone NOT NULL,
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT "TBM_SEGMENT_pkey" PRIMARY KEY (id),
-    CONSTRAINT "uni_TBM_SEGMENT" UNIQUE (start_date_time, end_date_time, session_id, course_id),
+    CONSTRAINT "TBM_SEGMENT_pkey" PRIMARY KEY (session_id, start_date_time, end_date_time),
     CONSTRAINT "fk_TBM_SESSION_session_id" FOREIGN KEY (session_id)
         REFERENCES public."TBM_SESSION" (session_id) MATCH SIMPLE
         ON UPDATE NO ACTION
@@ -387,9 +409,6 @@ TABLESPACE pg_default;
 
 ALTER TABLE public."TBM_SEGMENT"
     OWNER to ema_user;
--- Index: fki_fk_TBM_SESSION_session_id
-
--- DROP INDEX public."fki_fk_TBM_SESSION_session_id";
 
 CREATE INDEX "fki_fk_TBM_SESSION_session_id"
     ON public."TBM_SEGMENT" USING btree
@@ -439,11 +458,11 @@ CREATE INDEX "fki_fk_TBM_SESSION_id"
     (session_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
-CREATE INDEX "idx_TBM_SESSION_USER_session_course_id"
+CREATE INDEX "idx_TBM_SESSION_USER_session_user_id"
     ON public."TBM_SESSION_USER" USING btree
     (
-        session_id COLLATE pg_catalog."default" ASC NULLS LAST,
-        user_id COLLATE pg_catalog."default" ASC NULLS LAST
+        user_id COLLATE pg_catalog."default" ASC NULLS LAST,
+        session_id COLLATE pg_catalog."default" ASC NULLS LAST
     )
     TABLESPACE pg_default;
 

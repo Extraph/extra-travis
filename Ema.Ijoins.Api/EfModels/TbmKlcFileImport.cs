@@ -11,6 +11,7 @@ namespace Ema.Ijoins.Api.EfModels
         {
             TbKlcDataMasterHis = new HashSet<TbKlcDataMasterHi>();
             TbKlcDataMasters = new HashSet<TbKlcDataMaster>();
+            TbmSessions = new HashSet<TbmSession>();
         }
 
         public int Id { get; set; }
@@ -25,5 +26,6 @@ namespace Ema.Ijoins.Api.EfModels
 
         public virtual ICollection<TbKlcDataMasterHi> TbKlcDataMasterHis { get; set; }
         public virtual ICollection<TbKlcDataMaster> TbKlcDataMasters { get; set; }
+        public virtual ICollection<TbmSession> TbmSessions { get; set; }
     }
 }

@@ -8,7 +8,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
-using System.Net.Http.Headers;
 using Ema.Ijoins.Api.EfModels;
 
 namespace Ema.Ijoins.Api.Controllers
@@ -17,12 +16,12 @@ namespace Ema.Ijoins.Api.Controllers
   [ApiController]
   public class UploadFileController : ControllerBase
   {
-    private readonly IFileProvider fileProvider;
+    private readonly IFileProvider _fileProvider;
     private readonly ema_databaseContext _context;
 
     public UploadFileController(IFileProvider fileProvider, ema_databaseContext context)
     {
-      this.fileProvider = fileProvider;
+      _fileProvider = fileProvider;
       _context = context;
     }
 
@@ -72,41 +71,32 @@ namespace Ema.Ijoins.Api.Controllers
         List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcelEPPlus(pathGuid, attachFiles);
         List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas);
 
-        List<TbKlcDataMasterHi> klcDataMasterHi = Utility.MoveDataToHis(_context.TbKlcDataMasters.ToList());
-        _context.TbKlcDataMasterHis.AddRange(klcDataMasterHi);
-        await _context.SaveChangesAsync();
 
-        _context.TbKlcDataMasters.RemoveRange(_context.TbKlcDataMasters.ToList());
-        await _context.SaveChangesAsync();
+        //#region Move To His After 30 Day On Board Wait For Production Maybe When Gen Report Complete Trigger
+        //List<TbmSession> tbmSessions = await _context.TbmSessions.Where(w => w.EndDateTime <= DateTime.Now.AddDays(-60)).ToListAsync();
+        //tbmSessions.ForEach(ts =>
+        //{
+        //  List<TbmSessionUserHi> tbmSessionUserHis = new List<TbmSessionUserHi>();
 
+        //  List<TbmSessionUser> tbmSessionUsers = _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToList();
 
-
-        #region Move To His After 30 Day On Board
-        List<TbmSession> tbmSessions = await _context.TbmSessions.Where(w => w.EndDateTime <= DateTime.Now.AddDays(-30)).ToListAsync();
-        tbmSessions.ForEach(ts =>
-        {
-          List<TbmSessionUserHi> tbmSessionUserHis = new List<TbmSessionUserHi>();
-
-          List<TbmSessionUser> tbmSessionUsers = _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToList();
-
-          tbmSessionUsers.ForEach(tsu =>
-          {
-            tbmSessionUserHis.Add(new TbmSessionUserHi
-            {
-              SessionId = tsu.SessionId,
-              UserId = tsu.UserId,
-              RegistrationStatus = tsu.RegistrationStatus,
-              Createdatetime = tsu.Createdatetime,
-              UpdateBy = tsu.UpdateBy,
-              UpdateDatetime = tsu.UpdateDatetime
-            });
-          });
-          _context.TbmSessionUserHis.AddRange(tbmSessionUserHis);
-          _context.TbmSessionUsers.RemoveRange(tbmSessionUsers);
-        });
-        await _context.SaveChangesAsync();
-        #endregion
-
+        //  tbmSessionUsers.ForEach(tsu =>
+        //  {
+        //    tbmSessionUserHis.Add(new TbmSessionUserHi
+        //    {
+        //      SessionId = tsu.SessionId,
+        //      UserId = tsu.UserId,
+        //      RegistrationStatus = tsu.RegistrationStatus,
+        //      Createdatetime = tsu.Createdatetime,
+        //      UpdateBy = tsu.UpdateBy,
+        //      UpdateDatetime = tsu.UpdateDatetime
+        //    });
+        //  });
+        //  _context.TbmSessionUserHis.AddRange(tbmSessionUserHis);
+        //  _context.TbmSessionUsers.RemoveRange(tbmSessionUsers);
+        //});
+        //await _context.SaveChangesAsync();
+        //#endregion
 
 
         string strMessage = "";
@@ -156,34 +146,34 @@ namespace Ema.Ijoins.Api.Controllers
 
 
         IEnumerable<TbKlcDataMaster> tbKlcDataMasters = await _context.TbKlcDataMasters.Where(w => w.FileId == tbmKlcFileImport.Id).ToListAsync();
-        if (tbmKlcFileImport.ImportType == "Upload session and participants")
+
+
+        var tbKlcDataMastersGroupsBySessionId =
+            from klc in tbKlcDataMasters
+            group klc by new
+            {
+              klc.SessionId
+            } into gresult
+            select gresult.FirstOrDefault();
+        ;
+
+        tbKlcDataMastersGroupsBySessionId.ToList().ForEach(ts =>
         {
-
-          var tbKlcDataMastersGroups =
-              from klc in tbKlcDataMasters
-              group klc by new
-              {
-                klc.SessionId
-              } into gresult
-              select gresult.FirstOrDefault();
-          ;
-
-          tbKlcDataMastersGroups.ToList().ForEach(ts =>
+          TbmSession tbmSession = _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefault();
+          if (tbmSession != null) _context.TbmSegments.RemoveRange(_context.TbmSegments.Where(w => w.SessionId == tbmSession.SessionId).ToList());
+          if (tbmKlcFileImport.ImportType == "Upload session and participants")
           {
-            TbmSession tbmSession = _context.TbmSessions.Where(
-               w =>
-               w.SessionId == ts.SessionId
-             ).FirstOrDefault();
-
             if (tbmSession != null) _context.TbmSessionUsers.RemoveRange(_context.TbmSessionUsers.Where(w => w.SessionId == tbmSession.SessionId).ToList());
-          });
+            if (tbmSession != null) _context.TbmSessionUserHis.RemoveRange(_context.TbmSessionUserHis.Where(w => w.SessionId == tbmSession.SessionId).ToList());
+          }
+          _context.SaveChanges();
+        });
 
-        }
+
 
         foreach (TbKlcDataMaster klcDataMaster in tbKlcDataMasters)
         {
           int CourseTypeId;
-          int SegmentRunId;
           if (!TbmCourseTypeExists(klcDataMaster.CourseType))
           {
             TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType, CourseId = klcDataMaster.CourseId };
@@ -258,37 +248,44 @@ namespace Ema.Ijoins.Api.Controllers
             tbmSession.CourseCreditHours = klcDataMaster.CourseCreditHours;
             tbmSession.PassingCriteriaException = klcDataMaster.PassingCriteriaException;
             tbmSession.IsCancel = '0';
+            tbmSession.UpdateBy = "Admin Uploader";
+            tbmSession.UpdateDatetime = DateTime.Now;
             _context.Entry(tbmSession).State = EntityState.Modified;
             await _context.SaveChangesAsync();
           }
 
-          if (!TbmSegmentExists(klcDataMaster.StartDateTime, klcDataMaster.EndDateTime, klcDataMaster.SessionId, klcDataMaster.CourseId))
+          if (!TbmSegmentExists(klcDataMaster.StartDateTime, klcDataMaster.EndDateTime, klcDataMaster.SessionId))
           {
             TbmSegment tbmSegment = new TbmSegment
             {
-              CourseId = klcDataMaster.CourseId,
               SessionId = klcDataMaster.SessionId,
               SegmentNo = klcDataMaster.SegmentNo,
               SegmentName = klcDataMaster.SegmentName,
+              StartDate = klcDataMaster.StartDate,
+              EndDate = klcDataMaster.EndDate,
+              StartTime = klcDataMaster.StartTime,
+              EndTime = klcDataMaster.EndTime,
               StartDateTime = klcDataMaster.StartDateTime,
               EndDateTime = klcDataMaster.EndDateTime,
             };
             _context.TbmSegments.Add(tbmSegment);
             await _context.SaveChangesAsync();
-            SegmentRunId = tbmSegment.Id;
           }
           else
           {
             TbmSegment tbmSegment = await _context.TbmSegments.Where(
               w =>
-              w.StartDateTime == klcDataMaster.StartDateTime &&
-              w.EndDateTime == klcDataMaster.EndDateTime &&
               w.SessionId == klcDataMaster.SessionId &&
-              w.CourseId == klcDataMaster.CourseId
+              w.StartDateTime == klcDataMaster.StartDateTime &&
+              w.EndDateTime == klcDataMaster.EndDateTime
             )
               .FirstOrDefaultAsync();
             tbmSegment.SegmentNo = klcDataMaster.SegmentNo;
             tbmSegment.SegmentName = klcDataMaster.SegmentName;
+            tbmSegment.StartDate = klcDataMaster.StartDate;
+            tbmSegment.EndDate = klcDataMaster.EndDate;
+            tbmSegment.StartTime = klcDataMaster.StartTime;
+            tbmSegment.EndTime = klcDataMaster.EndTime;
             _context.Entry(tbmSegment).State = EntityState.Modified;
             await _context.SaveChangesAsync();
           }
@@ -315,10 +312,28 @@ namespace Ema.Ijoins.Api.Controllers
           {
             TbmSessionUser tbmSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == klcDataMaster.SessionId && w.UserId == klcDataMaster.UserId).FirstOrDefaultAsync();
             tbmSessionUser.RegistrationStatus = klcDataMaster.RegistrationStatus;
+            tbmSessionUser.UpdateDatetime = DateTime.Now;
             _context.Entry(tbmSessionUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
           }
         }
+
+        tbKlcDataMastersGroupsBySessionId.ToList().ForEach(ts =>
+        {
+          TbmSession tbmSession = _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefault();
+          if (tbmSession != null)
+          {
+            List<TbmSegment> tbmSegments = _context.TbmSegments.Where(w => w.SessionId == ts.SessionId).ToList();
+
+            DateTime minStartDate = tbmSegments.OrderBy(o => o.StartDateTime).FirstOrDefault().StartDateTime;
+            DateTime maxEndDate = tbmSegments.OrderByDescending(o => o.EndDateTime).FirstOrDefault().EndDateTime;
+            tbmSession.StartDateTime = minStartDate;
+            tbmSession.EndDateTime = maxEndDate;
+            _context.Entry(tbmSession).State = EntityState.Modified;
+            _context.SaveChanges();
+          }
+        });
+
 
         var klcFileImport = await _context.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
         klcFileImport.ImportTotalrecords = tbKlcDataMasters.Count().ToString();
@@ -328,7 +343,7 @@ namespace Ema.Ijoins.Api.Controllers
         await _context.SaveChangesAsync();
 
 
-        List<TbKlcDataMasterHi> klcDataMasterHi = Utility.MoveDataToHis(tbKlcDataMasters.ToList());
+        List<TbKlcDataMasterHi> klcDataMasterHi = Utility.MoveDataKlcUploadToHis(tbKlcDataMasters.ToList());
         _context.TbKlcDataMasterHis.AddRange(klcDataMasterHi);
         await _context.SaveChangesAsync();
         _context.TbKlcDataMasters.RemoveRange(tbKlcDataMasters.ToList());
@@ -339,7 +354,7 @@ namespace Ema.Ijoins.Api.Controllers
         await transaction.CommitAsync();
 
         var tbmKlcFileImports = await _context.TbmKlcFileImports.OrderByDescending(o => o.Createdatetime).ToListAsync();
-        tbmKlcFileImports.ForEach(w => { w.TbKlcDataMasters = null; w.TbKlcDataMasterHis = null; });
+        tbmKlcFileImports.ForEach(w => { w.TbKlcDataMasters = null; w.TbKlcDataMasterHis = null; w.TbmSessions = null; });
 
         return Ok(new
         {
@@ -389,12 +404,11 @@ namespace Ema.Ijoins.Api.Controllers
     {
       return _context.TbmSessions.Any(e => e.SessionId == SessionId);
     }
-    private bool TbmSegmentExists(DateTime StartDateTime, DateTime EndDateTime, string SessionId, string CourseId)
+    private bool TbmSegmentExists(DateTime StartDateTime, DateTime EndDateTime, string SessionId)
     {
       return _context.TbmSegments.Any(
         e =>
-       e.CourseId == CourseId
-      && e.SessionId == SessionId
+       e.SessionId == SessionId
       && e.StartDateTime == StartDateTime
       && e.EndDateTime == EndDateTime
       );
@@ -417,7 +431,7 @@ namespace Ema.Ijoins.Api.Controllers
     public IActionResult GetKlc()
     {
       var model = new FilesViewModel();
-      foreach (var item in this.fileProvider.GetDirectoryContents("KLC"))
+      foreach (var item in _fileProvider.GetDirectoryContents("KLC"))
       {
         model.Files.Add(
             new FileDetails { Name = item.Name, Path = item.PhysicalPath });
@@ -434,7 +448,7 @@ namespace Ema.Ijoins.Api.Controllers
     public IActionResult GetBanner()
     {
       var model = new FilesViewModel();
-      foreach (var item in this.fileProvider.GetDirectoryContents("Banner"))
+      foreach (var item in _fileProvider.GetDirectoryContents("Banner"))
       {
         model.Files.Add(
             new FileDetails { Name = item.Name, Path = item.PhysicalPath });
