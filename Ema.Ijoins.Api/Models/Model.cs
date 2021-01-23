@@ -9,18 +9,17 @@ namespace Ema.Ijoins.Api.Models
   public class Model
   {
   }
-  public class ModelSegmentsQR
+  public class ModelSessionsQR
   {
-    public int Id { get; set; }
     public int FileId { get; set; }
     public int CourseTypeId { get; set; }
-    public DateTime StartDateTime { get; set; }
-    public DateTime EndDateTime { get; set; }
-    public string SessionId { get; set; }
-    public string SessionName { get; set; }
     public string CourseId { get; set; }
     public string CourseName { get; set; }
     public string CourseNameTh { get; set; }
+    public string SessionId { get; set; }
+    public string SessionName { get; set; }
+    public DateTime StartDateTime { get; set; }
+    public DateTime EndDateTime { get; set; }
     public string CourseOwnerEmail { get; set; }
     public string CourseOwnerContactNo { get; set; }
     public string Venue { get; set; }
@@ -31,8 +30,9 @@ namespace Ema.Ijoins.Api.Models
     public string PassingCriteriaException { get; set; }
     public char IsCancel { get; set; }
     public DateTime Createdatetime { get; set; }
-    public List<TbmSegment> SegmentsQr { get; set; }
-
+    public string UpdateBy { get; set; }
+    public DateTime UpdateDatetime { get; set; }
+    public List<VSegmentGenQr> SegmentsQr { get; set; }
   }
 
 }

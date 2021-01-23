@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.Models;
+using System.Globalization;
 
 
 namespace Ema.Ijoins.Api.Services
@@ -15,6 +17,7 @@ namespace Ema.Ijoins.Api.Services
   {
     Task<object> UploadFileKlc(IFormFile file);
     Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
+    Task<IEnumerable<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
   }
 
   public class IjoinsService : IIjoinsService
@@ -384,6 +387,61 @@ namespace Ema.Ijoins.Api.Services
       && e.UserId == UserId
       );
     }
+
+
+
+    public async Task<IEnumerable<ModelSessionsQR>> GetSessions(TbmSession tbmSession)
+    {
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+
+      var tbmSessions = await _context.TbmSessions
+        .Where(
+                w => w.EndDateTime >= StartDay
+                && w.SessionId.Contains(tbmSession.SessionId)
+              )
+        .OrderBy(o => o.StartDateTime).ToListAsync();
+
+
+      List<ModelSessionsQR> segmentsQRs = new List<ModelSessionsQR>();
+      foreach (TbmSession session in tbmSessions)
+      {
+
+        List<VSegmentGenQr> vSegmentGenQrs = await _context.VSegmentGenQrs.Where(w => w.SessionId == session.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
+
+        segmentsQRs.Add(new ModelSessionsQR
+        {
+          FileId = session.FileId,
+          CourseTypeId = session.FileId,
+          CourseId = session.CourseId,
+          CourseName = session.CourseName,
+          CourseNameTh = session.CourseNameTh,
+          SessionId = session.SessionId,
+          SessionName = session.SessionName,
+          StartDateTime = session.StartDateTime,
+          EndDateTime = session.EndDateTime,
+          CourseOwnerEmail = session.CourseOwnerEmail,
+          CourseOwnerContactNo = session.CourseOwnerContactNo,
+          Venue = session.Venue,
+          Instructor = session.Instructor,
+          CourseCreditHoursInit = session.CourseCreditHoursInit,
+          PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
+          CourseCreditHours = session.CourseCreditHours,
+          PassingCriteriaException = session.PassingCriteriaException,
+          IsCancel = session.IsCancel,
+          Createdatetime = session.Createdatetime,
+          UpdateBy = session.UpdateBy,
+          UpdateDatetime = session.UpdateDatetime,
+          SegmentsQr = vSegmentGenQrs
+        });
+      }
+
+
+      return segmentsQRs;
+    }
+
+
+
   }
 
 
