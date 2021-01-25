@@ -40,8 +40,6 @@ namespace Ema.Ijoins.Api
 
       services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
 
-      services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "FileUploaded")));
-
       services.AddScoped<IIjoinsService, IjoinsService>();
 
       services.Configure<FormOptions>(options =>

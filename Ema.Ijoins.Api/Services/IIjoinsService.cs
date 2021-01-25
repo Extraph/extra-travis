@@ -36,6 +36,8 @@ namespace Ema.Ijoins.Api.Services
       {
         if (file == null || file.Length == 0) return new { Message = "file not selected" };
 
+        Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "FileUploaded", "KLC"));
+
         Guid guid = Guid.NewGuid();
         var path = Path.Combine(Directory.GetCurrentDirectory(), "FileUploaded", "KLC", file.GetFilename());
         var ext = Path.GetExtension(path).ToLowerInvariant();

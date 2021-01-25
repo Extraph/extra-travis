@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Ema.Ijoins.Api.EfModels;
 using ExcelDataReader;
-using System.Data;
 using System.IO;
 using OfficeOpenXml;
-using System.Globalization;
 
 namespace Ema.Ijoins.Api.Helpers
 {
