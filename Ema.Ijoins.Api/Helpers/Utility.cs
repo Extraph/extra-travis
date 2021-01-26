@@ -256,7 +256,7 @@ namespace Ema.Ijoins.Api.Helpers
             InvalidMessage = "Invalid End Time => " + data.EndTime
           });
         }
-        else if (!int.TryParse(data.CourseCreditHours, out int CourseCreditHours))
+        else if (!float.TryParse(data.CourseCreditHours, out float CourseCreditHours))
         {
           datasInvalid.Add(new TbKlcDataMaster
           {

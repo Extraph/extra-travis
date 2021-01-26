@@ -493,15 +493,15 @@ namespace Ema.Ijoins.Api.Services
 
     public async Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession)
     {
-      //CultureInfo enUS = new CultureInfo("en-US");
-      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
-      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
 
       return await _context.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
-        && w.StartDateTime <= DateTime.Now
-        && w.EndDateTime >= DateTime.Now
+        && w.StartDateTime <= EndDay
+        && w.EndDateTime >= StartDay
         && (
            w.CourseId.Contains(tbmSession.CourseId)
         || w.CourseName.Contains(tbmSession.CourseId)
