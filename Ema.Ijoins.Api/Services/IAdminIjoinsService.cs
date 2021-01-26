@@ -8,6 +8,7 @@ using System.IO;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.EfModels;
 using Ema.Ijoins.Api.Models;
+using Ema.Ijoins.Api.Services;
 using System.Globalization;
 
 
@@ -25,9 +26,11 @@ namespace Ema.Ijoins.Api.Services
   public class AdminIjoinsService : IAdminIjoinsService
   {
     private readonly ema_databaseContext _context;
-    public AdminIjoinsService(ema_databaseContext context)
+    private readonly UserIjoinsService _userIjoinsService;
+    public AdminIjoinsService(ema_databaseContext context, UserIjoinsService userIjoinsService)
     {
       _context = context;
+      _userIjoinsService = userIjoinsService;
     }
     public async Task<object> UploadFileKlc(IFormFile file)
     {
@@ -124,11 +127,15 @@ namespace Ema.Ijoins.Api.Services
         {
           TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
           if (tbmSession != null) _context.TbmSegments.RemoveRange(await _context.TbmSegments.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+
           if (tbmKlcFileImport.ImportType == "Upload session and participants")
           {
             if (tbmSession != null) _context.TbmSessionUsers.RemoveRange(await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
             if (tbmSession != null) _context.TbmSessionUserHis.RemoveRange(await _context.TbmSessionUserHis.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+
+            if (tbmSession != null) _userIjoinsService.RemoveSessionUser(new SessionUser { SessionId = tbmSession.SessionId });
           }
+
           await _context.SaveChangesAsync();
         }
 
@@ -299,6 +306,47 @@ namespace Ema.Ijoins.Api.Services
           }
         }
 
+        //Initial Data For Ijoin Session and Session User!!!!!
+        foreach (TbKlcDataMaster ts in tbKlcDataMastersGroupsBySessionId)
+        {
+          TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
+          _userIjoinsService.CreateSession(new Session
+          {
+            CourseId = tbmSession.CourseId,
+            CourseName = tbmSession.CourseName,
+            CourseNameTh = tbmSession.CourseNameTh,
+            SessionId = tbmSession.SessionId,
+            SessionName = tbmSession.SessionName,
+            StartDateTime = tbmSession.StartDateTime,
+            EndDateTime = tbmSession.EndDateTime,
+            CourseOwnerEmail = tbmSession.CourseOwnerEmail,
+            CourseOwnerContactNo = tbmSession.CourseOwnerContactNo,
+            Venue = tbmSession.Venue,
+            Instructor = tbmSession.Instructor,
+            CourseCreditHoursInit = tbmSession.CourseCreditHours,
+            PassingCriteriaExceptionInit = tbmSession.PassingCriteriaException,
+            CourseCreditHours = tbmSession.CourseCreditHours,
+            PassingCriteriaException = tbmSession.PassingCriteriaException,
+            IsCancel = '0'
+          });
+
+          List<TbmSessionUser> tbmSessionUsers = await _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+          foreach (TbmSessionUser su in tbmSessionUsers)
+          {
+            if (su.RegistrationStatus == "Enrolled")
+            {
+              _userIjoinsService.CreateSessionUser(new SessionUser
+              {
+                SessionId = su.SessionId,
+                UserId = su.UserId
+              });
+            }
+          }
+        }
+
+
+
+
 
         var klcFileImport = await _context.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
         klcFileImport.ImportTotalrecords = tbKlcDataMasters.Count().ToString();
@@ -452,7 +500,7 @@ namespace Ema.Ijoins.Api.Services
       return await _context.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
-        && w.StartDateTime <= DateTime.Now 
+        && w.StartDateTime <= DateTime.Now
         && w.EndDateTime >= DateTime.Now
         && (
            w.CourseId.Contains(tbmSession.CourseId)
@@ -482,8 +530,6 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
     }
-
-
 
   }
 

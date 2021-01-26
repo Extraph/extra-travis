@@ -34,13 +34,13 @@ namespace Ema.Ijoins.Api.Controllers
       return session;
     }
 
-    [HttpPost]
-    public async Task<ActionResult<Session>> CreateSession(Session session)
-    {
-      await _userIjoinsService.Create(session);
+    //[HttpPost]
+    //public async Task<ActionResult<Session>> CreateSession(Session session)
+    //{
+    //  await _userIjoinsService.Create(session);
 
-      return CreatedAtRoute("GetSession", new { id = session.Id.ToString() }, session);
-    }
+    //  return CreatedAtRoute("GetSession", new { id = session.Id.ToString() }, session);
+    //}
 
 
   }

@@ -52,18 +52,33 @@ namespace Ema.Ijoins.Api.Services
 
     public async Task<List<Session>> GetSession() => await _sessions.Find(s => true).ToListAsync();
     public async Task<Session> GetSession(string id) => await _sessions.Find<Session>(s => s.Id == id).FirstOrDefaultAsync();
-    public async Task<Session> Create(Session session)
+    public async void CreateSession(Session sIn)
     {
-      await _sessions.InsertOneAsync(session);
-      return session;
+      var session = await _sessions.Find<Session>(s => s.SessionId == sIn.SessionId).FirstOrDefaultAsync();
+      if (session == null)
+      {
+        await _sessions.InsertOneAsync(sIn);
+      }
+      else
+      {
+        sIn.Id = session.Id;
+        await _sessions.ReplaceOneAsync(s => s.SessionId == sIn.SessionId, sIn);
+      }
     }
-    public async void Update(string id, Session sIn) => await _sessions.ReplaceOneAsync(s => s.Id == id, sIn);
-
-    public async void Remove(Session sIn) => await _sessions.DeleteOneAsync(s => s.Id == sIn.Id);
-
-    public async void Remove(string id) => await _sessions.DeleteOneAsync(s => s.Id == id);
-
-
+    public async void CreateSessionUser(SessionUser suIn)
+    {
+      var sessionuser = await _sessionusers.Find<SessionUser>(su => su.SessionId == suIn.SessionId && su.UserId == suIn.UserId).FirstOrDefaultAsync();
+      if (sessionuser == null)
+      {
+        await _sessionusers.InsertOneAsync(suIn);
+      }
+      else
+      {
+        suIn.Id = sessionuser.Id;
+        await _sessionusers.ReplaceOneAsync(su => su.SessionId == suIn.SessionId && su.UserId == suIn.UserId, suIn);
+      }
+    }
+    public async void RemoveSessionUser(SessionUser sIn) => await _sessionusers.DeleteManyAsync(s => s.SessionId == sIn.SessionId);
   }
 }
 
