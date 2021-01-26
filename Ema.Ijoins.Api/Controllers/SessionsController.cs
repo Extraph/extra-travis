@@ -13,19 +13,17 @@ namespace Ema.Ijoins.Api.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class TbmSessionsController : ControllerBase
+  public class SessionsController : ControllerBase
   {
-    private readonly ema_databaseContext _context;
     private readonly IAdminIjoinsService _ijoinsService;
 
-    public TbmSessionsController(ema_databaseContext context, IAdminIjoinsService ijoinsService)
+    public SessionsController(IAdminIjoinsService ijoinsService)
     {
-      _context = context;
       _ijoinsService = ijoinsService;
     }
 
     [HttpPost]
-    public async Task<ActionResult<List<ModelSessionsQR>>> PostTbmSession(TbmSession tbmSession)
+    public async Task<ActionResult<List<ModelSessionsQR>>> SearchSession(TbmSession tbmSession)
     {
       var tbmSessions = await _ijoinsService.GetSessions(tbmSession);
 
@@ -63,40 +61,17 @@ namespace Ema.Ijoins.Api.Controllers
       return tbmSessions;
     }
 
-
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutTbmSession(string id, TbmSession tbmSession)
+    public async Task<IActionResult> UpdateSession(string id, TbmSession tbmSession)
     {
       if (id != tbmSession.SessionId)
       {
         return BadRequest();
       }
 
-      _context.Entry(tbmSession).State = EntityState.Modified;
-
-      try
-      {
-        await _context.SaveChangesAsync();
-      }
-      catch (DbUpdateConcurrencyException)
-      {
-        if (!TbmSessionExists(id))
-        {
-          return NotFound();
-        }
-        else
-        {
-          throw;
-        }
-      }
-
-      return NoContent();
+      return Ok(await _ijoinsService.UpdateSession(tbmSession));
     }
 
-    private bool TbmSessionExists(string id)
-    {
-      return _context.TbmSessions.Any(e => e.SessionId == id);
-    }
+
   }
 }

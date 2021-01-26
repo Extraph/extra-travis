@@ -1,22 +1,13 @@
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
 using Ema.IjoinsChkInOut.Api.Models;
 using Ema.IjoinsChkInOut.Api.Services;
-using Ema.IjoinsChkInOut.Api.EfModels;
+
 
 namespace Ema.IjoinsChkInOut.Api
 {
@@ -33,15 +24,11 @@ namespace Ema.IjoinsChkInOut.Api
     public void ConfigureServices(IServiceCollection services)
     {
 
-      services.Configure<IjoinsDatabaseSettings>(
-          Configuration.GetSection(nameof(IjoinsDatabaseSettings)));
+      services.Configure<UserIJoinDatabaseSettings>(Configuration.GetSection(nameof(UserIJoinDatabaseSettings)));
 
-      services.AddSingleton<IIjoinsDatabaseSettings>(sp =>
-          sp.GetRequiredService<IOptions<IjoinsDatabaseSettings>>().Value);
+      services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
 
-      services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
-
-      services.AddSingleton<IjoinsService>();
+      services.AddScoped<UserIjoinsService>();
 
       services.AddControllers();
       services.AddSwaggerGen(c =>

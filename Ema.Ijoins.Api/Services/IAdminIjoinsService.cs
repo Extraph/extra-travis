@@ -19,8 +19,10 @@ namespace Ema.Ijoins.Api.Services
     Task<object> UploadFileKlc(IFormFile file);
     Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
     Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
+    Task<object> UpdateSession(TbmSession tbmSession);
     Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession);
     Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession);
+    Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser);
   }
 
   public class AdminIjoinsService : IAdminIjoinsService
@@ -530,6 +532,39 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
     }
+
+    public async Task<object> UpdateSession(TbmSession tbmSession)
+    {
+      tbmSession.UpdateDatetime = DateTime.Now;
+      _context.Entry(tbmSession).State = EntityState.Modified;
+      try
+      {
+        await _context.SaveChangesAsync();
+        return new { Success = true };
+      }
+      catch (DbUpdateConcurrencyException e)
+      {
+        if (!TbmSessionExists(tbmSession.SessionId))
+        {
+          return new { Success = false, e.Message };
+        }
+        else
+        {
+          throw;
+        }
+      }
+    }
+
+    public async Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser)
+    {
+      return await _context.TbmSessionUsers
+          .Where(
+                 w => w.SessionId == tbmSessionUser.SessionId
+                 && w.UserId.Contains(tbmSessionUser.UserId)
+                )
+          .OrderBy(o => o.UserId).ToListAsync();
+    }
+
 
   }
 
