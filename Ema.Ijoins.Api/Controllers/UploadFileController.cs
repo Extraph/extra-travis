@@ -14,9 +14,9 @@ namespace Ema.Ijoins.Api.Controllers
   [ApiController]
   public class UploadFileController : ControllerBase
   {
-    private readonly IIjoinsService _ijoinsService;
+    private readonly IAdminIjoinsService _ijoinsService;
 
-    public UploadFileController(IIjoinsService ijoinsService)
+    public UploadFileController(IAdminIjoinsService ijoinsService)
     {
       _ijoinsService = ijoinsService;
     }

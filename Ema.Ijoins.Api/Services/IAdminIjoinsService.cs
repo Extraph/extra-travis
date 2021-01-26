@@ -13,19 +13,19 @@ using System.Globalization;
 
 namespace Ema.Ijoins.Api.Services
 {
-  public interface IIjoinsService
+  public interface IAdminIjoinsService
   {
     Task<object> UploadFileKlc(IFormFile file);
     Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
-    Task<IEnumerable<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
+    Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
     Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession);
     Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession);
   }
 
-  public class IjoinsService : IIjoinsService
+  public class AdminIjoinsService : IAdminIjoinsService
   {
     private readonly ema_databaseContext _context;
-    public IjoinsService(ema_databaseContext context)
+    public AdminIjoinsService(ema_databaseContext context)
     {
       _context = context;
     }
@@ -393,7 +393,7 @@ namespace Ema.Ijoins.Api.Services
     }
 
 
-    public async Task<IEnumerable<ModelSessionsQR>> GetSessions(TbmSession tbmSession)
+    public async Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession)
     {
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);

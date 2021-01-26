@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,13 +7,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Ema.Ijoins.Api.EfModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
-using System.IO;
 using Microsoft.AspNetCore.Http.Features;
+using Ema.Ijoins.Api.EfModels;
 using Ema.Ijoins.Api.Services;
+using Ema.Ijoins.Api.Models;
 
 namespace Ema.Ijoins.Api
 {
@@ -38,9 +35,15 @@ namespace Ema.Ijoins.Api
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ema.Ijoins.Api", Version = "v1" });
       });
 
+      services.Configure<UserIJoinDatabaseSettings>(Configuration.GetSection(nameof(UserIJoinDatabaseSettings)));
+
+      services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
+
       services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
 
-      services.AddScoped<IIjoinsService, IjoinsService>();
+      services.AddScoped<UserIjoinsService>();
+
+      services.AddScoped<IAdminIjoinsService, AdminIjoinsService>();
 
       services.Configure<FormOptions>(options =>
       {

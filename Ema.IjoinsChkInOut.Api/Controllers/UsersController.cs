@@ -20,7 +20,7 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
     [HttpGet]
     public ActionResult<List<UsersChecking>> Get() => _userService.Get();
 
-    [HttpGet("{id:length(24)}", Name = "GetBook")]
+    [HttpGet("{id:length(24)}", Name = "GetUser")]
     public ActionResult<UsersChecking> Get(string id)
     {
       var user = _userService.Get(id);

@@ -16,16 +16,16 @@ namespace Ema.Ijoins.Api.Controllers
   public class TbmSessionsController : ControllerBase
   {
     private readonly ema_databaseContext _context;
-    private readonly IIjoinsService _ijoinsService;
+    private readonly IAdminIjoinsService _ijoinsService;
 
-    public TbmSessionsController(ema_databaseContext context, IIjoinsService ijoinsService)
+    public TbmSessionsController(ema_databaseContext context, IAdminIjoinsService ijoinsService)
     {
       _context = context;
       _ijoinsService = ijoinsService;
     }
 
     [HttpPost]
-    public async Task<ActionResult<IEnumerable<ModelSessionsQR>>> PostTbmSession(TbmSession tbmSession)
+    public async Task<ActionResult<List<ModelSessionsQR>>> PostTbmSession(TbmSession tbmSession)
     {
       var tbmSessions = await _ijoinsService.GetSessions(tbmSession);
 
@@ -34,11 +34,11 @@ namespace Ema.Ijoins.Api.Controllers
         return NotFound();
       }
 
-      return tbmSessions.ToList();
+      return tbmSessions;
     }
 
     [HttpPost("ToDayClass")]
-    public async Task<ActionResult<IEnumerable<TbmSession>>> ToDayClass(TbmSession tbmSession)
+    public async Task<ActionResult<List<TbmSession>>> ToDayClass(TbmSession tbmSession)
     {
       var tbmSessions = await _ijoinsService.GetToDayClass(tbmSession);
 
@@ -51,7 +51,7 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     [HttpPost("SevenDayClass")]
-    public async Task<ActionResult<IEnumerable<TbmSession>>> SevenDayClass(TbmSession tbmSession)
+    public async Task<ActionResult<List<TbmSession>>> SevenDayClass(TbmSession tbmSession)
     {
       var tbmSessions = await _ijoinsService.GetSevenDayClass(tbmSession);
 
