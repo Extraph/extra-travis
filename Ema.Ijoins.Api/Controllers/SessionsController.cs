@@ -62,16 +62,20 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateSession(string id, TbmSession tbmSession)
+    public async Task<ActionResult<TbmSession>> UpdateSession(string id, TbmSession tbmSession)
     {
       if (id != tbmSession.SessionId)
       {
         return BadRequest();
       }
 
-      return Ok(await _ijoinsService.UpdateSession(tbmSession));
+      if (!_ijoinsService.TbmSessionExists(tbmSession.SessionId))
+      {
+        return NotFound();
+      }
+
+      return await _ijoinsService.UpdateSession(tbmSession);
     }
-
-
+    
   }
 }

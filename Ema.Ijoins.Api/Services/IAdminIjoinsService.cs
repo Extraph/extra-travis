@@ -19,10 +19,15 @@ namespace Ema.Ijoins.Api.Services
     Task<object> UploadFileKlc(IFormFile file);
     Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
     Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
-    Task<object> UpdateSession(TbmSession tbmSession);
+    Task<TbmSession> UpdateSession(TbmSession tbmSession);
     Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession);
     Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession);
     Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser);
+    Task<TbmSessionUser> AddParticipant(TbmSessionUser tbmSessionUser);
+    Task<TbmSessionUser> UpdateParticipant(TbmSessionUser tbmSessionUser);
+    Task<object> DeleteParticipant(TbmSessionUser tbmSessionUser);
+    bool TbmSessionUsersExists(string SessionId, string UserId);
+    bool TbmSessionExists(string SessionId);
   }
 
   public class AdminIjoinsService : IAdminIjoinsService
@@ -416,7 +421,7 @@ namespace Ema.Ijoins.Api.Services
     {
       return _context.TbmCourses.Any(e => e.CourseId == CourseId);
     }
-    private bool TbmSessionExists(string SessionId)
+    public bool TbmSessionExists(string SessionId)
     {
       return _context.TbmSessions.Any(e => e.SessionId == SessionId);
     }
@@ -433,7 +438,7 @@ namespace Ema.Ijoins.Api.Services
     {
       return _context.TbmRegistrationStatuses.Any(e => e.RegistrationStatus == RegistrationStatus);
     }
-    private bool TbmSessionUsersExists(string SessionId, string UserId)
+    public bool TbmSessionUsersExists(string SessionId, string UserId)
     {
       return _context.TbmSessionUsers.Any(
         e =>
@@ -441,7 +446,6 @@ namespace Ema.Ijoins.Api.Services
       && e.UserId == UserId
       );
     }
-
 
     public async Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession)
     {
@@ -492,7 +496,6 @@ namespace Ema.Ijoins.Api.Services
 
       return segmentsQRs;
     }
-
     public async Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession)
     {
       CultureInfo enUS = new CultureInfo("en-US");
@@ -512,7 +515,6 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
     }
-
     public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession)
     {
       //CultureInfo enUS = new CultureInfo("en-US");
@@ -532,29 +534,23 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
     }
-
-    public async Task<object> UpdateSession(TbmSession tbmSession)
+    public async Task<TbmSession> UpdateSession(TbmSession tbmSession)
     {
       tbmSession.UpdateDatetime = DateTime.Now;
       _context.Entry(tbmSession).State = EntityState.Modified;
       try
       {
         await _context.SaveChangesAsync();
-        return new { Success = true };
       }
-      catch (DbUpdateConcurrencyException e)
+      catch (DbUpdateConcurrencyException)
       {
-        if (!TbmSessionExists(tbmSession.SessionId))
-        {
-          return new { Success = false, e.Message };
-        }
-        else
-        {
-          throw;
-        }
+        throw;
       }
-    }
 
+      var retSession = await _context.TbmSessions.Where(w => w.SessionId == tbmSession.SessionId).FirstOrDefaultAsync();
+
+      return retSession;
+    }
     public async Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser)
     {
       return await _context.TbmSessionUsers
@@ -564,7 +560,51 @@ namespace Ema.Ijoins.Api.Services
                 )
           .OrderBy(o => o.UserId).ToListAsync();
     }
+    public async Task<TbmSessionUser> AddParticipant(TbmSessionUser tbmSessionUser)
+    {
+      _context.TbmSessionUsers.Add(tbmSessionUser);
+      try
+      {
+        await _context.SaveChangesAsync();
+      }
+      catch (DbUpdateException)
+      {
+        throw;
+      }
 
+      var retSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
+
+      return retSessionUser;
+    }
+    public async Task<TbmSessionUser> UpdateParticipant(TbmSessionUser tbmSessionUser)
+    {
+      tbmSessionUser.UpdateDatetime = DateTime.Now;
+      _context.Entry(tbmSessionUser).State = EntityState.Modified;
+      try
+      {
+        await _context.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        throw;
+      }
+
+      var retSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
+
+      return retSessionUser;
+    }
+    public async Task<object> DeleteParticipant(TbmSessionUser tbmSessionUser)
+    {
+      var chkSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
+      if (chkSessionUser == null)
+      {
+        return new { Success = false, Message = "NotFound" };
+      }
+      _context.TbmSessionUsers.Remove(chkSessionUser);
+      await _context.SaveChangesAsync();
+
+      return new { Success = true };
+    }
 
   }
 

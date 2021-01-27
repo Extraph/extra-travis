@@ -35,5 +35,38 @@ namespace Ema.Ijoins.Api.Controllers
 
       return tbmSessions;
     }
+
+    [HttpPost("Add")]
+    public async Task<ActionResult<TbmSessionUser>> AddParticipant(TbmSessionUser tbmSessionUser)
+    {
+      if (_ijoinsService.TbmSessionUsersExists(tbmSessionUser.SessionId, tbmSessionUser.UserId))
+      {
+        return Conflict();
+      }
+
+      return await _ijoinsService.AddParticipant(tbmSessionUser);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<TbmSessionUser>> UpdateParticipant(string id, TbmSessionUser tbmSessionUser)
+    {
+      if (id != tbmSessionUser.SessionId)
+      {
+        return BadRequest();
+      }
+
+      if (!_ijoinsService.TbmSessionUsersExists(tbmSessionUser.SessionId, tbmSessionUser.UserId))
+      {
+        return NotFound();
+      }
+
+      return await _ijoinsService.UpdateParticipant(tbmSessionUser);
+    }
+
+    [HttpPost("Delete")]
+    public async Task<IActionResult> DeleteParticipant(TbmSessionUser tbmSessionUser)
+    {
+      return Ok(await _ijoinsService.DeleteParticipant(tbmSessionUser));
+    }
   }
 }
