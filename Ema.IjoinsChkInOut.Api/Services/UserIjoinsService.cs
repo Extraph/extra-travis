@@ -52,6 +52,15 @@ namespace Ema.IjoinsChkInOut.Api.Services
     }
     public async Task RemoveSessionUser(SessionUser suIn) => await _sessionusers.DeleteOneAsync(s => s.SessionId == suIn.SessionId && s.UserId == suIn.UserId);
 
+    public async Task<List<UserRegistration>> GetUserRegistration(UserRegistration urIn)
+    {
+      return await _userregistrations.Find<UserRegistration>
+                (
+                 w => w.SessionId == urIn.SessionId
+                 && w.UserId.Contains(urIn.UserId)
+                ).ToListAsync();
+    }
+
     public async Task CheckIn(UserRegistration urIn)
     {
       var userregistration = await _userregistrations.Find<UserRegistration>(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId).FirstOrDefaultAsync();

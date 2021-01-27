@@ -20,6 +20,20 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
       _userIjoinsService = userIjoinsService;
     }
 
+    [HttpPost]
+    public async Task<ActionResult<List<UserRegistration>>> SearchParticipant(UserRegistration urIn)
+    {
+      var userRegistrations = await _userIjoinsService.GetUserRegistration(urIn);
+
+      if (userRegistrations == null)
+      {
+        return NotFound();
+      }
+
+      return userRegistrations;
+    }
+
+
     [HttpPost("CheckIn")]
     public async Task<ActionResult> CheckIn(UserRegistration urIn)
     {
