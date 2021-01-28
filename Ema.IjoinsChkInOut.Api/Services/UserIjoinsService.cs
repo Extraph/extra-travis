@@ -91,6 +91,51 @@ namespace Ema.IjoinsChkInOut.Api.Services
         await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
       }
     }
+
+    public async Task<List<SessionMobile>> GetSessionForMobileByUserId(SessionUser suIn)
+    {
+      List<SessionMobile> sessionMobiles = new List<SessionMobile>();
+      var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == suIn.UserId).ToListAsync();
+
+      foreach(SessionUser su in sessionUsers)
+      {
+        var session = await _sessions.Find<Session>(w => w.SessionId == su.SessionId).FirstOrDefaultAsync();
+        var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
+
+
+        sessionMobiles.Add(new SessionMobile {
+          UserId = su.UserId,
+          SessionId = su.SessionId,
+
+          IsCheckIn = userRegistration.IsCheckIn,
+          IsCheckOut = userRegistration.IsCheckOut,
+          CheckInDateTime = userRegistration.CheckInDateTime,
+          CheckOutDateTime = userRegistration.CheckOutDateTime,
+          CheckInBy = userRegistration.CheckInBy,
+          CheckOutBy = userRegistration.CheckOutBy,
+
+          CourseId = session.CourseId,
+          CourseName = session.CourseName,
+          CourseNameTh = session.CourseNameTh,
+          SessionName = session.SessionName,
+          StartDateTime = session.StartDateTime,
+          EndDateTime = session.EndDateTime,
+          CourseOwnerEmail = session.CourseOwnerEmail,
+          CourseOwnerContactNo = session.CourseOwnerContactNo,
+          Venue = session.Venue,
+          Instructor = session.Instructor,
+          CourseCreditHoursInit = session.CourseCreditHoursInit,
+          PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
+          CourseCreditHours = session.CourseCreditHours,
+          PassingCriteriaException = session.PassingCriteriaException,
+          IsCancel = session.IsCancel
+        });
+      }
+
+      return sessionMobiles;
+    }
+
+
   }
 }
 

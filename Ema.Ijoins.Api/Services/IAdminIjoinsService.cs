@@ -525,7 +525,7 @@ namespace Ema.Ijoins.Api.Services
       return await _context.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
-        && (w.EndDateTime >= DateTime.Now && w.EndDateTime <= nextSevenDate)
+        && (w.EndDateTime >= DateTime.Now && w.StartDateTime <= nextSevenDate)
         && (
            w.CourseId.Contains(tbmSession.CourseId)
         || w.CourseName.Contains(tbmSession.CourseId)
