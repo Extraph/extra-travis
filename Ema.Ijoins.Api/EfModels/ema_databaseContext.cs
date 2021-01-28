@@ -362,6 +362,8 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("start_time");
 
+                entity.Property(e => e.Venue).HasColumnName("venue");
+
                 entity.HasOne(d => d.Session)
                     .WithMany(p => p.TbmSegments)
                     .HasForeignKey(d => d.SessionId)

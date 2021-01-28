@@ -20,10 +20,17 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
       _userIjoinsService = userIjoinsService;
     }
 
-    [HttpPost]
-    public async Task<ActionResult<List<SessionMobile>>> SearchSessionCheckInOutByParticipant(SessionUser suIn)
+    [HttpPost("Update")]
+    public async Task<ActionResult> UpdateSession(Session sIn)
     {
-      var sessionMobiles = await _userIjoinsService.GetSessionForMobileByUserId(suIn);
+      await _userIjoinsService.UpdateSession(sIn);
+      return Ok();
+    }
+
+    [HttpGet("TodayClass/{userId}")]
+    public async Task<ActionResult<List<SessionMobile>>> TodayClass(String userId)
+    {
+      var sessionMobiles = await _userIjoinsService.GetSessionTodayForMobileByUserId(userId);
 
       if (sessionMobiles == null)
       {
@@ -33,6 +40,17 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
       return sessionMobiles;
     }
 
+    [HttpGet("SevendayClass/{userId}")]
+    public async Task<ActionResult<List<SessionMobile>>> SevendayClass(String userId)
+    {
+      var sessionMobiles = await _userIjoinsService.GetSessionSevendayForMobileByUserId(userId);
 
+      if (sessionMobiles == null)
+      {
+        return NotFound();
+      }
+
+      return sessionMobiles;
+    }
   }
 }

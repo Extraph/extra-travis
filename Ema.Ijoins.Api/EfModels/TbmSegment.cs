@@ -16,6 +16,7 @@ namespace Ema.Ijoins.Api.EfModels
         public string EndTime { get; set; }
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
+        public string Venue { get; set; }
         public DateTime Createdatetime { get; set; }
 
         public virtual TbmSession Session { get; set; }

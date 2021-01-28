@@ -244,6 +244,7 @@ namespace Ema.Ijoins.Api.Services
               EndTime = klcDataMaster.EndTime,
               StartDateTime = klcDataMaster.StartDateTime,
               EndDateTime = klcDataMaster.EndDateTime,
+              Venue = klcDataMaster.Venue,
             };
             _context.TbmSegments.Add(tbmSegment);
             await _context.SaveChangesAsync();
@@ -263,6 +264,7 @@ namespace Ema.Ijoins.Api.Services
             tbmSegment.EndDate = klcDataMaster.EndDate;
             tbmSegment.StartTime = klcDataMaster.StartTime;
             tbmSegment.EndTime = klcDataMaster.EndTime;
+            tbmSegment.Venue = klcDataMaster.Venue;
             _context.Entry(tbmSegment).State = EntityState.Modified;
             await _context.SaveChangesAsync();
           }

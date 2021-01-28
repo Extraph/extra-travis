@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using System.Globalization;
 
 namespace Ema.IjoinsChkInOut.Api.Services
 {
@@ -37,6 +38,21 @@ namespace Ema.IjoinsChkInOut.Api.Services
       _userregistrations.Indexes.CreateOne(new CreateIndexModel<UserRegistration>(indexKeysCheckInDateTime));
 
     }
+
+    public async Task UpdateSession(Session sIn)
+    {
+      var session = await _sessions.Find<Session>(s => s.SessionId == sIn.SessionId).FirstOrDefaultAsync();
+      if (session == null)
+      {
+        await _sessions.InsertOneAsync(sIn);
+      }
+      else
+      {
+        sIn.Id = session.Id;
+        await _sessions.ReplaceOneAsync(su => su.SessionId == sIn.SessionId, sIn);
+      }
+    }
+
     public async Task CreateSessionUser(SessionUser suIn)
     {
       var sessionuser = await _sessionusers.Find<SessionUser>(su => su.SessionId == suIn.SessionId && su.UserId == suIn.UserId).FirstOrDefaultAsync();
@@ -92,49 +108,114 @@ namespace Ema.IjoinsChkInOut.Api.Services
       }
     }
 
-    public async Task<List<SessionMobile>> GetSessionForMobileByUserId(SessionUser suIn)
+    public async Task<List<SessionMobile>> GetSessionTodayForMobileByUserId(string userId)
     {
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+
       List<SessionMobile> sessionMobiles = new List<SessionMobile>();
-      var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == suIn.UserId).ToListAsync();
+      var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == userId).ToListAsync();
 
-      foreach(SessionUser su in sessionUsers)
+      foreach (SessionUser su in sessionUsers)
       {
-        var session = await _sessions.Find<Session>(w => w.SessionId == su.SessionId).FirstOrDefaultAsync();
-        var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
+        var session = await _sessions.Find<Session>(w =>
+               w.IsCancel == '0'
+            && w.SessionId == su.SessionId
+            && w.StartDateTime <= EndDay
+            && w.EndDateTime >= StartDay
+        ).FirstOrDefaultAsync();
 
+        if (session != null)
+        {
+          var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
+          sessionMobiles.Add(new SessionMobile
+          {
+            UserId = su.UserId,
+            SessionId = su.SessionId,
 
-        sessionMobiles.Add(new SessionMobile {
-          UserId = su.UserId,
-          SessionId = su.SessionId,
+            //if(userRegistration != null) { }
+            IsCheckIn = (char)(userRegistration?.IsCheckIn),
+            IsCheckOut = (char)(userRegistration?.IsCheckOut),
+            CheckInDateTime = (DateTime)(userRegistration?.CheckInDateTime),
+            CheckOutDateTime = (DateTime)(userRegistration?.CheckOutDateTime),
+            CheckInBy = userRegistration?.CheckInBy,
+            CheckOutBy = userRegistration?.CheckOutBy,
 
-          IsCheckIn = userRegistration.IsCheckIn,
-          IsCheckOut = userRegistration.IsCheckOut,
-          CheckInDateTime = userRegistration.CheckInDateTime,
-          CheckOutDateTime = userRegistration.CheckOutDateTime,
-          CheckInBy = userRegistration.CheckInBy,
-          CheckOutBy = userRegistration.CheckOutBy,
-
-          CourseId = session.CourseId,
-          CourseName = session.CourseName,
-          CourseNameTh = session.CourseNameTh,
-          SessionName = session.SessionName,
-          StartDateTime = session.StartDateTime,
-          EndDateTime = session.EndDateTime,
-          CourseOwnerEmail = session.CourseOwnerEmail,
-          CourseOwnerContactNo = session.CourseOwnerContactNo,
-          Venue = session.Venue,
-          Instructor = session.Instructor,
-          CourseCreditHoursInit = session.CourseCreditHoursInit,
-          PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
-          CourseCreditHours = session.CourseCreditHours,
-          PassingCriteriaException = session.PassingCriteriaException,
-          IsCancel = session.IsCancel
-        });
+            CourseId = session.CourseId,
+            CourseName = session.CourseName,
+            CourseNameTh = session.CourseNameTh,
+            SessionName = session.SessionName,
+            StartDateTime = session.StartDateTime,
+            EndDateTime = session.EndDateTime,
+            CourseOwnerEmail = session.CourseOwnerEmail,
+            CourseOwnerContactNo = session.CourseOwnerContactNo,
+            Venue = session.Venue,
+            Instructor = session.Instructor,
+            CourseCreditHoursInit = session.CourseCreditHoursInit,
+            PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
+            CourseCreditHours = session.CourseCreditHours,
+            PassingCriteriaException = session.PassingCriteriaException,
+            IsCancel = session.IsCancel
+          });
+        }
       }
 
       return sessionMobiles;
     }
 
+    public async Task<List<SessionMobile>> GetSessionSevendayForMobileByUserId(string userId)
+    {
+      DateTime nextSevenDate = DateTime.Now.AddDays(7);
+
+      List<SessionMobile> sessionMobiles = new List<SessionMobile>();
+      var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == userId).ToListAsync();
+
+      foreach (SessionUser su in sessionUsers)
+      {
+        var session = await _sessions.Find<Session>(w =>
+               w.IsCancel == '0'
+            && w.SessionId == su.SessionId
+            && (w.EndDateTime >= DateTime.Now && w.StartDateTime <= nextSevenDate)
+        ).FirstOrDefaultAsync();
+
+        if (session != null)
+        {
+          var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
+          sessionMobiles.Add(new SessionMobile
+          {
+            UserId = su.UserId,
+            SessionId = su.SessionId,
+
+            //if(userRegistration != null) { }
+            IsCheckIn = (char)(userRegistration?.IsCheckIn),
+            IsCheckOut = (char)(userRegistration?.IsCheckOut),
+            CheckInDateTime = (DateTime)(userRegistration?.CheckInDateTime),
+            CheckOutDateTime = (DateTime)(userRegistration?.CheckOutDateTime),
+            CheckInBy = userRegistration?.CheckInBy,
+            CheckOutBy = userRegistration?.CheckOutBy,
+
+            CourseId = session.CourseId,
+            CourseName = session.CourseName,
+            CourseNameTh = session.CourseNameTh,
+            SessionName = session.SessionName,
+            StartDateTime = session.StartDateTime,
+            EndDateTime = session.EndDateTime,
+            CourseOwnerEmail = session.CourseOwnerEmail,
+            CourseOwnerContactNo = session.CourseOwnerContactNo,
+            Venue = session.Venue,
+            Instructor = session.Instructor,
+            CourseCreditHoursInit = session.CourseCreditHoursInit,
+            PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
+            CourseCreditHours = session.CourseCreditHours,
+            PassingCriteriaException = session.PassingCriteriaException,
+            IsCancel = session.IsCancel
+          });
+        }
+      }
+
+      return sessionMobiles;
+    }
 
   }
 }
