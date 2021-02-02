@@ -560,7 +560,7 @@ namespace Ema.Ijoins.Api.Services
                  w => w.SessionId == tbmSessionUser.SessionId
                  && w.UserId.Contains(tbmSessionUser.UserId)
                 )
-          .OrderBy(o => o.UserId).ToListAsync();
+          .OrderBy(o => o.UserId).ToListAsync(); //order by name asc
     }
     public async Task<TbmSessionUser> AddParticipant(TbmSessionUser tbmSessionUser)
     {

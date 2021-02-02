@@ -90,6 +90,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         userregistration.IsCheckIn = '1';
         userregistration.CheckInBy = urIn.CheckInBy;
         await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
+        // Return You Already Check In
       }
     }
     public async Task CheckOut(UserRegistration urIn)
@@ -105,6 +106,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         userregistration.IsCheckOut = '1';
         userregistration.CheckOutBy = urIn.CheckOutBy;
         await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
+        // Return You Already Check Out
       }
     }
 
@@ -128,40 +130,11 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
         if (session != null)
         {
-          var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
-          sessionMobiles.Add(new SessionMobile
-          {
-            UserId = su.UserId,
-            SessionId = su.SessionId,
-
-            //if(userRegistration != null) { }
-            IsCheckIn = (char)(userRegistration?.IsCheckIn),
-            IsCheckOut = (char)(userRegistration?.IsCheckOut),
-            CheckInDateTime = (DateTime)(userRegistration?.CheckInDateTime),
-            CheckOutDateTime = (DateTime)(userRegistration?.CheckOutDateTime),
-            CheckInBy = userRegistration?.CheckInBy,
-            CheckOutBy = userRegistration?.CheckOutBy,
-
-            CourseId = session.CourseId,
-            CourseName = session.CourseName,
-            CourseNameTh = session.CourseNameTh,
-            SessionName = session.SessionName,
-            StartDateTime = session.StartDateTime,
-            EndDateTime = session.EndDateTime,
-            CourseOwnerEmail = session.CourseOwnerEmail,
-            CourseOwnerContactNo = session.CourseOwnerContactNo,
-            Venue = session.Venue,
-            Instructor = session.Instructor,
-            CourseCreditHoursInit = session.CourseCreditHoursInit,
-            PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
-            CourseCreditHours = session.CourseCreditHours,
-            PassingCriteriaException = session.PassingCriteriaException,
-            IsCancel = session.IsCancel
-          });
+          await GenSessionsForDisplay(sessionMobiles, su, session);
         }
       }
 
-      return sessionMobiles;
+      return sessionMobiles.OrderBy(o => o.StartDateTime).ToList();
     }
 
     public async Task<List<SessionMobile>> GetSessionSevendayForMobileByUserId(string userId)
@@ -181,38 +154,53 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
         if (session != null)
         {
-          var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
-          sessionMobiles.Add(new SessionMobile
-          {
-            UserId = su.UserId,
-            SessionId = su.SessionId,
-
-            //if(userRegistration != null) { }
-            IsCheckIn = (char)(userRegistration?.IsCheckIn),
-            IsCheckOut = (char)(userRegistration?.IsCheckOut),
-            CheckInDateTime = (DateTime)(userRegistration?.CheckInDateTime),
-            CheckOutDateTime = (DateTime)(userRegistration?.CheckOutDateTime),
-            CheckInBy = userRegistration?.CheckInBy,
-            CheckOutBy = userRegistration?.CheckOutBy,
-
-            CourseId = session.CourseId,
-            CourseName = session.CourseName,
-            CourseNameTh = session.CourseNameTh,
-            SessionName = session.SessionName,
-            StartDateTime = session.StartDateTime,
-            EndDateTime = session.EndDateTime,
-            CourseOwnerEmail = session.CourseOwnerEmail,
-            CourseOwnerContactNo = session.CourseOwnerContactNo,
-            Venue = session.Venue,
-            Instructor = session.Instructor,
-            CourseCreditHoursInit = session.CourseCreditHoursInit,
-            PassingCriteriaExceptionInit = session.PassingCriteriaExceptionInit,
-            CourseCreditHours = session.CourseCreditHours,
-            PassingCriteriaException = session.PassingCriteriaException,
-            IsCancel = session.IsCancel
-          });
+          await GenSessionsForDisplay(sessionMobiles, su, session);
         }
       }
+
+      return sessionMobiles.OrderBy(o => o.StartDateTime).ToList();
+    }
+
+    private async Task<List<SessionMobile>> GenSessionsForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
+    {
+      var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
+
+
+
+      SessionMobile sessionMobile = new SessionMobile();
+      sessionMobile.UserId = su.UserId;
+      sessionMobile.SessionId = su.SessionId;
+      if (userRegistration != null
+        && (
+           userRegistration.CheckInDateTime.ToString("yyyyMMdd") == DateTime.Now.ToString("yyyyMMdd")
+        || userRegistration.CheckOutDateTime.ToString("yyyyMMdd") == DateTime.Now.ToString("yyyyMMdd")
+        )
+      )
+      {
+        sessionMobile.IsCheckIn = userRegistration.IsCheckIn;
+        sessionMobile.IsCheckOut = userRegistration.IsCheckOut;
+        sessionMobile.CheckInDateTime = userRegistration.CheckInDateTime;
+        sessionMobile.CheckOutDateTime = userRegistration.CheckOutDateTime;
+        sessionMobile.CheckInBy = userRegistration.CheckInBy;
+        sessionMobile.CheckOutBy = userRegistration.CheckOutBy;
+      }
+      sessionMobile.CourseId = s.CourseId;
+      sessionMobile.CourseName = s.CourseName;
+      sessionMobile.CourseNameTh = s.CourseNameTh;
+      sessionMobile.SessionName = s.SessionName;
+      sessionMobile.StartDateTime = s.StartDateTime;
+      sessionMobile.EndDateTime = s.EndDateTime;
+      sessionMobile.CourseOwnerEmail = s.CourseOwnerEmail;
+      sessionMobile.CourseOwnerContactNo = s.CourseOwnerContactNo;
+      sessionMobile.Venue = s.Venue;
+      sessionMobile.Instructor = s.Instructor;
+      sessionMobile.CourseCreditHoursInit = s.CourseCreditHoursInit;
+      sessionMobile.PassingCriteriaExceptionInit = s.PassingCriteriaExceptionInit;
+      sessionMobile.CourseCreditHours = s.CourseCreditHours;
+      sessionMobile.PassingCriteriaException = s.PassingCriteriaException;
+      sessionMobile.IsCancel = s.IsCancel;
+
+      sessionMobiles.Add(sessionMobile);
 
       return sessionMobiles;
     }
