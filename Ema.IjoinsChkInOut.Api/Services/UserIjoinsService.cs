@@ -134,7 +134,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         }
       }
 
-      return sessionMobiles.OrderBy(o => o.StartDateTime).ToList();
+      return sessionMobiles.OrderBy(o => o.StartDateTime).ThenBy(o => o.SessionId).ToList();
     }
 
     public async Task<List<SessionMobile>> GetSessionSevendayForMobileByUserId(string userId)
@@ -158,7 +158,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         }
       }
 
-      return sessionMobiles.OrderBy(o => o.StartDateTime).ToList();
+      return sessionMobiles.OrderBy(o => o.StartDateTime).ThenBy(o => o.SessionId).ToList();
     }
 
     private async Task<List<SessionMobile>> GenSessionsForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
@@ -171,7 +171,8 @@ namespace Ema.IjoinsChkInOut.Api.Services
       sessionMobile.UserId = su.UserId;
       sessionMobile.SessionId = su.SessionId;
       if (userRegistration != null
-        && (
+        &&
+        (
            userRegistration.CheckInDateTime.ToString("yyyyMMdd") == DateTime.Now.ToString("yyyyMMdd")
         || userRegistration.CheckOutDateTime.ToString("yyyyMMdd") == DateTime.Now.ToString("yyyyMMdd")
         )
@@ -184,6 +185,19 @@ namespace Ema.IjoinsChkInOut.Api.Services
         sessionMobile.CheckInBy = userRegistration.CheckInBy;
         sessionMobile.CheckOutBy = userRegistration.CheckOutBy;
       }
+
+      if(
+          DateTime.UtcNow >= s.StartDateTime.AddMinutes(-30)
+        )
+      {
+        sessionMobile.CanCheckInOut = '1';
+      }
+      else
+      {
+        sessionMobile.CanCheckInOut = '0';
+      }
+
+
       sessionMobile.CourseId = s.CourseId;
       sessionMobile.CourseName = s.CourseName;
       sessionMobile.CourseNameTh = s.CourseNameTh;

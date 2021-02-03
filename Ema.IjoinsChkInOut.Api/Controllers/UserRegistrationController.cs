@@ -21,7 +21,7 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult<List<UserRegistration>>> SearchParticipant(UserRegistration urIn)
+    public async Task<ActionResult<List<UserRegistration>>> GetUserRegistration(UserRegistration urIn)
     {
       var userRegistrations = await _userIjoinsService.GetUserRegistration(urIn);
 

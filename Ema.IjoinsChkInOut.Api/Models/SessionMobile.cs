@@ -10,6 +10,7 @@ namespace Ema.IjoinsChkInOut.Api.Models
     public string UserId { get; set; }
     public string SessionId { get; set; }
 
+    public char CanCheckInOut { get; set; }
 
     public char IsCheckIn { get; set; }
     public char IsCheckOut { get; set; }
