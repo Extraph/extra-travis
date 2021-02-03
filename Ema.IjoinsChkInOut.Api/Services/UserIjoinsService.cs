@@ -74,40 +74,105 @@ namespace Ema.IjoinsChkInOut.Api.Services
                 (
                  w => w.SessionId == urIn.SessionId
                  && w.UserId.Contains(urIn.UserId)
+                 && (
+                   w.CheckInDate == DateTime.Now.ToString("yyyyMMdd")
+                || w.CheckOutDate == DateTime.Now.ToString("yyyyMMdd")
+                    )
                 ).ToListAsync();
     }
 
-    public async Task CheckIn(UserRegistration urIn)
+    public async Task<object> CheckIn(UserRegistration urIn)
     {
-      var userregistration = await _userregistrations.Find<UserRegistration>(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId).FirstOrDefaultAsync();
-      if (userregistration == null)
+      try
       {
-        await _userregistrations.InsertOneAsync(urIn);
+        string responseMsg = "";
+        bool isLate = false;
+        bool isAlert = false;
+
+        if (urIn.StartDateQr != DateTime.UtcNow.ToString("yyyyMMdd"))
+        {
+          isAlert = true;
+          responseMsg = "Wrong date of QR Code!";
+          return new { isScanSuccess = !isAlert, isAlert, isLate, scanResponseMsg = responseMsg };
+        }
+
+        var session = await _sessions.Find<Session>(w => w.SessionId == urIn.SessionId).FirstOrDefaultAsync();
+        
+        if (int.Parse(DateTime.UtcNow.ToString("HHmm")) > int.Parse(session.StartDateTime.AddMinutes(1).ToString("HHmm")))
+        { responseMsg = "Your session has already started!"; isLate = true; }
+
+        var userregistration = await _userregistrations.Find<UserRegistration>(
+          ur =>
+             ur.SessionId == urIn.SessionId
+          && ur.UserId == urIn.UserId
+          && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
+          ).FirstOrDefaultAsync();
+        if (userregistration == null)
+        {
+          await _userregistrations.InsertOneAsync(urIn);
+        }
+        else
+        {
+          isAlert = true;
+          responseMsg = "You already checked in.";
+          //userregistration.CheckInDateTime = DateTime.Now;
+          //userregistration.IsCheckIn = '1';
+          //userregistration.CheckInBy = urIn.CheckInBy;
+          //await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
+        }
+
+        return new { isScanSuccess = !isAlert, isAlert, isLate, scanResponseMsg = responseMsg };
       }
-      else
+      catch (Exception ex)
       {
-        userregistration.CheckInDateTime = DateTime.Now;
-        userregistration.IsCheckIn = '1';
-        userregistration.CheckInBy = urIn.CheckInBy;
-        await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
-        // Return You Already Check In
+        return new { isScanSuccess = false, scanResponseMsg = ex.Message };
       }
     }
-    public async Task CheckOut(UserRegistration urIn)
+    public async Task<object> CheckOut(UserRegistration urIn)
     {
-      var userregistration = await _userregistrations.Find<UserRegistration>(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId).FirstOrDefaultAsync();
-      if (userregistration == null)
+      try
       {
-        await _userregistrations.InsertOneAsync(urIn);
+        string responseMsg = "";
+        bool isAlert = false;
+
+        if (urIn.StartDateQr != DateTime.UtcNow.ToString("yyyyMMdd"))
+        {
+          isAlert = true;
+          responseMsg = "Wrong date of QR Code!";
+          return new { isScanSuccess = !isAlert, isAlert, scanResponseMsg = responseMsg };
+        }
+
+
+        var userregistration = await _userregistrations.Find<UserRegistration>(
+          ur => ur.SessionId == urIn.SessionId
+          && ur.UserId == urIn.UserId
+          && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
+          ).FirstOrDefaultAsync();
+        if (userregistration == null)
+        {
+          isAlert = true;
+          responseMsg = "Please checked in before check out!";
+          //await _userregistrations.InsertOneAsync(urIn);
+        }
+        else
+        {
+          userregistration.CheckOutDateTime = DateTime.Now;
+          userregistration.IsCheckOut = '1';
+          userregistration.CheckOutBy = urIn.CheckOutBy;
+          await _userregistrations.ReplaceOneAsync(
+            ur => ur.SessionId == urIn.SessionId
+            && ur.UserId == urIn.UserId
+            && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
+            , userregistration);
+        }
+
+        return new { isScanSuccess = !isAlert, isAlert, scanResponseMsg = responseMsg };
       }
-      else
+      catch (Exception ex)
       {
-        userregistration.CheckOutDateTime = DateTime.Now;
-        userregistration.IsCheckOut = '1';
-        userregistration.CheckOutBy = urIn.CheckOutBy;
-        await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
-        // Return You Already Check Out
+        return new { isScanSuccess = false, scanResponseMsg = ex.Message };
       }
+
     }
 
     public async Task<List<SessionMobile>> GetSessionTodayForMobileByUserId(string userId)
@@ -163,9 +228,14 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
     private async Task<List<SessionMobile>> GenSessionsForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
     {
-      var userRegistration = await _userregistrations.Find<UserRegistration>(w => w.SessionId == su.SessionId && w.UserId == su.UserId).FirstOrDefaultAsync();
-
-
+      var userRegistration = await _userregistrations.Find<UserRegistration>(
+        w => w.SessionId == su.SessionId
+        && w.UserId == su.UserId
+        && (
+            w.CheckInDate == DateTime.Now.ToString("yyyyMMdd")
+         || w.CheckOutDate == DateTime.Now.ToString("yyyyMMdd")
+           )
+        ).FirstOrDefaultAsync();
 
       SessionMobile sessionMobile = new SessionMobile();
       sessionMobile.UserId = su.UserId;
@@ -186,8 +256,11 @@ namespace Ema.IjoinsChkInOut.Api.Services
         sessionMobile.CheckOutBy = userRegistration.CheckOutBy;
       }
 
-      if(
-          DateTime.UtcNow >= s.StartDateTime.AddMinutes(-30)
+      if (
+          DateTime.UtcNow >= s.StartDateTime.AddMinutes(-30) &&
+          DateTime.UtcNow <= s.EndDateTime.AddHours(2) &&
+          int.Parse(DateTime.UtcNow.ToString("HHmm")) >= int.Parse(s.StartDateTime.AddMinutes(-30).ToString("HHmm")) &&
+          int.Parse(DateTime.UtcNow.ToString("HHmm")) <= int.Parse(s.EndDateTime.AddHours(2).ToString("HHmm"))
         )
       {
         sessionMobile.CanCheckInOut = '1';

@@ -37,19 +37,23 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
     [HttpPost("CheckIn")]
     public async Task<ActionResult> CheckIn(UserRegistration urIn)
     {
-      urIn.CheckInDateTime = DateTime.Now;
+      urIn.CheckInDateTime = DateTime.UtcNow;
+      urIn.CheckInDate = DateTime.UtcNow.ToString("yyyyMMdd");
+      urIn.CheckInTime = int.Parse(DateTime.UtcNow.ToString("HHmm"));
       urIn.IsCheckIn = '1';
-      await _userIjoinsService.CheckIn(urIn);
-      return Ok();
+      
+      return Ok(await _userIjoinsService.CheckIn(urIn));
     }
 
     [HttpPost("CheckOut")]
     public async Task<ActionResult> CheckOut(UserRegistration urIn)
     {
-      urIn.CheckOutDateTime = DateTime.Now;
+      urIn.CheckOutDateTime = DateTime.UtcNow;
+      urIn.CheckOutDate = DateTime.UtcNow.ToString("yyyyMMdd");
+      urIn.CheckOutTime = int.Parse(DateTime.UtcNow.ToString("HHmm"));
       urIn.IsCheckOut = '1';
-      await _userIjoinsService.CheckOut(urIn);
-      return Ok();
+      
+      return Ok(await _userIjoinsService.CheckOut(urIn));
     }
 
 
