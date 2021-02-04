@@ -26,6 +26,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
       var indexKeysCom = Builders<UserRegistration>.IndexKeys.Combine(
                                   Builders<UserRegistration>.IndexKeys.Ascending(s => s.SessionId),
                                   Builders<UserRegistration>.IndexKeys.Ascending(s => s.UserId),
+                                  Builders<UserRegistration>.IndexKeys.Ascending(s => s.CheckInDate),
                                   Builders<UserRegistration>.IndexKeys.Ascending(s => s.CheckInDateTime)
                               );
       var indexKeysSessionId = Builders<UserRegistration>.IndexKeys.Ascending(s => s.SessionId);
