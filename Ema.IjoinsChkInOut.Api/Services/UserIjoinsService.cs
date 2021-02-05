@@ -217,7 +217,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         var session = await _sessions.Find<Session>(w =>
                w.IsCancel == '0'
             && w.SessionId == su.SessionId
-            && (w.EndDateTime >= DateTime.Now && w.StartDateTime <= nextSevenDate)
+            && (w.StartDateTime > DateTime.Now && w.StartDateTime <= nextSevenDate)
         ).FirstOrDefaultAsync();
 
         if (session != null)
@@ -266,10 +266,10 @@ namespace Ema.IjoinsChkInOut.Api.Services
       }
 
       if (
-          DateTime.UtcNow >= s.StartDateTime.AddHours(-2) &&
-          DateTime.UtcNow <= s.EndDateTime.AddHours(2) &&
-          int.Parse(DateTime.UtcNow.ToString("HHmm")) >= int.Parse(s.StartDateTime.AddHours(-2).ToString("HHmm")) &&
-          int.Parse(DateTime.UtcNow.ToString("HHmm")) <= int.Parse(s.EndDateTime.AddHours(2).ToString("HHmm"))
+          DateTime.UtcNow >= s.StartDateTime.AddHours(-2) 
+          //&& DateTime.UtcNow <= s.EndDateTime.AddHours(2) 
+          && int.Parse(DateTime.UtcNow.ToString("HHmm")) >= int.Parse(s.StartDateTime.AddHours(-2).ToString("HHmm")) 
+          //&& int.Parse(DateTime.UtcNow.ToString("HHmm")) <= int.Parse(s.EndDateTime.AddHours(2).ToString("HHmm"))
         )
       {
         sessionMobile.CanCheckInOut = '1';
