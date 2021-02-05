@@ -6,6 +6,7 @@
     string ConnectionString { get; set; }
     string DatabaseName { get; set; }
     string SessionCollectionName { get; set; }
+    string SegmentCollectionName { get; set; }
     string SessionUserCollectionName { get; set; }
     string UserRegistrationName { get; set; }
   }
@@ -14,6 +15,7 @@
     public string ConnectionString { get; set; }
     public string DatabaseName { get; set; }
     public string SessionCollectionName { get; set; }
+    public string SegmentCollectionName { get; set; }
     public string SessionUserCollectionName { get; set; }
     public string UserRegistrationName { get; set; }
   }

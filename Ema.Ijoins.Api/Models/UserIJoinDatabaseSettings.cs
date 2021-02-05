@@ -6,6 +6,7 @@
     string ConnectionString { get; set; }
     string DatabaseName { get; set; }
     string SessionCollectionName { get; set; }
+    string SegmentCollectionName { get; set; }
     string SessionUserCollectionName { get; set; }    
   }
   public class UserIJoinDatabaseSettings : IUserIJoinDatabaseSettings
@@ -13,6 +14,7 @@
     public string ConnectionString { get; set; }
     public string DatabaseName { get; set; }
     public string SessionCollectionName { get; set; }
+    public string SegmentCollectionName { get; set; }
     public string SessionUserCollectionName { get; set; }
   }
 

@@ -9,8 +9,8 @@ namespace Ema.Ijoins.Api.Services
   public class UserIjoinsService
   {
     private readonly IMongoCollection<Session> _sessions;
+    private readonly IMongoCollection<Segment> _segments;
     private readonly IMongoCollection<SessionUser> _sessionusers;
-
 
     public UserIjoinsService(IUserIJoinDatabaseSettings settings)
     {
@@ -18,6 +18,7 @@ namespace Ema.Ijoins.Api.Services
       var database = client.GetDatabase(settings.DatabaseName);
 
       _sessions = database.GetCollection<Session>(settings.SessionCollectionName);
+      _segments = database.GetCollection<Segment>(settings.SegmentCollectionName);
       _sessionusers = database.GetCollection<SessionUser>(settings.SessionUserCollectionName);
 
       var indexKeysSessionCom = Builders<Session>.IndexKeys.Combine(
@@ -33,6 +34,23 @@ namespace Ema.Ijoins.Api.Services
       _sessions.Indexes.CreateOne(new CreateIndexModel<Session>(indexKeysSessionId));
       _sessions.Indexes.CreateOne(new CreateIndexModel<Session>(indexKeysStartDateTime));
       _sessions.Indexes.CreateOne(new CreateIndexModel<Session>(indexKeysEndDateTime));
+
+
+
+      var indexKeysSegmentCom = Builders<Segment>.IndexKeys.Combine(
+                                  Builders<Segment>.IndexKeys.Ascending(s => s.SessionId),
+                                  Builders<Segment>.IndexKeys.Ascending(s => s.StartDate),
+                                  Builders<Segment>.IndexKeys.Ascending(s => s.EndDate)
+                              );
+      var indexKeysSegmentSessionId = Builders<Segment>.IndexKeys.Ascending(s => s.SessionId);
+      var indexKeysSegmentStartDate = Builders<Segment>.IndexKeys.Ascending(s => s.StartDate);
+      var indexKeysSegmentEndDate = Builders<Segment>.IndexKeys.Ascending(s => s.EndDate);
+
+      _segments.Indexes.CreateOne(new CreateIndexModel<Segment>(indexKeysSegmentCom));
+      _segments.Indexes.CreateOne(new CreateIndexModel<Segment>(indexKeysSegmentSessionId));
+      _segments.Indexes.CreateOne(new CreateIndexModel<Segment>(indexKeysSegmentStartDate));
+      _segments.Indexes.CreateOne(new CreateIndexModel<Segment>(indexKeysSegmentEndDate));
+
 
 
 
@@ -79,6 +97,28 @@ namespace Ema.Ijoins.Api.Services
       }
     }
     public async void RemoveSessionUser(SessionUser sIn) => await _sessionusers.DeleteManyAsync(s => s.SessionId == sIn.SessionId);
+    public async void CreateSegment(Segment seIn)
+    {
+      var segment = await _segments.Find<Segment>(su =>
+            su.SessionId == seIn.SessionId &&
+            su.StartDateTime == seIn.StartDateTime &&
+            su.EndDateTime == seIn.EndDateTime
+            ).FirstOrDefaultAsync();
+      if (segment == null)
+      {
+        await _segments.InsertOneAsync(seIn);
+      }
+      else
+      {
+        seIn.Id = segment.Id;
+        await _segments.ReplaceOneAsync(su => 
+            su.SessionId == seIn.SessionId && 
+            su.StartDateTime == seIn.StartDateTime && 
+            su.EndDateTime == seIn.EndDateTime
+            , seIn);
+      }
+    }
+    public async void RemoveSegmentUser(Segment seIn) => await _segments.DeleteManyAsync(s => s.SessionId == seIn.SessionId);
   }
 }
 

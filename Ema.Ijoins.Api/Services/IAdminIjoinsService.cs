@@ -135,6 +135,8 @@ namespace Ema.Ijoins.Api.Services
           TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
           if (tbmSession != null) _context.TbmSegments.RemoveRange(await _context.TbmSegments.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
 
+          if (tbmSession != null) _userIjoinsService.RemoveSegmentUser(new Segment { SessionId = tbmSession.SessionId });
+
           if (tbmKlcFileImport.ImportType == "Upload session and participants")
           {
             if (tbmSession != null) _context.TbmSessionUsers.RemoveRange(await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
@@ -338,6 +340,26 @@ namespace Ema.Ijoins.Api.Services
             PassingCriteriaException = tbmSession.PassingCriteriaException,
             IsCancel = '0'
           });
+
+          List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+          foreach (TbmSegment se in tbmSegments)
+          {
+              _userIjoinsService.CreateSegment(new Segment
+              {
+                SessionId = se.SessionId,
+                SegmentNo = se.SegmentNo,
+                SegmentName = se.SegmentName,
+                StartDate = se.StartDateTime.ToString("yyyyMMdd"),
+                EndDate = se.EndDateTime.ToString("yyyyMMdd"),
+                StartTime = se.StartDateTime.ToString("HHmm"),
+                EndTime = se.EndDateTime.ToString("HHmm"),
+                StartDateTime = se.StartDateTime,
+                EndDateTime = se.EndDateTime,
+                Venue = se.Venue,
+                Createdatetime = DateTime.Now
+              });
+            
+          }
 
           List<TbmSessionUser> tbmSessionUsers = await _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync();
           foreach (TbmSessionUser su in tbmSessionUsers)

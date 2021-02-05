@@ -11,6 +11,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
   public class UserIjoinsService
   {
     private readonly IMongoCollection<Session> _sessions;
+    private readonly IMongoCollection<Segment> _segments;
     private readonly IMongoCollection<SessionUser> _sessionusers;
     private readonly IMongoCollection<UserRegistration> _userregistrations;
 
@@ -20,6 +21,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
       var database = client.GetDatabase(settings.DatabaseName);
 
       _sessions = database.GetCollection<Session>(settings.SessionCollectionName);
+      _segments = database.GetCollection<Segment>(settings.SegmentCollectionName);
       _sessionusers = database.GetCollection<SessionUser>(settings.SessionUserCollectionName);
       _userregistrations = database.GetCollection<UserRegistration>(settings.UserRegistrationName);
 
@@ -229,6 +231,12 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
     private async Task<List<SessionMobile>> GenSessionsForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
     {
+      var segment = await _segments.Find<Segment>(
+        w => w.SessionId == s.SessionId &&
+          w.StartDate == DateTime.Now.ToString("yyyyMMdd") &&
+          w.EndDate == DateTime.Now.ToString("yyyyMMdd")
+        ).FirstOrDefaultAsync();
+
       var userRegistration = await _userregistrations.Find<UserRegistration>(
         w => w.SessionId == su.SessionId
         && w.UserId == su.UserId
@@ -258,9 +266,9 @@ namespace Ema.IjoinsChkInOut.Api.Services
       }
 
       if (
-          DateTime.UtcNow >= s.StartDateTime.AddMinutes(-30) &&
+          DateTime.UtcNow >= s.StartDateTime.AddHours(-2) &&
           DateTime.UtcNow <= s.EndDateTime.AddHours(2) &&
-          int.Parse(DateTime.UtcNow.ToString("HHmm")) >= int.Parse(s.StartDateTime.AddMinutes(-30).ToString("HHmm")) &&
+          int.Parse(DateTime.UtcNow.ToString("HHmm")) >= int.Parse(s.StartDateTime.AddHours(-2).ToString("HHmm")) &&
           int.Parse(DateTime.UtcNow.ToString("HHmm")) <= int.Parse(s.EndDateTime.AddHours(2).ToString("HHmm"))
         )
       {
@@ -280,7 +288,18 @@ namespace Ema.IjoinsChkInOut.Api.Services
       sessionMobile.EndDateTime = s.EndDateTime;
       sessionMobile.CourseOwnerEmail = s.CourseOwnerEmail;
       sessionMobile.CourseOwnerContactNo = s.CourseOwnerContactNo;
-      sessionMobile.Venue = s.Venue;
+
+
+      if (segment != null)
+      {
+        sessionMobile.Venue = segment.Venue;
+      }
+      else
+      {
+        sessionMobile.Venue = s.Venue;
+      }
+
+
       sessionMobile.Instructor = s.Instructor;
       sessionMobile.CourseCreditHoursInit = s.CourseCreditHoursInit;
       sessionMobile.PassingCriteriaExceptionInit = s.PassingCriteriaExceptionInit;
