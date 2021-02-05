@@ -167,6 +167,14 @@ namespace Ema.IjoinsChkInOut.Api.Services
             && ur.UserId == urIn.UserId
             && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
             , userregistration);
+
+          var session = await _sessions.Find<Session>(w => w.SessionId == userregistration.SessionId).FirstOrDefaultAsync();
+          CultureInfo enUS = new CultureInfo("en-US");
+          DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+          if (session != null && session.EndDateTime > EndDay)
+          {
+            responseMsg = "Don't forget to join the remaining days.";
+          }
         }
 
         return new { isScanSuccess = !isAlert, isAlert, scanResponseMsg = responseMsg };
