@@ -240,10 +240,13 @@ namespace Ema.Ijoins.Api.Services
               SessionId = klcDataMaster.SessionId,
               SegmentNo = klcDataMaster.SegmentNo,
               SegmentName = klcDataMaster.SegmentName,
-              StartDate = klcDataMaster.StartDate,
-              EndDate = klcDataMaster.EndDate,
-              StartTime = klcDataMaster.StartTime,
-              EndTime = klcDataMaster.EndTime,
+
+              StartDate = klcDataMaster.StartDateTime.ToString("yyyyMMdd"),
+              EndDate = klcDataMaster.EndDateTime.ToString("yyyyMMdd"),
+
+              StartTime = klcDataMaster.StartDateTime.ToString("HHmm"),
+              EndTime = klcDataMaster.EndDateTime.ToString("HHmm"),
+
               StartDateTime = klcDataMaster.StartDateTime,
               EndDateTime = klcDataMaster.EndDateTime,
               Venue = klcDataMaster.Venue,
@@ -262,10 +265,13 @@ namespace Ema.Ijoins.Api.Services
               .FirstOrDefaultAsync();
             tbmSegment.SegmentNo = klcDataMaster.SegmentNo;
             tbmSegment.SegmentName = klcDataMaster.SegmentName;
-            tbmSegment.StartDate = klcDataMaster.StartDate;
-            tbmSegment.EndDate = klcDataMaster.EndDate;
-            tbmSegment.StartTime = klcDataMaster.StartTime;
-            tbmSegment.EndTime = klcDataMaster.EndTime;
+
+            tbmSegment.StartDate = klcDataMaster.StartDateTime.ToString("yyyyMMdd");
+            tbmSegment.EndDate = klcDataMaster.EndDateTime.ToString("yyyyMMdd");
+
+            tbmSegment.StartTime = klcDataMaster.StartDateTime.ToString("HHmm");
+            tbmSegment.EndTime = klcDataMaster.EndDateTime.ToString("HHmm");
+
             tbmSegment.Venue = klcDataMaster.Venue;
             _context.Entry(tbmSegment).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -344,21 +350,21 @@ namespace Ema.Ijoins.Api.Services
           List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.SessionId == ts.SessionId).ToListAsync();
           foreach (TbmSegment se in tbmSegments)
           {
-              _userIjoinsService.CreateSegment(new Segment
-              {
-                SessionId = se.SessionId,
-                SegmentNo = se.SegmentNo,
-                SegmentName = se.SegmentName,
-                StartDate = se.StartDateTime.ToString("yyyyMMdd"),
-                EndDate = se.EndDateTime.ToString("yyyyMMdd"),
-                StartTime = se.StartDateTime.ToString("HHmm"),
-                EndTime = se.EndDateTime.ToString("HHmm"),
-                StartDateTime = se.StartDateTime,
-                EndDateTime = se.EndDateTime,
-                Venue = se.Venue,
-                Createdatetime = DateTime.Now
-              });
-            
+            _userIjoinsService.CreateSegment(new Segment
+            {
+              SessionId = se.SessionId,
+              SegmentNo = se.SegmentNo,
+              SegmentName = se.SegmentName,
+              StartDate = se.StartDateTime.ToString("yyyyMMdd"),
+              EndDate = se.EndDateTime.ToString("yyyyMMdd"),
+              StartTime = se.StartDateTime.ToString("HHmm"),
+              EndTime = se.EndDateTime.ToString("HHmm"),
+              StartDateTime = se.StartDateTime,
+              EndDateTime = se.EndDateTime,
+              Venue = se.Venue,
+              Createdatetime = DateTime.Now
+            });
+
           }
 
           List<TbmSessionUser> tbmSessionUsers = await _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync();
@@ -526,7 +532,9 @@ namespace Ema.Ijoins.Api.Services
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
 
-      return await _context.TbmSessions.Where(
+      string today = DateTime.Now.ToString("yyyyMMdd");
+
+      var session = await _context.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
         && w.StartDateTime <= EndDay
@@ -538,6 +546,22 @@ namespace Ema.Ijoins.Api.Services
         || w.CourseName.Contains(tbmSession.CourseId.ToUpper())
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
+
+      foreach (TbmSession sessionItem in session)
+      {
+        var segment = await _context.TbmSegments.Where(
+        w => w.SessionId == sessionItem.SessionId &&
+          w.StartDate == today &&
+          w.EndDate == today
+        ).FirstOrDefaultAsync();
+
+        if (segment != null)
+          sessionItem.Venue = segment.Venue;
+
+        sessionItem.TbmSegments = null;
+      }
+
+      return session;
     }
     public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession)
     {
