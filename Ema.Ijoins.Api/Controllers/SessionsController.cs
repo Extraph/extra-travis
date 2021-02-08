@@ -36,7 +36,7 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     [HttpPost("ToDayClass")]
-    public async Task<ActionResult<List<TbmSession>>> ToDayClass(TbmSession tbmSession)
+    public async Task<ActionResult<List<TbmSession>>> ToDayClass(FetchSessions tbmSession)
     {
       var tbmSessions = await _ijoinsService.GetToDayClass(tbmSession);
 
@@ -60,6 +60,20 @@ namespace Ema.Ijoins.Api.Controllers
 
       return tbmSessions;
     }
+
+    [HttpPost("NextSixDayDashs")]
+    public async Task<ActionResult<List<ModelNextSixDayDash>>> NextSixDayDashs()
+    {
+      var tbmSessions = await _ijoinsService.GetNextSixDayDashs();
+
+      if (tbmSessions == null)
+      {
+        return NotFound();
+      }
+
+      return tbmSessions;
+    }
+
 
     [HttpPut("{id}")]
     public async Task<ActionResult<TbmSession>> UpdateSession(string id, TbmSession tbmSession)

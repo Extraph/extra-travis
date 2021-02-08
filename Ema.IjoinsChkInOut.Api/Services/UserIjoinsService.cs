@@ -215,6 +215,8 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
     public async Task<List<SessionMobile>> GetSessionSevendayForMobileByUserId(string userId)
     {
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
       DateTime nextSevenDate = DateTime.Now.AddDays(7);
 
       List<SessionMobile> sessionMobiles = new List<SessionMobile>();
@@ -225,7 +227,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         var session = await _sessions.Find<Session>(w =>
                w.IsCancel == '0'
             && w.SessionId == su.SessionId
-            && (w.StartDateTime > DateTime.Now && w.StartDateTime <= nextSevenDate)
+            && (w.StartDateTime > EndDay && w.StartDateTime <= nextSevenDate)
         ).FirstOrDefaultAsync();
 
         if (session != null)

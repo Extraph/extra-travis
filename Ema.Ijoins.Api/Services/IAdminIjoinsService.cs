@@ -19,8 +19,9 @@ namespace Ema.Ijoins.Api.Services
     Task<object> UploadFileKlc(IFormFile file);
     Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
     Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
+    Task<List<ModelNextSixDayDash>> GetNextSixDayDashs();
     Task<TbmSession> UpdateSession(TbmSession tbmSession);
-    Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession);
+    Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession);
     Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession);
     Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser);
     Task<TbmSessionUser> AddParticipant(TbmSessionUser tbmSessionUser);
@@ -526,13 +527,40 @@ namespace Ema.Ijoins.Api.Services
 
       return segmentsQRs;
     }
-    public async Task<List<TbmSession>> GetToDayClass(TbmSession tbmSession)
-    {
-      CultureInfo enUS = new CultureInfo("en-US");
-      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
-      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
 
-      string today = DateTime.Now.ToString("yyyyMMdd");
+    public async Task<List<ModelNextSixDayDash>> GetNextSixDayDashs()
+    {
+      List<ModelNextSixDayDash> retNextSixDayDash = new List<ModelNextSixDayDash>();
+      CultureInfo enUS = new CultureInfo("en-US");
+      var session = await _context.TbmSessions.Where(
+        w =>
+        w.IsCancel == '0'
+        && w.EndDateTime >= DateTime.Now
+        ).OrderBy(o => o.StartDateTime).ToListAsync();
+
+      for (int i = 1; i <= 6; i++)
+      {
+        DateTime date = DateTime.Now.AddDays(i);
+        DateTime.TryParseExact(date.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+        DateTime.TryParseExact(date.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+        retNextSixDayDash.Add(new ModelNextSixDayDash
+        {
+          DateTime = date,
+          AddDay = i,
+          SessionCount = session.Where(w => w.StartDateTime <= EndDay && w.EndDateTime >= StartDay).ToList().Count.ToString()
+        });
+      }
+
+      return retNextSixDayDash;
+    }
+    public async Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession)
+    {
+      
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.AddDays(tbmSession.AddDay).ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      DateTime.TryParseExact(DateTime.Now.AddDays(tbmSession.AddDay).ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+
+      string today = DateTime.Now.AddDays(tbmSession.AddDay).ToString("yyyyMMdd");
 
       var session = await _context.TbmSessions.Where(
         w =>
@@ -558,6 +586,7 @@ namespace Ema.Ijoins.Api.Services
         if (segment != null)
           sessionItem.Venue = segment.Venue;
 
+        sessionItem.Createdatetime = DateTime.Now.AddDays(tbmSession.AddDay);
         sessionItem.TbmSegments = null;
       }
 
