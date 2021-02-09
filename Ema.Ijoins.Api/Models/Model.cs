@@ -35,6 +35,29 @@ namespace Ema.Ijoins.Api.Models
     public List<VSegmentGenQr> SegmentsQr { get; set; }
   }
 
+  public class ModelReport
+  {
+    public int No { get; set; }
+    public string UserId { get; set; }
+    public string UserNameSurname { get; set; }
+    public string UserDepartment { get; set; }
+    public string UserCompany { get; set; }
+
+    public string Date { get; set; }
+    public string CheckInTime { get; set; }
+    public string CheckOutTime { get; set; }
+    public string TrainingStatus { get; set; }
+
+
+    public DateTime CheckInDateTime { get; set; }
+    public string CheckInDate { get; set; }
+    public DateTime CheckOutDateTime { get; set; }
+    public string CheckOutDate { get; set; }
+
+    public string CheckInBy { get; set; }
+    public string CheckOutBy { get; set; }
+  }
+
   public class ModelNextSixDayDash
   {
     public DateTime DateTime { get; set; }

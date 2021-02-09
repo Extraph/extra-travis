@@ -159,7 +159,9 @@ namespace Ema.IjoinsChkInOut.Api.Services
         }
         else
         {
-          userregistration.CheckOutDateTime = DateTime.Now;
+          userregistration.CheckOutDateTime = DateTime.UtcNow;
+          userregistration.CheckOutDate = DateTime.UtcNow.ToString("yyyyMMdd");
+          userregistration.CheckOutTime = int.Parse(DateTime.UtcNow.ToString("HHmm"));
           userregistration.IsCheckOut = '1';
           userregistration.CheckOutBy = urIn.CheckOutBy;
           await _userregistrations.ReplaceOneAsync(

@@ -3,6 +3,8 @@ using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
+using System;
 
 namespace Ema.Ijoins.Api.Services
 {
@@ -11,6 +13,7 @@ namespace Ema.Ijoins.Api.Services
     private readonly IMongoCollection<Session> _sessions;
     private readonly IMongoCollection<Segment> _segments;
     private readonly IMongoCollection<SessionUser> _sessionusers;
+    private readonly IMongoCollection<UserRegistration> _userregistrations;
 
     public UserIjoinsService(IUserIJoinDatabaseSettings settings)
     {
@@ -20,6 +23,7 @@ namespace Ema.Ijoins.Api.Services
       _sessions = database.GetCollection<Session>(settings.SessionCollectionName);
       _segments = database.GetCollection<Segment>(settings.SegmentCollectionName);
       _sessionusers = database.GetCollection<SessionUser>(settings.SessionUserCollectionName);
+      _userregistrations = database.GetCollection<UserRegistration>(settings.UserRegistrationName);
 
       var indexKeysSessionCom = Builders<Session>.IndexKeys.Combine(
                                   Builders<Session>.IndexKeys.Ascending(s => s.SessionId),
@@ -111,14 +115,22 @@ namespace Ema.Ijoins.Api.Services
       else
       {
         seIn.Id = segment.Id;
-        await _segments.ReplaceOneAsync(su => 
-            su.SessionId == seIn.SessionId && 
-            su.StartDateTime == seIn.StartDateTime && 
+        await _segments.ReplaceOneAsync(su =>
+            su.SessionId == seIn.SessionId &&
+            su.StartDateTime == seIn.StartDateTime &&
             su.EndDateTime == seIn.EndDateTime
             , seIn);
       }
     }
     public async void RemoveSegmentUser(Segment seIn) => await _segments.DeleteManyAsync(s => s.SessionId == seIn.SessionId);
+    public async Task<List<UserRegistration>> GetUserRegistration(UserRegistration urIn)
+    {
+      return await _userregistrations.Find<UserRegistration>
+                (
+                 w => w.SessionId == urIn.SessionId
+                 && w.UserId == urIn.UserId
+                ).ToListAsync();
+    }
   }
 }
 

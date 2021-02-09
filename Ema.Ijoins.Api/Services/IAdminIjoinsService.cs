@@ -29,6 +29,7 @@ namespace Ema.Ijoins.Api.Services
     Task<object> DeleteParticipant(TbmSessionUser tbmSessionUser);
     bool TbmSessionUsersExists(string SessionId, string UserId);
     bool TbmSessionExists(string SessionId);
+    Task<List<ModelReport>> GetReport(TbmSession tbmSession);
   }
 
   public class AdminIjoinsService : IAdminIjoinsService
@@ -555,7 +556,7 @@ namespace Ema.Ijoins.Api.Services
     }
     public async Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession)
     {
-      
+
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.AddDays(tbmSession.AddDay).ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
       DateTime.TryParseExact(DateTime.Now.AddDays(tbmSession.AddDay).ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
@@ -594,15 +595,15 @@ namespace Ema.Ijoins.Api.Services
     }
     public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession)
     {
-      //CultureInfo enUS = new CultureInfo("en-US");
+      CultureInfo enUS = new CultureInfo("en-US");
       //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
-      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
       DateTime nextSevenDate = DateTime.Now.AddDays(7);
 
       return await _context.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
-        && (w.EndDateTime >= DateTime.Now && w.StartDateTime <= nextSevenDate)
+        && (w.EndDateTime > EndDay && w.StartDateTime <= nextSevenDate)
         && (
            w.CourseId.Contains(tbmSession.CourseId)
         || w.CourseName.Contains(tbmSession.CourseId)
@@ -681,6 +682,148 @@ namespace Ema.Ijoins.Api.Services
       await _context.SaveChangesAsync();
 
       return new { Success = true };
+    }
+
+
+    public async Task<List<ModelReport>> GetReport(TbmSession tbmSession)
+    {
+      //CultureInfo enUS = new CultureInfo("en-US");
+      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+
+
+      var sessionData = await _context.TbmSessions
+          .Where(
+                 w => w.SessionId == tbmSession.SessionId
+                )
+          .FirstOrDefaultAsync();
+
+      //var segmentData = await _context.TbmSegments
+      //    .Where(
+      //           w => w.SessionId == tbmSession.SessionId
+      //          ).OrderBy(o => o.StartDateTime).ToListAsync();
+
+      var segmentData = await _context.VSegmentGenQrs.Where(w => w.SessionId == tbmSession.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
+
+
+      var tbmSessionUsers = await _context.TbmSessionUsers
+          .Where(
+                 w => w.SessionId == tbmSession.SessionId
+                )
+          .OrderBy(o => o.UserId).ToListAsync();
+
+
+      List<ModelReport> reportList = new List<ModelReport>();
+      int row = 0;
+      foreach (TbmSessionUser su in tbmSessionUsers)
+      {
+
+
+        string TrainingStatus = "";
+        DateTime CheckInDateTime = DateTime.MinValue;
+        DateTime CheckOutDateTime = DateTime.MinValue;
+        var userRegistrations = await _userIjoinsService.GetUserRegistration(new UserRegistration { SessionId = su.SessionId, UserId = su.UserId });
+
+        if (su.RegistrationStatus == "Cancelled")
+        {
+          TrainingStatus = "Cancelled";
+        }
+        else if (userRegistrations.Count == 0)
+        {
+          TrainingStatus = "No Show";
+        }
+        else
+        {
+          //% การเข้าอบรมของพนักงาน = (จำนวนชั่วโมงอบรมจริง / จำนวนชั่วโมงอบรมที่วางแผนไว้(Credit hours)) * 100
+          double realMinuteAttend = 0;
+          double percentAttend = 0;
+          foreach (VSegmentGenQr sg in segmentData)
+          {
+            var userRegis = userRegistrations.Where(w => w.CheckInDate == sg.StartDateTime.Value.ToString("yyyyMMdd")).FirstOrDefault();
+            if (userRegis != null)
+            {
+              if (userRegis.CheckInDateTime.ToLocalTime() < sg.StartDateTime) //เหลือคิดเวลาตาม Segment
+              {
+                CheckInDateTime = sg.StartDateTime.Value;
+              }
+              else
+              {
+                CheckInDateTime = userRegis.CheckInDateTime.ToLocalTime();
+              }
+
+              if (userRegis.CheckOutDateTime.ToLocalTime() > sg.EndDateTime)
+              {
+                CheckOutDateTime = sg.EndDateTime.Value;
+              }
+              else
+              {
+                CheckOutDateTime = userRegis.CheckOutDateTime.ToLocalTime();
+              }
+
+              if (userRegis.CheckInDateTime != DateTime.MinValue && userRegis.CheckOutDateTime != DateTime.MinValue)
+              {
+                TimeSpan ts = CheckOutDateTime - CheckInDateTime;
+                if (ts.TotalMinutes > 0)
+                  realMinuteAttend += ts.TotalMinutes;
+              }
+            }
+          }
+          percentAttend = (realMinuteAttend / (double.Parse(sessionData.CourseCreditHours) * 60)) * 100;
+
+          //Completed(ผ่านการอบรม) = % การเข้าอบรมของพนักงาน >= % Passing Criteria
+          //Incomplete(ไม่ผ่านการอบรม) = % การเข้าอบรมของพนักงาน < % Passing Criteria หรือ Check in/out ไม่ครบ
+          if (percentAttend >= (double.Parse(sessionData.PassingCriteriaException) * 100))
+          {
+            TrainingStatus = "Completed";
+          }
+          else
+          {
+            TrainingStatus = "Incompleted";
+          }
+        }
+        if (CheckInDateTime != DateTime.MinValue && CheckOutDateTime == DateTime.MinValue && TrainingStatus == "")
+        {
+          TrainingStatus = "Incompleted";
+        }
+
+        string dateShow = "";
+        if(CheckInDateTime == DateTime.MinValue)
+        {
+          dateShow = "";
+        }
+        else if (CheckInDateTime.ToString("dd'/'MM'/'yyyy") == CheckOutDateTime.ToString("dd'/'MM'/'yyyy"))
+        {
+          dateShow = CheckInDateTime.ToString("dd'/'MM'/'yyyy");
+        }
+        else
+        {
+          dateShow = CheckInDateTime.ToString("dd'/'MM'/'yyyy") + " - " + CheckOutDateTime.ToString("dd'/'MM'/'yyyy");
+        }
+
+        reportList.Add(new ModelReport
+        {
+          No = ++row,
+          UserId = su.UserId,
+          UserNameSurname = "",
+          UserDepartment = "",
+          UserCompany = "",
+
+          Date = dateShow,
+          CheckInTime = CheckInDateTime != DateTime.MinValue ? CheckInDateTime.ToLocalTime().ToString("HH:mm") : "",
+          CheckOutTime = CheckOutDateTime != DateTime.MinValue ? CheckOutDateTime.ToLocalTime().ToString("HH:mm") : "",
+          TrainingStatus = TrainingStatus,
+
+
+          CheckInDateTime = CheckInDateTime,
+          //CheckInDate = "",
+          CheckOutDateTime = CheckOutDateTime,
+          //CheckOutDate = "",
+
+          CheckInBy = "",
+          CheckOutBy = "",
+        });
+      }
+
+      return reportList;
     }
 
   }
