@@ -833,5 +833,34 @@ namespace Ema.Ijoins.Api.Helpers
         return result;
       }
     }
+
+
+
+    public static string GetStryyyyMMddNow()
+    {
+      CultureInfo enUS = new CultureInfo("en-US");
+      return DateTime.Now.ToString("yyyyMMdd", enUS);
+    }
+
+    public static string GetStrHHmmNow()
+    {
+      CultureInfo enUS = new CultureInfo("en-US");
+      return DateTime.Now.ToString("HHmm", enUS);
+    }
+
+    public static DateTime GetStartDay()
+    {
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+      return StartDay;
+    }
+
+    public static DateTime GetEndDay()
+    {
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
+      return EndDay;
+    }
+
   }
 }
