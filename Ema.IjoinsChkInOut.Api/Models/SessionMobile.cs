@@ -29,6 +29,9 @@ namespace Ema.IjoinsChkInOut.Api.Models
     public string CourseOwnerEmail { get; set; }
     public string CourseOwnerContactNo { get; set; }
     public string Venue { get; set; }
+    public string SegmentName { get; set; }
+    public DateTime SegmentStartDateTime { get; set; }
+    public DateTime SegmentEndDateTime { get; set; }
     public string Instructor { get; set; }
     public string CourseCreditHoursInit { get; set; }
     public string PassingCriteriaExceptionInit { get; set; }

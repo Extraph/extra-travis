@@ -536,6 +536,8 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasColumnType("timestamp with time zone")
                     .HasColumnName("end_date_time");
 
+                entity.Property(e => e.SegmentName).HasColumnName("segment_name");
+
                 entity.Property(e => e.SessionId).HasColumnName("session_id");
 
                 entity.Property(e => e.SessionName).HasColumnName("session_name");

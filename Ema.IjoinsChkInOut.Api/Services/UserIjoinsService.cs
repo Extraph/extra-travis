@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 using System.Globalization;
+using Ema.IjoinsChkInOut.Api.Helpers;
 
 namespace Ema.IjoinsChkInOut.Api.Services
 {
@@ -78,8 +79,8 @@ namespace Ema.IjoinsChkInOut.Api.Services
                  w => w.SessionId == urIn.SessionId
                  && w.UserId.Contains(urIn.UserId)
                  && (
-                   w.CheckInDate == DateTime.Now.ToString("yyyyMMdd")
-                || w.CheckOutDate == DateTime.Now.ToString("yyyyMMdd")
+                   w.CheckInDate == Utility.GetStryyyyMMddNow()
+                || w.CheckOutDate == Utility.GetStryyyyMMddNow()
                     )
                 ).ToListAsync();
     }
@@ -92,23 +93,29 @@ namespace Ema.IjoinsChkInOut.Api.Services
         bool isLate = false;
         bool isAlert = false;
 
-        if (urIn.StartDateQr != DateTime.UtcNow.ToString("yyyyMMdd"))
+        if (urIn.StartDateQr != Utility.GetStryyyyMMddNow())
         {
           isAlert = true;
           responseMsg = "Wrong date of QR Code!";
           return new { isScanSuccess = !isAlert, isAlert, isLate, scanResponseMsg = responseMsg };
         }
 
-        var session = await _sessions.Find<Session>(w => w.SessionId == urIn.SessionId).FirstOrDefaultAsync();
-        
-        if (int.Parse(DateTime.UtcNow.ToString("HHmm")) > int.Parse(session.StartDateTime.AddMinutes(1).ToString("HHmm")))
-        { responseMsg = "Your session has already started!"; isLate = true; }
+        var segment = await _segments.Find<Segment>(
+        w => w.SessionId == urIn.SessionId &&
+          w.StartDate == Utility.GetStryyyyMMddNow() &&
+          w.EndDate == Utility.GetStryyyyMMddNow()
+        ).FirstOrDefaultAsync();
+        if (segment != null)
+        {
+          if (int.Parse(Utility.GetStrHHmmNow()) > int.Parse(segment.StartDateTime.ToLocalTime().AddMinutes(1).ToString("HHmm")))
+          { responseMsg = "Your session has already started!"; isLate = true; }
+        }
 
         var userregistration = await _userregistrations.Find<UserRegistration>(
           ur =>
              ur.SessionId == urIn.SessionId
           && ur.UserId == urIn.UserId
-          && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
+          && ur.CheckInDate == Utility.GetStryyyyMMddNow()
           ).FirstOrDefaultAsync();
         if (userregistration == null)
         {
@@ -118,10 +125,6 @@ namespace Ema.IjoinsChkInOut.Api.Services
         {
           isAlert = true;
           responseMsg = "You already checked in.";
-          //userregistration.CheckInDateTime = DateTime.Now;
-          //userregistration.IsCheckIn = '1';
-          //userregistration.CheckInBy = urIn.CheckInBy;
-          //await _userregistrations.ReplaceOneAsync(ur => ur.SessionId == urIn.SessionId && ur.UserId == urIn.UserId, userregistration);
         }
 
         return new { isScanSuccess = !isAlert, isAlert, isLate, scanResponseMsg = responseMsg };
@@ -138,7 +141,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
         string responseMsg = "";
         bool isAlert = false;
 
-        if (urIn.StartDateQr != DateTime.UtcNow.ToString("yyyyMMdd"))
+        if (urIn.StartDateQr != Utility.GetStryyyyMMddNow())
         {
           isAlert = true;
           responseMsg = "Wrong date of QR Code!";
@@ -149,31 +152,28 @@ namespace Ema.IjoinsChkInOut.Api.Services
         var userregistration = await _userregistrations.Find<UserRegistration>(
           ur => ur.SessionId == urIn.SessionId
           && ur.UserId == urIn.UserId
-          && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
+          && ur.CheckInDate == Utility.GetStryyyyMMddNow()
           ).FirstOrDefaultAsync();
         if (userregistration == null)
         {
           isAlert = true;
           responseMsg = "Please checked in before check out!";
-          //await _userregistrations.InsertOneAsync(urIn);
         }
         else
         {
-          userregistration.CheckOutDateTime = DateTime.UtcNow;
-          userregistration.CheckOutDate = DateTime.UtcNow.ToString("yyyyMMdd");
-          userregistration.CheckOutTime = int.Parse(DateTime.UtcNow.ToString("HHmm"));
+          userregistration.CheckOutDateTime = DateTime.Now;
+          userregistration.CheckOutDate = Utility.GetStryyyyMMddNow();
+          userregistration.CheckOutTime = int.Parse(Utility.GetStrHHmmNow());
           userregistration.IsCheckOut = '1';
           userregistration.CheckOutBy = urIn.CheckOutBy;
           await _userregistrations.ReplaceOneAsync(
             ur => ur.SessionId == urIn.SessionId
             && ur.UserId == urIn.UserId
-            && ur.CheckInDate == DateTime.UtcNow.ToString("yyyyMMdd")
+            && ur.CheckInDate == Utility.GetStryyyyMMddNow()
             , userregistration);
 
           var session = await _sessions.Find<Session>(w => w.SessionId == userregistration.SessionId).FirstOrDefaultAsync();
-          CultureInfo enUS = new CultureInfo("en-US");
-          DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
-          if (session != null && session.EndDateTime > EndDay)
+          if (session != null && session.EndDateTime.ToLocalTime() > Utility.GetEndDay())
           {
             responseMsg = "Don't forget to join the remaining days.";
           }
@@ -190,10 +190,6 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
     public async Task<List<SessionMobile>> GetSessionTodayForMobileByUserId(string userId)
     {
-      CultureInfo enUS = new CultureInfo("en-US");
-      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
-      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
-
       List<SessionMobile> sessionMobiles = new List<SessionMobile>();
       var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == userId).ToListAsync();
 
@@ -202,13 +198,13 @@ namespace Ema.IjoinsChkInOut.Api.Services
         var session = await _sessions.Find<Session>(w =>
                w.IsCancel == '0'
             && w.SessionId == su.SessionId
-            && w.StartDateTime <= EndDay
-            && w.EndDateTime >= StartDay
+            && w.StartDateTime <= Utility.GetEndDay()
+            && w.EndDateTime >= Utility.GetStartDay()
         ).FirstOrDefaultAsync();
 
         if (session != null)
         {
-          await GenSessionsForDisplay(sessionMobiles, su, session);
+          await GenSessionsTodayForDisplay(sessionMobiles, su, session);
         }
       }
 
@@ -217,8 +213,6 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
     public async Task<List<SessionMobile>> GetSessionSevendayForMobileByUserId(string userId)
     {
-      CultureInfo enUS = new CultureInfo("en-US");
-      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
       DateTime nextSevenDate = DateTime.Now.AddDays(7);
 
       List<SessionMobile> sessionMobiles = new List<SessionMobile>();
@@ -229,68 +223,151 @@ namespace Ema.IjoinsChkInOut.Api.Services
         var session = await _sessions.Find<Session>(w =>
                w.IsCancel == '0'
             && w.SessionId == su.SessionId
-            && (w.StartDateTime > EndDay && w.StartDateTime <= nextSevenDate)
+            && (w.StartDateTime > Utility.GetEndDay() && w.StartDateTime <= nextSevenDate)
         ).FirstOrDefaultAsync();
 
         if (session != null)
         {
-          await GenSessionsForDisplay(sessionMobiles, su, session);
+          GenSessionsSevendayForDisplay(sessionMobiles, su, session);
         }
       }
 
       return sessionMobiles.OrderBy(o => o.StartDateTime).ThenBy(o => o.SessionId).ToList();
     }
 
-    private async Task<List<SessionMobile>> GenSessionsForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
+    private async Task<List<SessionMobile>> GenSessionsTodayForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
     {
       var segment = await _segments.Find<Segment>(
         w => w.SessionId == s.SessionId &&
-          w.StartDate == DateTime.Now.ToString("yyyyMMdd") &&
-          w.EndDate == DateTime.Now.ToString("yyyyMMdd")
+          w.StartDate == Utility.GetStryyyyMMddNow() &&
+          w.EndDate == Utility.GetStryyyyMMddNow()
         ).FirstOrDefaultAsync();
 
-      var userRegistration = await _userregistrations.Find<UserRegistration>(
+
+      if (segment != null)
+      {
+        var userRegistration = await _userregistrations.Find<UserRegistration>(
         w => w.SessionId == su.SessionId
         && w.UserId == su.UserId
         && (
-            w.CheckInDate == DateTime.Now.ToString("yyyyMMdd")
-         || w.CheckOutDate == DateTime.Now.ToString("yyyyMMdd")
+            w.CheckInDate == Utility.GetStryyyyMMddNow()
+         || w.CheckOutDate == Utility.GetStryyyyMMddNow()
            )
         ).FirstOrDefaultAsync();
+
+        SessionMobile sessionMobile = new SessionMobile();
+        sessionMobile.UserId = su.UserId;
+        sessionMobile.SessionId = su.SessionId;
+        if (userRegistration != null
+          &&
+          (
+             userRegistration.CheckInDateTime.ToLocalTime().ToString("yyyyMMdd") == Utility.GetStryyyyMMddNow()
+          || userRegistration.CheckOutDateTime.ToLocalTime().ToString("yyyyMMdd") == Utility.GetStryyyyMMddNow()
+          )
+        )
+        {
+          sessionMobile.IsCheckIn = userRegistration.IsCheckIn;
+          sessionMobile.IsCheckOut = userRegistration.IsCheckOut;
+          sessionMobile.CheckInDateTime = userRegistration.CheckInDateTime;
+          sessionMobile.CheckOutDateTime = userRegistration.CheckOutDateTime;
+          sessionMobile.CheckInBy = userRegistration.CheckInBy;
+          sessionMobile.CheckOutBy = userRegistration.CheckOutBy;
+        }
+
+        if (
+            DateTime.Now >= segment.StartDateTime.ToLocalTime().AddHours(-2)
+            && int.Parse(Utility.GetStrHHmmNow()) >= int.Parse(segment.StartDateTime.ToLocalTime().AddHours(-2).ToString("HHmm"))
+          )
+        {
+          sessionMobile.CanCheckInOut = '1';
+        }
+        else
+        {
+          sessionMobile.CanCheckInOut = '0';
+        }
+
+
+        sessionMobile.CourseId = s.CourseId;
+        sessionMobile.CourseName = s.CourseName;
+        sessionMobile.CourseNameTh = s.CourseNameTh;
+        sessionMobile.SessionName = s.SessionName;
+
+        sessionMobile.StartDateTime = s.StartDateTime;
+        sessionMobile.EndDateTime = s.EndDateTime;
+
+        if (segment != null)
+        {
+          sessionMobile.SegmentStartDateTime = segment.StartDateTime;
+          sessionMobile.SegmentEndDateTime = segment.EndDateTime;
+        }
+
+        sessionMobile.CourseOwnerEmail = s.CourseOwnerEmail;
+        sessionMobile.CourseOwnerContactNo = s.CourseOwnerContactNo;
+
+
+        if (segment != null)
+        {
+          sessionMobile.Venue = segment.Venue;
+          sessionMobile.SegmentName = segment.SegmentName;
+        }
+        else
+        {
+          sessionMobile.Venue = s.Venue;
+        }
+
+
+        sessionMobile.Instructor = s.Instructor;
+        sessionMobile.CourseCreditHoursInit = s.CourseCreditHoursInit;
+        sessionMobile.PassingCriteriaExceptionInit = s.PassingCriteriaExceptionInit;
+        sessionMobile.CourseCreditHours = s.CourseCreditHours;
+        sessionMobile.PassingCriteriaException = s.PassingCriteriaException;
+        sessionMobile.IsCancel = s.IsCancel;
+
+        sessionMobiles.Add(sessionMobile);
+      }
+      else
+      {
+        // รอถามคุณก้อย ว่า กรณี Script วันทำอย่างไร
+
+        //SessionMobile sessionMobile = new SessionMobile();
+        //sessionMobile.UserId = su.UserId;
+        //sessionMobile.SessionId = su.SessionId;
+        //sessionMobile.CanCheckInOut = '0';
+        //sessionMobile.CourseId = s.CourseId;
+        //sessionMobile.CourseName = s.CourseName;
+        //sessionMobile.CourseNameTh = s.CourseNameTh;
+        //sessionMobile.SessionName = s.SessionName;
+
+        //sessionMobile.StartDateTime = s.StartDateTime;
+        //sessionMobile.EndDateTime = s.EndDateTime;
+
+        //sessionMobile.CourseOwnerEmail = s.CourseOwnerEmail;
+        //sessionMobile.CourseOwnerContactNo = s.CourseOwnerContactNo;
+
+        //sessionMobile.Venue = s.Venue;
+
+        //sessionMobile.Instructor = s.Instructor;
+        //sessionMobile.CourseCreditHoursInit = s.CourseCreditHoursInit;
+        //sessionMobile.PassingCriteriaExceptionInit = s.PassingCriteriaExceptionInit;
+        //sessionMobile.CourseCreditHours = s.CourseCreditHours;
+        //sessionMobile.PassingCriteriaException = s.PassingCriteriaException;
+        //sessionMobile.IsCancel = s.IsCancel;
+
+        //sessionMobiles.Add(sessionMobile);
+      }
+
+
+      return sessionMobiles;
+    }
+
+    private List<SessionMobile> GenSessionsSevendayForDisplay(List<SessionMobile> sessionMobiles, SessionUser su, Session s)
+    {
 
       SessionMobile sessionMobile = new SessionMobile();
       sessionMobile.UserId = su.UserId;
       sessionMobile.SessionId = su.SessionId;
-      if (userRegistration != null
-        &&
-        (
-           userRegistration.CheckInDateTime.ToString("yyyyMMdd") == DateTime.Now.ToString("yyyyMMdd")
-        || userRegistration.CheckOutDateTime.ToString("yyyyMMdd") == DateTime.Now.ToString("yyyyMMdd")
-        )
-      )
-      {
-        sessionMobile.IsCheckIn = userRegistration.IsCheckIn;
-        sessionMobile.IsCheckOut = userRegistration.IsCheckOut;
-        sessionMobile.CheckInDateTime = userRegistration.CheckInDateTime;
-        sessionMobile.CheckOutDateTime = userRegistration.CheckOutDateTime;
-        sessionMobile.CheckInBy = userRegistration.CheckInBy;
-        sessionMobile.CheckOutBy = userRegistration.CheckOutBy;
-      }
 
-      if (
-          DateTime.UtcNow >= s.StartDateTime.AddHours(-2) 
-          //&& DateTime.UtcNow <= s.EndDateTime.AddHours(2) 
-          && int.Parse(DateTime.UtcNow.ToString("HHmm")) >= int.Parse(s.StartDateTime.AddHours(-2).ToString("HHmm")) 
-          //&& int.Parse(DateTime.UtcNow.ToString("HHmm")) <= int.Parse(s.EndDateTime.AddHours(2).ToString("HHmm"))
-        )
-      {
-        sessionMobile.CanCheckInOut = '1';
-      }
-      else
-      {
-        sessionMobile.CanCheckInOut = '0';
-      }
-
+      sessionMobile.CanCheckInOut = '0';
 
       sessionMobile.CourseId = s.CourseId;
       sessionMobile.CourseName = s.CourseName;
@@ -301,16 +378,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
       sessionMobile.CourseOwnerEmail = s.CourseOwnerEmail;
       sessionMobile.CourseOwnerContactNo = s.CourseOwnerContactNo;
 
-
-      if (segment != null)
-      {
-        sessionMobile.Venue = segment.Venue;
-      }
-      else
-      {
-        sessionMobile.Venue = s.Venue;
-      }
-
+      sessionMobile.Venue = s.Venue;
 
       sessionMobile.Instructor = s.Instructor;
       sessionMobile.CourseCreditHoursInit = s.CourseCreditHoursInit;

@@ -349,20 +349,20 @@ namespace Ema.Ijoins.Api.Services
             IsCancel = '0'
           });
 
-          List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.SessionId == ts.SessionId).ToListAsync();
-          foreach (TbmSegment se in tbmSegments)
+          List<VSegmentGenQr> tbmSegments = await _context.VSegmentGenQrs.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+          foreach (VSegmentGenQr se in tbmSegments)
           {
             _userIjoinsService.CreateSegment(new Segment
             {
               SessionId = se.SessionId,
-              SegmentNo = se.SegmentNo,
+              //SegmentNo = se.SegmentNo,
               SegmentName = se.SegmentName,
-              StartDate = se.StartDateTime.ToString("yyyyMMdd"),
-              EndDate = se.EndDateTime.ToString("yyyyMMdd"),
-              StartTime = se.StartDateTime.ToString("HHmm"),
-              EndTime = se.EndDateTime.ToString("HHmm"),
-              StartDateTime = se.StartDateTime,
-              EndDateTime = se.EndDateTime,
+              StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
+              EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
+              StartTime = se.StartDateTime.Value.ToString("HHmm"),
+              EndTime = se.EndDateTime.Value.ToString("HHmm"),
+              StartDateTime = se.StartDateTime.Value,
+              EndDateTime = se.EndDateTime.Value,
               Venue = se.Venue,
               Createdatetime = DateTime.Now
             });

@@ -13,6 +13,7 @@ namespace Ema.Ijoins.Api.EfModels
         public string SessionId { get; set; }
         public string SessionName { get; set; }
         public string Venue { get; set; }
+        public string SegmentName { get; set; }
         public DateTime? StartDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
     }

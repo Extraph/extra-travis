@@ -525,6 +525,7 @@ CREATE OR REPLACE VIEW public."v_Segment_Gen_Qr"
     ss.session_id,
     ss.session_name,
     sg.venue,
+    sg.segment_name,
     to_timestamp(((to_char(sg.intervalday, 'YYYY-MM-DD'::text) || ' '::text) || to_char(sg.start_date_time, 'HH24:MI:SS'::text)), 'YYYY-MM-DD HH24:MI:SS'::text) AS start_date_time,
     to_timestamp(((to_char(sg.intervalday, 'YYYY-MM-DD'::text) || ' '::text) || to_char(sg.end_date_time, 'HH24:MI:SS'::text)), 'YYYY-MM-DD HH24:MI:SS'::text) AS end_date_time
    FROM (( SELECT "TBM_SEGMENT".session_id,
@@ -533,6 +534,7 @@ CREATE OR REPLACE VIEW public."v_Segment_Gen_Qr"
             min("TBM_SEGMENT".start_date_time) AS start_date_time,
             max("TBM_SEGMENT".end_date_time) AS end_date_time,
             max("TBM_SEGMENT".venue) AS venue,
+            max("TBM_SEGMENT".segment_name) AS segment_name,
             generate_series(((min("TBM_SEGMENT".start_date_time))::date)::timestamp with time zone, ((max("TBM_SEGMENT".end_date_time))::date)::timestamp with time zone, '1 day'::interval) AS intervalday
            FROM "TBM_SEGMENT"
           GROUP BY "TBM_SEGMENT".session_id, "TBM_SEGMENT".start_date, "TBM_SEGMENT".end_date

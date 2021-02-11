@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Ema.IjoinsChkInOut.Api.Services;
 using Ema.IjoinsChkInOut.Api.Models;
+using Ema.IjoinsChkInOut.Api.Helpers;
 
 
 namespace Ema.IjoinsChkInOut.Api.Controllers
@@ -37,9 +38,9 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
     [HttpPost("CheckIn")]
     public async Task<ActionResult> CheckIn(UserRegistration urIn)
     {
-      urIn.CheckInDateTime = DateTime.UtcNow;
-      urIn.CheckInDate = DateTime.UtcNow.ToString("yyyyMMdd");
-      urIn.CheckInTime = int.Parse(DateTime.UtcNow.ToString("HHmm"));
+      urIn.CheckInDateTime = DateTime.Now;
+      urIn.CheckInDate = Utility.GetStryyyyMMddNow();
+      urIn.CheckInTime = int.Parse(Utility.GetStrHHmmNow());
       urIn.IsCheckIn = '1';
       
       return Ok(await _userIjoinsService.CheckIn(urIn));
@@ -48,9 +49,9 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
     [HttpPost("CheckOut")]
     public async Task<ActionResult> CheckOut(UserRegistration urIn)
     {
-      urIn.CheckOutDateTime = DateTime.UtcNow;
-      urIn.CheckOutDate = DateTime.UtcNow.ToString("yyyyMMdd");
-      urIn.CheckOutTime = int.Parse(DateTime.UtcNow.ToString("HHmm"));
+      urIn.CheckOutDateTime = DateTime.Now;
+      urIn.CheckOutDate = Utility.GetStryyyyMMddNow();
+      urIn.CheckOutTime = int.Parse(Utility.GetStrHHmmNow());
       urIn.IsCheckOut = '1';
       
       return Ok(await _userIjoinsService.CheckOut(urIn));
