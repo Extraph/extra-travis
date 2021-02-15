@@ -68,7 +68,7 @@ namespace Ema.Ijoins.Api.Controllers
         {
           return NotFound();
         }
-        else 
+        else
         {
           throw;
         }
