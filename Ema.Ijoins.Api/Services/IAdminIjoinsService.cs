@@ -29,6 +29,8 @@ namespace Ema.Ijoins.Api.Services
     Task<object> DeleteParticipant(TbmSessionUser tbmSessionUser);
     bool TbmSessionUsersExists(string SessionId, string UserId);
     bool TbmSessionExists(string SessionId);
+
+    Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession);
     Task<List<ModelReport>> GetReport(TbmSession tbmSession);
   }
 
@@ -685,25 +687,32 @@ namespace Ema.Ijoins.Api.Services
     }
 
 
+    public async Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession)
+    {
+      CultureInfo enUS = new CultureInfo("en-US");
+      DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
+
+      var tbmSessions = await _context.TbmSessions
+        .Where(
+                w => 
+                //w.EndDateTime >= StartDay && 
+                w.SessionId.Contains(tbmSession.SessionId)
+              )
+        .OrderByDescending(o => o.StartDateTime).ToListAsync();
+
+      return tbmSessions;
+    }
+
+
     public async Task<List<ModelReport>> GetReport(TbmSession tbmSession)
     {
-      //CultureInfo enUS = new CultureInfo("en-US");
-      //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
-
-
       var sessionData = await _context.TbmSessions
           .Where(
                  w => w.SessionId == tbmSession.SessionId
                 )
           .FirstOrDefaultAsync();
 
-      //var segmentData = await _context.TbmSegments
-      //    .Where(
-      //           w => w.SessionId == tbmSession.SessionId
-      //          ).OrderBy(o => o.StartDateTime).ToListAsync();
-
       var segmentData = await _context.VSegmentGenQrs.Where(w => w.SessionId == tbmSession.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
-
 
       var tbmSessionUsers = await _context.TbmSessionUsers
           .Where(
@@ -711,116 +720,131 @@ namespace Ema.Ijoins.Api.Services
                 )
           .OrderBy(o => o.UserId).ToListAsync();
 
-
       List<ModelReport> reportList = new List<ModelReport>();
-      int row = 0;
+      int row = 1;
       foreach (TbmSessionUser su in tbmSessionUsers)
       {
 
-
-        string TrainingStatus = "";
+        string SegmentTrainingStatus = "";
+        string CurrentTrainingStatus = "";
+        string FinalTrainingStatus = "";
         DateTime CheckInDateTime = DateTime.MinValue;
         DateTime CheckOutDateTime = DateTime.MinValue;
         var userRegistrations = await _userIjoinsService.GetUserRegistration(new UserRegistration { SessionId = su.SessionId, UserId = su.UserId });
 
-        if (su.RegistrationStatus == "Cancelled")
+        List<ModelSegmentReport> segmentReports = new List<ModelSegmentReport>();
+
+        double realMinuteAttend = 0;
+        double percentAttend = 0;
+        foreach (VSegmentGenQr sg in segmentData)
         {
-          TrainingStatus = "Cancelled";
-        }
-        else if (userRegistrations.Count == 0)
-        {
-          TrainingStatus = "No Show";
-        }
-        else
-        {
-          //% การเข้าอบรมของพนักงาน = (จำนวนชั่วโมงอบรมจริง / จำนวนชั่วโมงอบรมที่วางแผนไว้(Credit hours)) * 100
-          double realMinuteAttend = 0;
-          double percentAttend = 0;
-          foreach (VSegmentGenQr sg in segmentData)
+          var userRegis = userRegistrations.Where(w => w.CheckInDate == sg.StartDateTime.Value.ToString("yyyyMMdd")).FirstOrDefault();
+          if (userRegis != null)
           {
-            var userRegis = userRegistrations.Where(w => w.CheckInDate == sg.StartDateTime.Value.ToString("yyyyMMdd")).FirstOrDefault();
-            if (userRegis != null)
+
+            segmentReports.Add(new ModelSegmentReport
             {
-              if (userRegis.CheckInDateTime.ToLocalTime() < sg.StartDateTime) //เหลือคิดเวลาตาม Segment
-              {
-                CheckInDateTime = sg.StartDateTime.Value;
-              }
-              else
-              {
-                CheckInDateTime = userRegis.CheckInDateTime.ToLocalTime();
-              }
+              CheckInDateTime = userRegis.CheckInDateTime.ToLocalTime().ToString("HH:mm"),
+              CheckOutDateTime = userRegis.CheckOutDateTime.ToLocalTime().ToString("HH:mm"),
+              StartDateTime = sg.StartDateTime.Value.ToString("dd'/'MM'/'yyyy"),
+              EndDateTime = sg.EndDateTime.Value.ToString("dd'/'MM'/'yyyy")
+            });
 
-              if (userRegis.CheckOutDateTime.ToLocalTime() > sg.EndDateTime)
-              {
-                CheckOutDateTime = sg.EndDateTime.Value;
-              }
-              else
-              {
-                CheckOutDateTime = userRegis.CheckOutDateTime.ToLocalTime();
-              }
-
-              if (userRegis.CheckInDateTime != DateTime.MinValue && userRegis.CheckOutDateTime != DateTime.MinValue)
-              {
-                TimeSpan ts = CheckOutDateTime - CheckInDateTime;
-                if (ts.TotalMinutes > 0)
-                  realMinuteAttend += ts.TotalMinutes;
-              }
+            if (userRegis.CheckInDateTime.ToLocalTime() < sg.StartDateTime)
+            {
+              CheckInDateTime = sg.StartDateTime.Value;
             }
-          }
-          percentAttend = (realMinuteAttend / (double.Parse(sessionData.CourseCreditHours) * 60)) * 100;
+            else
+            {
+              CheckInDateTime = userRegis.CheckInDateTime.ToLocalTime();
+            }
 
-          //Completed(ผ่านการอบรม) = % การเข้าอบรมของพนักงาน >= % Passing Criteria
-          //Incomplete(ไม่ผ่านการอบรม) = % การเข้าอบรมของพนักงาน < % Passing Criteria หรือ Check in/out ไม่ครบ
-          if (percentAttend >= (double.Parse(sessionData.PassingCriteriaException) * 100))
-          {
-            TrainingStatus = "Completed";
+            if (userRegis.CheckOutDateTime.ToLocalTime() > sg.EndDateTime)
+            {
+              CheckOutDateTime = sg.EndDateTime.Value;
+            }
+            else
+            {
+              CheckOutDateTime = userRegis.CheckOutDateTime.ToLocalTime();
+            }
+
+            if (userRegis.CheckInDateTime != DateTime.MinValue && userRegis.CheckOutDateTime != DateTime.MinValue)
+            {
+              TimeSpan ts = CheckOutDateTime - CheckInDateTime;
+              if (ts.TotalMinutes > 0)
+                realMinuteAttend += ts.TotalMinutes;
+            }
           }
           else
           {
-            TrainingStatus = "Incompleted";
+            segmentReports.Add(new ModelSegmentReport
+            {
+              CheckInDateTime = "",
+              CheckOutDateTime = "",
+              StartDateTime = sg.StartDateTime.Value.ToString("dd'/'MM'/'yyyy"),
+              EndDateTime = sg.EndDateTime.Value.ToString("dd'/'MM'/'yyyy")
+            });
           }
         }
-        if (CheckInDateTime != DateTime.MinValue && CheckOutDateTime == DateTime.MinValue && TrainingStatus == "")
+        percentAttend = (realMinuteAttend / (double.Parse(sessionData.CourseCreditHours) * 60)) * 100;
+        if (percentAttend >= (double.Parse(sessionData.PassingCriteriaException) * 100))
         {
-          TrainingStatus = "Incompleted";
-        }
-
-        string dateShow = "";
-        if(CheckInDateTime == DateTime.MinValue)
-        {
-          dateShow = "";
-        }
-        else if (CheckInDateTime.ToString("dd'/'MM'/'yyyy") == CheckOutDateTime.ToString("dd'/'MM'/'yyyy"))
-        {
-          dateShow = CheckInDateTime.ToString("dd'/'MM'/'yyyy");
+          SegmentTrainingStatus = "Completed";
         }
         else
         {
-          dateShow = CheckInDateTime.ToString("dd'/'MM'/'yyyy") + " - " + CheckOutDateTime.ToString("dd'/'MM'/'yyyy");
+          SegmentTrainingStatus = "Incompleted";
         }
 
-        reportList.Add(new ModelReport
+        int isRowSpan = 0;
+        foreach (ModelSegmentReport segmentReport in segmentReports)
         {
-          No = ++row,
-          UserId = su.UserId,
-          UserNameSurname = "",
-          UserDepartment = "",
-          UserCompany = "",
+          isRowSpan++;
 
-          Date = dateShow,
-          CheckInTime = CheckInDateTime != DateTime.MinValue ? CheckInDateTime.ToLocalTime().ToString("HH:mm") : "",
-          CheckOutTime = CheckOutDateTime != DateTime.MinValue ? CheckOutDateTime.ToLocalTime().ToString("HH:mm") : "",
-          TrainingStatus = TrainingStatus,
+          if (su.RegistrationStatus == "Cancelled")
+          {
+            FinalTrainingStatus = "Cancelled";
+            CurrentTrainingStatus = su.RegistrationStatus;
+          }
+          else if (segmentReport.CheckInDateTime == "" && segmentReport.CheckOutDateTime == "")
+          {
+            FinalTrainingStatus = "No Show";
+            CurrentTrainingStatus = su.RegistrationStatus;
+          }
+          else if (segmentReport.CheckInDateTime != "" && segmentReport.CheckOutDateTime == "")
+          {
+            FinalTrainingStatus = "Incompleted";
+            CurrentTrainingStatus = "Check-in";
+          }
+          else if (segmentReport.CheckInDateTime != "" && segmentReport.CheckOutDateTime != "")
+          {
+            FinalTrainingStatus = SegmentTrainingStatus;
+            CurrentTrainingStatus = "Check-out";
+          }
+          else
+          {
+            FinalTrainingStatus = SegmentTrainingStatus;
+          }
 
+          CultureInfo enUS = new CultureInfo("en-US");
+          DateTime.TryParseExact(sessionData.EndDateTime.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
 
-          CheckInDateTime = CheckInDateTime,
-          //CheckInDate = "",
-          CheckOutDateTime = CheckOutDateTime,
-          //CheckOutDate = "",
+          reportList.Add(new ModelReport
+          {
+            No = row,
+            UserId = su.UserId,
+            UserNameSurname = "",
+            UserDepartment = "",
+            UserCompany = "",
+            Date = segmentReport.StartDateTime,
+            CheckInTime = segmentReport.CheckInDateTime,
+            CheckOutTime = segmentReport.CheckOutDateTime,
+            TrainingStatus = DateTime.Now > EndDay ? FinalTrainingStatus : CurrentTrainingStatus,
+            Segments = isRowSpan == 1 ? segmentReports : null
+          });
+        }
 
-          CheckInBy = "",
-          CheckOutBy = "",
-        });
+        row++;
       }
 
       return reportList;

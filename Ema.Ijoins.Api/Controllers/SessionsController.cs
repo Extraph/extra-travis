@@ -92,6 +92,19 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
 
+    [HttpPost("ReportSessions")]
+    public async Task<ActionResult<List<TbmSession>>> GetReportSessions(TbmSession tbmSession)
+    {
+      var tbmSessions = await _ijoinsService.GetReportSessions(tbmSession);
+
+      if (tbmSessions == null)
+      {
+        return NotFound();
+      }
+
+      return tbmSessions;
+    }
+
     [HttpPost("Report")]
     public async Task<ActionResult<List<ModelReport>>> GetReport(TbmSession tbmSession)
     {

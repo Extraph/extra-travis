@@ -48,14 +48,15 @@ namespace Ema.Ijoins.Api.Models
     public string CheckOutTime { get; set; }
     public string TrainingStatus { get; set; }
 
+    public List<ModelSegmentReport> Segments { get; set; }
+  }
 
-    public DateTime CheckInDateTime { get; set; }
-    public string CheckInDate { get; set; }
-    public DateTime CheckOutDateTime { get; set; }
-    public string CheckOutDate { get; set; }
-
-    public string CheckInBy { get; set; }
-    public string CheckOutBy { get; set; }
+  public class ModelSegmentReport
+  {
+    public string StartDateTime { get; set; }
+    public string EndDateTime { get; set; }
+    public string CheckInDateTime { get; set; }
+    public string CheckOutDateTime { get; set; }
   }
 
   public class ModelNextSixDayDash

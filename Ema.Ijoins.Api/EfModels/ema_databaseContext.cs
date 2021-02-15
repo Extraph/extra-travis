@@ -19,14 +19,18 @@ namespace Ema.Ijoins.Api.EfModels
 
         public virtual DbSet<TbKlcDataMaster> TbKlcDataMasters { get; set; }
         public virtual DbSet<TbKlcDataMasterHi> TbKlcDataMasterHis { get; set; }
+        public virtual DbSet<TbUserCompany> TbUserCompanies { get; set; }
+        public virtual DbSet<TbmCompany> TbmCompanies { get; set; }
         public virtual DbSet<TbmCourse> TbmCourses { get; set; }
         public virtual DbSet<TbmCourseType> TbmCourseTypes { get; set; }
         public virtual DbSet<TbmKlcFileImport> TbmKlcFileImports { get; set; }
         public virtual DbSet<TbmRegistrationStatus> TbmRegistrationStatuses { get; set; }
+        public virtual DbSet<TbmRole> TbmRoles { get; set; }
         public virtual DbSet<TbmSegment> TbmSegments { get; set; }
         public virtual DbSet<TbmSession> TbmSessions { get; set; }
         public virtual DbSet<TbmSessionUser> TbmSessionUsers { get; set; }
         public virtual DbSet<TbmSessionUserHi> TbmSessionUserHis { get; set; }
+        public virtual DbSet<TbmUser> TbmUsers { get; set; }
         public virtual DbSet<VSegmentGenQr> VSegmentGenQrs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -230,6 +234,50 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasConstraintName("fk_tbm_klc_file_import_id_his");
             });
 
+            modelBuilder.Entity<TbUserCompany>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.CompanyId })
+                    .HasName("TB_USER_COMPANY_pkey");
+
+                entity.ToTable("TB_USER_COMPANY");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.CompanyId).HasColumnName("company_id");
+
+                entity.Property(e => e.CreateBy).HasColumnName("create_by");
+
+                entity.Property(e => e.CreateDatetime)
+                    .HasColumnName("create_datetime")
+                    .HasDefaultValueSql("now()");
+            });
+
+            modelBuilder.Entity<TbmCompany>(entity =>
+            {
+                entity.HasKey(e => e.CompanyId)
+                    .HasName("TBM_COMPANY_pkey");
+
+                entity.ToTable("TBM_COMPANY");
+
+                entity.Property(e => e.CompanyId).HasColumnName("company_id");
+
+                entity.Property(e => e.CompanyCode)
+                    .IsRequired()
+                    .HasColumnName("company_code");
+
+                entity.Property(e => e.CreateBy).HasColumnName("create_by");
+
+                entity.Property(e => e.CreateDatetime)
+                    .HasColumnName("create_datetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
+
+                entity.Property(e => e.UpdateDatetime)
+                    .HasColumnName("update_datetime")
+                    .HasDefaultValueSql("now()");
+            });
+
             modelBuilder.Entity<TbmCourse>(entity =>
             {
                 entity.HasKey(e => e.CourseId)
@@ -319,6 +367,32 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.RegistrationStatus)
                     .IsRequired()
                     .HasColumnName("registration_status");
+            });
+
+            modelBuilder.Entity<TbmRole>(entity =>
+            {
+                entity.HasKey(e => e.RoleId)
+                    .HasName("TBM_ROLE_pkey");
+
+                entity.ToTable("TBM_ROLE");
+
+                entity.Property(e => e.RoleId).HasColumnName("role_id");
+
+                entity.Property(e => e.CreateBy).HasColumnName("create_by");
+
+                entity.Property(e => e.CreateDatetime)
+                    .HasColumnName("create_datetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.RoleName)
+                    .IsRequired()
+                    .HasColumnName("role_name");
+
+                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
+
+                entity.Property(e => e.UpdateDatetime)
+                    .HasColumnName("update_datetime")
+                    .HasDefaultValueSql("now()");
             });
 
             modelBuilder.Entity<TbmSegment>(entity =>
@@ -520,6 +594,26 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasConstraintName("fk_TBM_SESSION_HIS_id");
             });
 
+            modelBuilder.Entity<TbmUser>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("TBM_USER_pkey");
+
+                entity.ToTable("TBM_USER");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.CreateDatetime)
+                    .HasColumnName("create_datetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.RoleId).HasColumnName("role_id");
+
+                entity.Property(e => e.UserPassword)
+                    .IsRequired()
+                    .HasColumnName("user_password");
+            });
+
             modelBuilder.Entity<VSegmentGenQr>(entity =>
             {
                 entity.HasNoKey();
@@ -551,11 +645,15 @@ namespace Ema.Ijoins.Api.EfModels
 
             modelBuilder.HasSequence("TB_KLC_DATA_MASTER_id_seq");
 
+            modelBuilder.HasSequence("TBM_COMPANY_company_id_seq").HasMax(2147483647);
+
             modelBuilder.HasSequence("TBM_COURSE_TYPE_id_seq").HasMax(2147483647);
 
             modelBuilder.HasSequence("TBM_KLC_FILE_IMPORT_id_seq").HasMax(2147483647);
 
             modelBuilder.HasSequence("TBM_REGISTRATION_STATUS_id_seq").HasMax(2147483647);
+
+            modelBuilder.HasSequence("TBM_ROLE_role_id_seq").HasMax(2147483647);
 
             modelBuilder.HasSequence("TBM_SEGMENT_id_seq");
 

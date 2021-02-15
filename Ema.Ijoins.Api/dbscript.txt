@@ -33,9 +33,6 @@
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 
--- SEQUENCE: public.TBM_KLC_FILE_IMPORT_id_seq
-
--- DROP SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq";
 
 CREATE SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq"
     INCREMENT 1
@@ -47,10 +44,6 @@ CREATE SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq"
 ALTER SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq"
     OWNER TO ema_user;
 
--- SEQUENCE: public.TB_KLC_DATA_MASTER_id_seq
-
--- DROP SEQUENCE public."TB_KLC_DATA_MASTER_id_seq";
-
 CREATE SEQUENCE public."TB_KLC_DATA_MASTER_id_seq"
     INCREMENT 1
     START 1
@@ -60,11 +53,6 @@ CREATE SEQUENCE public."TB_KLC_DATA_MASTER_id_seq"
 
 ALTER SEQUENCE public."TB_KLC_DATA_MASTER_id_seq"
     OWNER TO ema_user;
-
-
--- SEQUENCE: public.TBM_COURSE_TYPE_id_seq
-
--- DROP SEQUENCE public."TBM_COURSE_TYPE_id_seq";
 
 CREATE SEQUENCE public."TBM_COURSE_TYPE_id_seq"
     INCREMENT 1
@@ -76,11 +64,6 @@ CREATE SEQUENCE public."TBM_COURSE_TYPE_id_seq"
 ALTER SEQUENCE public."TBM_COURSE_TYPE_id_seq"
     OWNER TO ema_user;
 
-
--- SEQUENCE: public.TBM_REGISTRATION_STATUS_id_seq
-
--- DROP SEQUENCE public."TBM_REGISTRATION_STATUS_id_seq";
-
 CREATE SEQUENCE public."TBM_REGISTRATION_STATUS_id_seq"
     INCREMENT 1
     START 1
@@ -91,11 +74,6 @@ CREATE SEQUENCE public."TBM_REGISTRATION_STATUS_id_seq"
 ALTER SEQUENCE public."TBM_REGISTRATION_STATUS_id_seq"
     OWNER TO ema_user;
 
-
--- SEQUENCE: public.TBM_SEGMENT_id_seq
-
--- DROP SEQUENCE public."TBM_SEGMENT_id_seq";
-
 CREATE SEQUENCE public."TBM_SEGMENT_id_seq"
     INCREMENT 1
     START 1
@@ -105,6 +83,103 @@ CREATE SEQUENCE public."TBM_SEGMENT_id_seq"
 
 ALTER SEQUENCE public."TBM_SEGMENT_id_seq"
     OWNER TO ema_user;
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
+CREATE SEQUENCE public."TBM_COMPANY_company_id_seq"
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public."TBM_COMPANY_company_id_seq"
+    OWNER TO ema_user;
+
+CREATE SEQUENCE public."TBM_ROLE_role_id_seq"
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public."TBM_ROLE_role_id_seq"
+    OWNER TO ema_user;
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
+CREATE TABLE public."TBM_COMPANY"
+(
+    company_id integer NOT NULL DEFAULT nextval('"TBM_COMPANY_company_id_seq"'::regclass),
+    company_code text COLLATE pg_catalog."default" NOT NULL,
+    create_by text COLLATE pg_catalog."default",
+    create_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    update_by text COLLATE pg_catalog."default",
+    update_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_COMPANY_pkey" PRIMARY KEY (company_id),
+    CONSTRAINT uni_company_code UNIQUE (company_code)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_COMPANY"
+    OWNER to ema_user;
+
+
+CREATE TABLE public."TBM_ROLE"
+(
+    role_id integer NOT NULL DEFAULT nextval('"TBM_ROLE_role_id_seq"'::regclass),
+    role_name text COLLATE pg_catalog."default" NOT NULL,
+    create_by text COLLATE pg_catalog."default",
+    create_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    update_by text COLLATE pg_catalog."default",
+    update_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_ROLE_pkey" PRIMARY KEY (role_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_ROLE"
+    OWNER to ema_user;
+
+    INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Super Admin');
+    INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Admin');
+    INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Instructor'); 
+    
+
+
+CREATE TABLE public."TBM_USER"
+(
+    user_id text COLLATE pg_catalog."default" NOT NULL,
+    user_password text COLLATE pg_catalog."default" NOT NULL,
+    role_id integer NOT NULL,
+    create_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TBM_USER_pkey" PRIMARY KEY (user_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TBM_USER"
+    OWNER to ema_user;
+
+
+CREATE TABLE public."TB_USER_COMPANY"
+(
+    user_id integer NOT NULL,
+    company_id integer NOT NULL,
+    create_by text COLLATE pg_catalog."default",
+    create_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT "TB_USER_COMPANY_pkey" PRIMARY KEY (user_id, company_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TB_USER_COMPANY"
+    OWNER to ema_user;
 
 
 ------------------------------------------------------------------------------------
