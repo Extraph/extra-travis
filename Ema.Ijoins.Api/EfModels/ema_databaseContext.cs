@@ -236,12 +236,9 @@ namespace Ema.Ijoins.Api.EfModels
 
             modelBuilder.Entity<TbUserCompany>(entity =>
             {
-                entity.HasKey(e => new { e.UserId, e.CompanyId })
-                    .HasName("TB_USER_COMPANY_pkey");
-
                 entity.ToTable("TB_USER_COMPANY");
 
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.CompanyId).HasColumnName("company_id");
 
@@ -250,6 +247,10 @@ namespace Ema.Ijoins.Api.EfModels
                 entity.Property(e => e.CreateDatetime)
                     .HasColumnName("create_datetime")
                     .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id");
             });
 
             modelBuilder.Entity<TbmCompany>(entity =>
@@ -258,6 +259,9 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasName("TBM_COMPANY_pkey");
 
                 entity.ToTable("TBM_COMPANY");
+
+                entity.HasIndex(e => e.CompanyCode, "uni_company_code")
+                    .IsUnique();
 
                 entity.Property(e => e.CompanyId).HasColumnName("company_id");
 
@@ -609,9 +613,13 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.RoleId).HasColumnName("role_id");
 
-                entity.Property(e => e.UserPassword)
-                    .IsRequired()
-                    .HasColumnName("user_password");
+                entity.Property(e => e.UserCompany).HasColumnName("user_company");
+
+                entity.Property(e => e.UserName).HasColumnName("user_name");
+
+                entity.Property(e => e.UserOrganization).HasColumnName("user_organization");
+
+                entity.Property(e => e.UserPassword).HasColumnName("user_password");
             });
 
             modelBuilder.Entity<VSegmentGenQr>(entity =>
@@ -644,6 +652,8 @@ namespace Ema.Ijoins.Api.EfModels
             });
 
             modelBuilder.HasSequence("TB_KLC_DATA_MASTER_id_seq");
+
+            modelBuilder.HasSequence("TB_USER_COMPANY_id_seq").HasMax(2147483647);
 
             modelBuilder.HasSequence("TBM_COMPANY_company_id_seq").HasMax(2147483647);
 

@@ -26,3 +26,4 @@
  DROP SEQUENCE public."TBM_SEGMENT_id_seq";
  DROP SEQUENCE public."TBM_COMPANY_company_id_seq";
  DROP SEQUENCE public."TBM_ROLE_role_id_seq";
+ DROP SEQUENCE public."TB_USER_COMPANY_id_seq";

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Ema.Ijoins.Api.EfModels;
 using Ema.Ijoins.Api.Services;
 using Ema.Ijoins.Api.Models;
+using Ema.Ijoins.Api.Helpers;
 
 namespace Ema.Ijoins.Api
 {
@@ -37,6 +38,8 @@ namespace Ema.Ijoins.Api
 
       services.Configure<UserIJoinDatabaseSettings>(Configuration.GetSection(nameof(UserIJoinDatabaseSettings)));
 
+      services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
       services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
 
       services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
@@ -44,6 +47,8 @@ namespace Ema.Ijoins.Api
       services.AddScoped<UserIjoinsService>();
 
       services.AddScoped<IAdminIjoinsService, AdminIjoinsService>();
+
+      services.AddScoped<IUserService, UserService>();
 
       services.Configure<FormOptions>(options =>
       {
@@ -72,7 +77,9 @@ namespace Ema.Ijoins.Api
 
       app.UseRouting();
 
-      app.UseAuthorization();
+      //app.UseAuthorization();
+
+      app.UseMiddleware<JwtMiddleware>();
 
       app.UseEndpoints(endpoints =>
       {

@@ -3,11 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ema.Ijoins.Api.Models
 {
   public class Model
   {
+  }
+
+  public class AuthenticateRequest
+  {
+    [Required]
+    public string Username { get; set; }
+
+    [Required]
+    public string Password { get; set; }
+  }
+  public class AuthenticateResponse
+  {
+    public int Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Username { get; set; }
+    public string Token { get; set; }
+
+
+    public AuthenticateResponse(User user, string token)
+    {
+      Id = user.Id;
+      FirstName = user.FirstName;
+      LastName = user.LastName;
+      Username = user.Username;
+      Token = token;
+    }
   }
   public class ModelSessionsQR
   {
