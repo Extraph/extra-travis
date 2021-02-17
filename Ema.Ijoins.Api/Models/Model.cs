@@ -17,7 +17,7 @@ namespace Ema.Ijoins.Api.Models
     [Required]
     public string Username { get; set; }
 
-    [Required]
+    //[Required]
     public string Password { get; set; }
   }
   public class AuthenticateResponse

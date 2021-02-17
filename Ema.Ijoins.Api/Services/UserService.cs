@@ -36,7 +36,7 @@ namespace Ema.Ijoins.Api.Services
 
     public AuthenticateResponse Authenticate(AuthenticateRequest model)
     {
-      var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+      var user = _users.SingleOrDefault(x => x.Username == model.Username);
 
       // return null if user not found
       if (user == null) return null;

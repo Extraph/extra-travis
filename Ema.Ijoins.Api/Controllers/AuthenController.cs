@@ -5,7 +5,7 @@ using Ema.Ijoins.Api.Services;
 namespace Ema.Ijoins.Api.Controllers
 {
   [ApiController]
-  [Route("[controller]")]
+  [Route("api/[controller]")]
   public class AuthenController : ControllerBase
   {
     private IUserService _userService;
@@ -18,12 +18,20 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("authenticate")]
     public IActionResult Authenticate(AuthenticateRequest model)
     {
-      var response = _userService.Authenticate(model);
+      try
+      {
+        var response = _userService.Authenticate(model);
 
-      if (response == null)
-        return BadRequest(new { message = "Username or password is incorrect" });
+        if (response == null)
+          return Ok(new { isauthen = false, message = "Username or password is incorrect.", response });
 
-      return Ok(response);
+        return Ok(new { isauthen = true, message = "Success", response });
+      }
+      catch (System.Exception ex)
+      {
+        return Ok(new { isauthen = false, message = string.Format("Service Issue : {0}", ex.Message) });
+      }
+
     }
 
     [Authorize]
