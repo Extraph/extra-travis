@@ -17,24 +17,22 @@ namespace Ema.Ijoins.Api.Models
     [Required]
     public string Username { get; set; }
 
-    //[Required]
+    [Required]
     public string Password { get; set; }
   }
   public class AuthenticateResponse
   {
-    public int Id { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Username { get; set; }
+    public string UserId { get; set; }
+    public string UserName { get; set; }
+    public int RoleId { get; set; }
     public string Token { get; set; }
 
 
-    public AuthenticateResponse(User user, string token)
+    public AuthenticateResponse(TbmUser user, string token)
     {
-      Id = user.Id;
-      FirstName = user.FirstName;
-      LastName = user.LastName;
-      Username = user.Username;
+      UserId = user.UserId;
+      UserName = user.UserName;
+      RoleId = user.RoleId;
       Token = token;
     }
   }

@@ -12,7 +12,7 @@ namespace Ema.Ijoins.Api.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class UploadFileController : ControllerBase
+  public class UploadFileController : BaseController
   {
     private readonly IAdminIjoinsService _ijoinsService;
 

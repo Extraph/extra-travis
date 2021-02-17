@@ -9,6 +9,9 @@ using System.Text;
 using Ema.Ijoins.Api.Entities;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.Models;
+using Ema.Ijoins.Api.EfModels;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ema.Ijoins.Api.Services
 {
@@ -16,7 +19,7 @@ namespace Ema.Ijoins.Api.Services
   {
     AuthenticateResponse Authenticate(AuthenticateRequest model);
     IEnumerable<User> GetAll();
-    User GetById(int id);
+    TbmUser GetById(string UserId);
   }
 
   public class UserService : IUserService
@@ -27,16 +30,20 @@ namespace Ema.Ijoins.Api.Services
             new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
         };
 
+    private readonly ema_databaseContext _context;
     private readonly AppSettings _appSettings;
 
-    public UserService(IOptions<AppSettings> appSettings)
+    public UserService(ema_databaseContext context, IOptions<AppSettings> appSettings)
     {
+      _context = context;
       _appSettings = appSettings.Value;
     }
 
     public AuthenticateResponse Authenticate(AuthenticateRequest model)
     {
-      var user = _users.SingleOrDefault(x => x.Username == model.Username);
+      //var user = _users.SingleOrDefault(x => x.Username == model.Username);
+
+      var user = _context.TbmUsers.Where(w => w.UserId == model.Username).FirstOrDefault();
 
       // return null if user not found
       if (user == null) return null;
@@ -52,21 +59,21 @@ namespace Ema.Ijoins.Api.Services
       return _users;
     }
 
-    public User GetById(int id)
+    public TbmUser GetById(string UserId)
     {
-      return _users.FirstOrDefault(x => x.Id == id);
+      return _context.TbmUsers.Where(w => w.UserId == UserId).FirstOrDefault();
     }
 
     // helper methods
 
-    private string generateJwtToken(User user)
+    private string generateJwtToken(TbmUser user)
     {
       // generate token that is valid for 7 days
       var tokenHandler = new JwtSecurityTokenHandler();
       var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
       var tokenDescriptor = new SecurityTokenDescriptor
       {
-        Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+        Subject = new ClaimsIdentity(new[] { new Claim("id", user.UserId) }),
         Expires = DateTime.UtcNow.AddDays(7),
         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
       };

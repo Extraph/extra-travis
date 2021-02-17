@@ -11,7 +11,7 @@ namespace Ema.Ijoins.Api.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class RoleController : ControllerBase
+  public class RoleController : BaseController
   {
     private readonly ema_databaseContext _context;
 

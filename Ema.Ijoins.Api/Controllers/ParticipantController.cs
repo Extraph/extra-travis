@@ -14,7 +14,7 @@ namespace Ema.Ijoins.Api.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class ParticipantController : ControllerBase
+  public class ParticipantController : BaseController
   {
 
     private readonly IAdminIjoinsService _ijoinsService;
