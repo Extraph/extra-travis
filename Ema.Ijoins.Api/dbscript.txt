@@ -179,6 +179,8 @@ TABLESPACE pg_default;
 ALTER TABLE public."TBM_USER"
     OWNER to ema_user;
 
+    INSERT INTO public."TBM_USER"(user_id, role_id) VALUES ('7E020390', 1);
+
 
 CREATE TABLE public."TB_USER_COMPANY"
 (
@@ -411,6 +413,8 @@ CREATE TABLE public."TBM_SESSION"
 (
     file_id integer NOT NULL,
     course_type_id integer NOT NULL,
+    company_id integer NOT NULL,
+    company_code text COLLATE pg_catalog."default" NOT NULL,
     course_id text COLLATE pg_catalog."default" NOT NULL,
     course_name text COLLATE pg_catalog."default" NOT NULL,
     course_name_th text COLLATE pg_catalog."default",

@@ -27,9 +27,7 @@ namespace Ema.Ijoins.Api.Controllers
     {
       AssignUserAuthen();
 
-      string user = UserAuthen.UserId;
-
-      var tbmSessions = await _ijoinsService.GetSessions(tbmSession);
+      var tbmSessions = await _ijoinsService.GetSessions(tbmSession, UserAuthen.UserId);
 
       if (tbmSessions == null)
       {
@@ -42,7 +40,9 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("ToDayClass")]
     public async Task<ActionResult<List<TbmSession>>> ToDayClass(FetchSessions tbmSession)
     {
-      var tbmSessions = await _ijoinsService.GetToDayClass(tbmSession);
+      AssignUserAuthen();
+
+      var tbmSessions = await _ijoinsService.GetToDayClass(tbmSession, UserAuthen.UserId);
 
       if (tbmSessions == null)
       {
@@ -55,7 +55,9 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("SevenDayClass")]
     public async Task<ActionResult<List<TbmSession>>> SevenDayClass(TbmSession tbmSession)
     {
-      var tbmSessions = await _ijoinsService.GetSevenDayClass(tbmSession);
+      AssignUserAuthen();
+
+      var tbmSessions = await _ijoinsService.GetSevenDayClass(tbmSession, UserAuthen.UserId);
 
       if (tbmSessions == null)
       {
@@ -68,7 +70,9 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("NextSixDayDashs")]
     public async Task<ActionResult<List<ModelNextSixDayDash>>> NextSixDayDashs()
     {
-      var tbmSessions = await _ijoinsService.GetNextSixDayDashs();
+      AssignUserAuthen();
+
+      var tbmSessions = await _ijoinsService.GetNextSixDayDashs(UserAuthen.UserId);
 
       if (tbmSessions == null)
       {
@@ -99,7 +103,9 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("ReportSessions")]
     public async Task<ActionResult<List<TbmSession>>> GetReportSessions(TbmSession tbmSession)
     {
-      var tbmSessions = await _ijoinsService.GetReportSessions(tbmSession);
+      AssignUserAuthen();
+
+      var tbmSessions = await _ijoinsService.GetReportSessions(tbmSession, UserAuthen.UserId);
 
       if (tbmSessions == null)
       {
@@ -112,6 +118,7 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("Report")]
     public async Task<ActionResult<List<ModelReport>>> GetReport(TbmSession tbmSession)
     {
+      
       var tbmSessions = await _ijoinsService.GetReport(tbmSession);
 
       if (tbmSessions == null)

@@ -464,6 +464,12 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.SessionId).HasColumnName("session_id");
 
+                entity.Property(e => e.CompanyCode)
+                    .IsRequired()
+                    .HasColumnName("company_code");
+
+                entity.Property(e => e.CompanyId).HasColumnName("company_id");
+
                 entity.Property(e => e.CourseCreditHours).HasColumnName("course_credit_hours");
 
                 entity.Property(e => e.CourseCreditHoursInit).HasColumnName("course_credit_hours_init");

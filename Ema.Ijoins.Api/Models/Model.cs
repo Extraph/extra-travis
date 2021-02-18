@@ -12,6 +12,14 @@ namespace Ema.Ijoins.Api.Models
   {
   }
 
+  public class KlcFileImportRequest
+  {
+    public int Id { get; set; }
+    public string ImportType { get; set; }
+    public int CompanyId { get; set; }
+    public string CompanyCode { get; set; }
+  }
+
   public class AuthenticateRequest
   {
     [Required]

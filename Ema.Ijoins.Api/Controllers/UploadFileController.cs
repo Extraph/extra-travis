@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Services;
 
 namespace Ema.Ijoins.Api.Controllers
@@ -34,7 +34,7 @@ namespace Ema.Ijoins.Api.Controllers
     }
 
     [HttpPost("ImportKlcData")]
-    public async Task<IActionResult> ImportKlcData(TbmKlcFileImport tbmKlcFileImport)
+    public async Task<IActionResult> ImportKlcData(KlcFileImportRequest tbmKlcFileImport)
     {
 
       object oRet = await _ijoinsService.ImportKlcData(tbmKlcFileImport);

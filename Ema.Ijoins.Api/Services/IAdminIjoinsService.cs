@@ -17,12 +17,12 @@ namespace Ema.Ijoins.Api.Services
   public interface IAdminIjoinsService
   {
     Task<object> UploadFileKlc(IFormFile file);
-    Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport);
-    Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession);
-    Task<List<ModelNextSixDayDash>> GetNextSixDayDashs();
+    Task<object> ImportKlcData(KlcFileImportRequest tbmKlcFileImport);
+    Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession, string userId);
+    Task<List<ModelNextSixDayDash>> GetNextSixDayDashs(string userId);
     Task<TbmSession> UpdateSession(TbmSession tbmSession);
-    Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession);
-    Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession);
+    Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession, string userId);
+    Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession, string userId);
     Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser);
     Task<TbmSessionUser> AddParticipant(TbmSessionUser tbmSessionUser);
     Task<TbmSessionUser> UpdateParticipant(TbmSessionUser tbmSessionUser);
@@ -30,7 +30,7 @@ namespace Ema.Ijoins.Api.Services
     bool TbmSessionUsersExists(string SessionId, string UserId);
     bool TbmSessionExists(string SessionId);
 
-    Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession);
+    Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession, string userId);
     Task<List<ModelReport>> GetReport(TbmSession tbmSession);
   }
 
@@ -113,7 +113,7 @@ namespace Ema.Ijoins.Api.Services
       }
     }
 
-    public async Task<object> ImportKlcData(TbmKlcFileImport tbmKlcFileImport)
+    public async Task<object> ImportKlcData(KlcFileImportRequest tbmKlcFileImport)
     {
       using var transaction = _context.Database.BeginTransaction();
 
@@ -191,6 +191,10 @@ namespace Ema.Ijoins.Api.Services
             {
               FileId = klcDataMaster.FileId,
               CourseTypeId = CourseTypeId,
+
+              CompanyId = tbmKlcFileImport.CompanyId,
+              CompanyCode = tbmKlcFileImport.CompanyCode,
+
               CourseId = klcDataMaster.CourseId,
               CourseName = klcDataMaster.CourseName,
               CourseNameTh = klcDataMaster.CourseNameTh,
@@ -215,6 +219,10 @@ namespace Ema.Ijoins.Api.Services
             TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == klcDataMaster.SessionId).FirstOrDefaultAsync();
             tbmSession.FileId = klcDataMaster.FileId;
             tbmSession.CourseTypeId = CourseTypeId;
+
+            tbmSession.CompanyId = tbmKlcFileImport.CompanyId;
+            tbmSession.CompanyCode = tbmKlcFileImport.CompanyCode;
+
             tbmSession.CourseId = klcDataMaster.CourseId;
             tbmSession.CourseName = klcDataMaster.CourseName;
             tbmSession.CourseNameTh = klcDataMaster.CourseNameTh;
@@ -481,7 +489,7 @@ namespace Ema.Ijoins.Api.Services
       );
     }
 
-    public async Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession)
+    public async Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession, string userId)
     {
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
@@ -493,9 +501,17 @@ namespace Ema.Ijoins.Api.Services
               )
         .OrderBy(o => o.StartDateTime).ToListAsync();
 
+      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbmSessionsCompanies = (
+            from s in tbmSessions
+            where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
+            select s
+            );
+
+      //var sess = tbmSessionsCompanies.ToList();
 
       List<ModelSessionsQR> segmentsQRs = new List<ModelSessionsQR>();
-      foreach (TbmSession session in tbmSessions)
+      foreach (TbmSession session in tbmSessionsCompanies.ToList())
       {
 
         List<VSegmentGenQr> vSegmentGenQrs = await _context.VSegmentGenQrs.Where(w => w.SessionId == session.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
@@ -531,7 +547,7 @@ namespace Ema.Ijoins.Api.Services
       return segmentsQRs;
     }
 
-    public async Task<List<ModelNextSixDayDash>> GetNextSixDayDashs()
+    public async Task<List<ModelNextSixDayDash>> GetNextSixDayDashs(string userId)
     {
       List<ModelNextSixDayDash> retNextSixDayDash = new List<ModelNextSixDayDash>();
       CultureInfo enUS = new CultureInfo("en-US");
@@ -540,6 +556,13 @@ namespace Ema.Ijoins.Api.Services
         w.IsCancel == '0'
         && w.EndDateTime >= DateTime.Now
         ).OrderBy(o => o.StartDateTime).ToListAsync();
+
+      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbmSessionsCompanies = (
+            from s in session
+            where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
+            select s
+            );
 
       for (int i = 1; i <= 6; i++)
       {
@@ -550,13 +573,13 @@ namespace Ema.Ijoins.Api.Services
         {
           DateTime = date,
           AddDay = i,
-          SessionCount = session.Where(w => w.StartDateTime <= EndDay && w.EndDateTime >= StartDay).ToList().Count.ToString()
+          SessionCount = tbmSessionsCompanies.ToList().Where(w => w.StartDateTime <= EndDay && w.EndDateTime >= StartDay).ToList().Count.ToString()
         });
       }
 
       return retNextSixDayDash;
     }
-    public async Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession)
+    public async Task<List<TbmSession>> GetToDayClass(FetchSessions tbmSession, string userId)
     {
 
       CultureInfo enUS = new CultureInfo("en-US");
@@ -578,7 +601,14 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
 
-      foreach (TbmSession sessionItem in session)
+      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbmSessionsCompanies = (
+            from s in session
+            where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
+            select s
+            );
+
+      foreach (TbmSession sessionItem in tbmSessionsCompanies.ToList())
       {
         var segment = await _context.TbmSegments.Where(
         w => w.SessionId == sessionItem.SessionId &&
@@ -595,14 +625,14 @@ namespace Ema.Ijoins.Api.Services
 
       return session;
     }
-    public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession)
+    public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession, string userId)
     {
       CultureInfo enUS = new CultureInfo("en-US");
       //DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
       DateTime nextSevenDate = DateTime.Now.AddDays(7);
 
-      return await _context.TbmSessions.Where(
+      var session = await _context.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
         && (w.EndDateTime > EndDay && w.StartDateTime <= nextSevenDate)
@@ -613,6 +643,15 @@ namespace Ema.Ijoins.Api.Services
         || w.CourseName.Contains(tbmSession.CourseId.ToUpper())
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
+
+      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbmSessionsCompanies = (
+            from s in session
+            where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
+            select s
+            );
+
+      return tbmSessionsCompanies.ToList();
     }
     public async Task<TbmSession> UpdateSession(TbmSession tbmSession)
     {
@@ -687,20 +726,27 @@ namespace Ema.Ijoins.Api.Services
     }
 
 
-    public async Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession)
+    public async Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession, string userId)
     {
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
 
       var tbmSessions = await _context.TbmSessions
         .Where(
-                w => 
+                w =>
                 //w.EndDateTime >= StartDay && 
                 w.SessionId.Contains(tbmSession.SessionId)
               )
         .OrderByDescending(o => o.StartDateTime).ToListAsync();
 
-      return tbmSessions;
+      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbmSessionsCompanies = (
+            from s in tbmSessions
+            where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
+            select s
+            );
+
+      return tbmSessionsCompanies.ToList();
     }
 
 
