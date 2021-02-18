@@ -499,7 +499,7 @@ namespace Ema.Ijoins.Api.Services
                 w => w.EndDateTime >= StartDay
                 && w.SessionId.Contains(tbmSession.SessionId)
               )
-        .OrderBy(o => o.StartDateTime).ToListAsync();
+        .OrderByDescending(o => o.StartDateTime).ToListAsync();
 
       var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
       var tbmSessionsCompanies = (
@@ -520,6 +520,7 @@ namespace Ema.Ijoins.Api.Services
         {
           FileId = session.FileId,
           CourseTypeId = session.FileId,
+          CompanyCode = session.CompanyCode,
           CourseId = session.CourseId,
           CourseName = session.CourseName,
           CourseNameTh = session.CourseNameTh,
@@ -623,7 +624,7 @@ namespace Ema.Ijoins.Api.Services
         sessionItem.TbmSegments = null;
       }
 
-      return session;
+      return tbmSessionsCompanies.ToList();
     }
     public async Task<List<TbmSession>> GetSevenDayClass(TbmSession tbmSession, string userId)
     {
@@ -790,8 +791,8 @@ namespace Ema.Ijoins.Api.Services
 
             segmentReports.Add(new ModelSegmentReport
             {
-              CheckInDateTime = userRegis.CheckInDateTime.ToLocalTime().ToString("HH:mm"),
-              CheckOutDateTime = userRegis.CheckOutDateTime.ToLocalTime().ToString("HH:mm"),
+              CheckInDateTime = userRegis.IsCheckIn == '1' ? userRegis.CheckInDateTime.ToLocalTime().ToString("HH:mm") : "",
+              CheckOutDateTime = userRegis.IsCheckOut == '1' ? userRegis.CheckOutDateTime.ToLocalTime().ToString("HH:mm") : "",
               StartDateTime = sg.StartDateTime.Value.ToString("dd'/'MM'/'yyyy"),
               EndDateTime = sg.EndDateTime.Value.ToString("dd'/'MM'/'yyyy")
             });
@@ -842,6 +843,44 @@ namespace Ema.Ijoins.Api.Services
           SegmentTrainingStatus = "Incompleted";
         }
 
+
+        bool isNoshow = true;
+        bool isIncomplete = true;
+        foreach (ModelSegmentReport segmentReport in segmentReports)
+        {
+          if (su.RegistrationStatus == "Cancelled")
+          {
+            FinalTrainingStatus = "Cancelled";
+          }
+          else if (segmentReport.CheckInDateTime != "" && segmentReport.CheckOutDateTime == "")
+          {
+            isNoshow = false;
+          }
+          else if (segmentReport.CheckInDateTime != "" && segmentReport.CheckOutDateTime != "")
+          {
+            isNoshow = false;
+            isIncomplete = false;
+          }
+        }
+        if (su.RegistrationStatus == "Cancelled")
+        {
+          FinalTrainingStatus = "Cancelled";
+        }
+        else if (isNoshow)
+        {
+          FinalTrainingStatus = "No Show";
+        }
+        else if (isIncomplete)
+        {
+          FinalTrainingStatus = "Incompleted";
+        }
+        else
+        {
+          FinalTrainingStatus = SegmentTrainingStatus;
+        }
+
+
+
         int isRowSpan = 0;
         foreach (ModelSegmentReport segmentReport in segmentReports)
         {
@@ -849,27 +888,19 @@ namespace Ema.Ijoins.Api.Services
 
           if (su.RegistrationStatus == "Cancelled")
           {
-            FinalTrainingStatus = "Cancelled";
             CurrentTrainingStatus = su.RegistrationStatus;
           }
           else if (segmentReport.CheckInDateTime == "" && segmentReport.CheckOutDateTime == "")
           {
-            FinalTrainingStatus = "No Show";
             CurrentTrainingStatus = su.RegistrationStatus;
           }
           else if (segmentReport.CheckInDateTime != "" && segmentReport.CheckOutDateTime == "")
           {
-            FinalTrainingStatus = "Incompleted";
             CurrentTrainingStatus = "Check-in";
           }
           else if (segmentReport.CheckInDateTime != "" && segmentReport.CheckOutDateTime != "")
           {
-            FinalTrainingStatus = SegmentTrainingStatus;
             CurrentTrainingStatus = "Check-out";
-          }
-          else
-          {
-            FinalTrainingStatus = SegmentTrainingStatus;
           }
 
           CultureInfo enUS = new CultureInfo("en-US");
