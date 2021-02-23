@@ -32,6 +32,8 @@ namespace Ema.Ijoins.Api.Services
 
     Task<List<TbmSession>> GetReportSessions(TbmSession tbmSession, string userId);
     Task<List<ModelReport>> GetReport(TbmSession tbmSession);
+
+    Task<List<TbmCompany>> GetUserCompany(string userId);
   }
 
   public class AdminIjoinsService : IAdminIjoinsService
@@ -75,6 +77,9 @@ namespace Ema.Ijoins.Api.Services
         }
 
         List<TbKlcDataMaster> tbKlcDatas = Utility.ReadExcelEPPlus(pathGuid, attachFiles);
+        var tbKlcDatasCheck = tbKlcDatas.Select(d => new { d.CourseId, d.CourseName, d.SessionId, d.SessionName, d.StartDateTime, d.EndDateTime })
+                                                          .Distinct()
+                                                          .ToList();
         List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas);
 
         string strMessage = "";
@@ -95,6 +100,7 @@ namespace Ema.Ijoins.Api.Services
         {
           Success = true,
           Message = strMessage,
+          DataCheck = tbKlcDatasCheck,
           DataInvalid = tbKlcDatasInvalid,
           FileUploadId = attachFiles.Id,
           TotalNo = tbKlcDatas.Count,
@@ -749,8 +755,6 @@ namespace Ema.Ijoins.Api.Services
 
       return tbmSessionsCompanies.ToList();
     }
-
-
     public async Task<List<ModelReport>> GetReport(TbmSession tbmSession)
     {
       var sessionData = await _context.TbmSessions
@@ -927,6 +931,23 @@ namespace Ema.Ijoins.Api.Services
       return reportList;
     }
 
+    public async Task<List<TbmCompany>> GetUserCompany(string userId)
+    {
+      var tbUserCompanies = await _context.TbUserCompanies
+          .Where(
+                 w => w.UserId == userId
+                )
+          .ToListAsync();
+
+      var tbmCompanies = (
+            from c in _context.TbmCompanies
+            where tbUserCompanies.Select(x => x.CompanyId).Contains(c.CompanyId)
+            select c
+            );
+
+
+      return tbmCompanies.ToList();
+    }
   }
 
 

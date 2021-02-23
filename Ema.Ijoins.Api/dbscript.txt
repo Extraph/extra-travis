@@ -158,6 +158,7 @@ ALTER TABLE public."TBM_ROLE"
 
     INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Super Admin');
     INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Admin');
+    INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Report Admin');
     INSERT INTO public."TBM_ROLE"(role_name) VALUES ('Instructor'); 
     
 

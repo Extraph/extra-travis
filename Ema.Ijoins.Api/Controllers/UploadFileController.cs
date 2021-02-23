@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Services;
+using Ema.Ijoins.Api.EfModels;
 
 namespace Ema.Ijoins.Api.Controllers
 {
@@ -41,6 +43,14 @@ namespace Ema.Ijoins.Api.Controllers
 
       return Ok(oRet);
 
+    }
+
+    [HttpGet("GetUserCompany")]
+    public async Task<ActionResult<List<TbmCompany>>> GetUserCompany()
+    {
+      AssignUserAuthen();
+
+      return await _ijoinsService.GetUserCompany(UserAuthen.UserId);
     }
 
   }
