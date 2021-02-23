@@ -5,6 +5,7 @@ using Ema.Ijoins.Api.EfModels;
 using ExcelDataReader;
 using System.IO;
 using OfficeOpenXml;
+using System.Linq;
 
 namespace Ema.Ijoins.Api.Helpers
 {
@@ -127,7 +128,7 @@ namespace Ema.Ijoins.Api.Helpers
       }
       return datas;
     }
-    public static List<TbKlcDataMaster> ValidateData(List<TbKlcDataMaster> tbKlcDatas)
+    public static List<TbKlcDataMaster> ValidateData(List<TbKlcDataMaster> tbKlcDatas, List<TbmCourseType> tbmCourseTypes)
     {
 
       CultureInfo enUS = new CultureInfo("en-US");
@@ -136,7 +137,37 @@ namespace Ema.Ijoins.Api.Helpers
 
       foreach (TbKlcDataMaster data in tbKlcDatas)
       {
-        if (!DateTime.TryParse(data.StartDate, out DateTime StartDate))
+        if (!tbmCourseTypes.Any(e => e.CourseType == data.CourseType))
+        {
+          datasInvalid.Add(new TbKlcDataMaster
+          {
+            Id = data.Id,
+            FileId = data.FileId,
+            CourseType = data.CourseType,
+            CourseId = data.CourseId,
+            CourseName = data.CourseName,
+            CourseNameTh = data.CourseNameTh,
+            SessionId = data.SessionId,
+            SessionName = data.SessionName,
+            SegmentNo = data.SegmentNo,
+            SegmentName = data.SegmentName,
+            StartDate = data.StartDate,
+            EndDate = data.EndDate,
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
+            CourseOwnerEmail = data.CourseOwnerEmail,
+            CourseOwnerContactNo = data.CourseOwnerContactNo,
+            Venue = data.Venue,
+            Instructor = data.Instructor,
+            CourseCreditHours = data.CourseCreditHours,
+            PassingCriteriaException = data.PassingCriteriaException,
+            UserCompany = data.UserCompany,
+            UserId = data.UserId,
+            RegistrationStatus = data.RegistrationStatus,
+            InvalidMessage = "Invalid Course Type => " + data.CourseType
+          });
+        }
+        else if (!DateTime.TryParse(data.StartDate, out DateTime StartDate))
         {
           datasInvalid.Add(new TbKlcDataMaster
           {

@@ -80,7 +80,10 @@ namespace Ema.Ijoins.Api.Services
         var tbKlcDatasCheck = tbKlcDatas.Select(d => new { d.CourseId, d.CourseName, d.SessionId, d.SessionName, d.StartDateTime, d.EndDateTime })
                                                           .Distinct()
                                                           .ToList();
-        List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas);
+
+        var tbmCourseTypes = await _context.TbmCourseTypes.ToListAsync();
+
+        List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas, tbmCourseTypes);
 
         string strMessage = "";
         try
