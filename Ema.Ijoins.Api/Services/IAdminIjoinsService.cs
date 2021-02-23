@@ -162,19 +162,19 @@ namespace Ema.Ijoins.Api.Services
 
         foreach (TbKlcDataMaster klcDataMaster in tbKlcDataMasters)
         {
-          int CourseTypeId;
-          if (!TbmCourseTypeExists(klcDataMaster.CourseType))
-          {
-            TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType, CourseId = klcDataMaster.CourseId };
-            _context.TbmCourseTypes.Add(tbmCourseType);
-            await _context.SaveChangesAsync();
-            CourseTypeId = tbmCourseType.Id;
-          }
-          else
-          {
-            TbmCourseType tbmCourseType = await _context.TbmCourseTypes.Where(w => w.CourseType == klcDataMaster.CourseType).FirstOrDefaultAsync();
-            CourseTypeId = tbmCourseType.Id;
-          }
+          //int CourseTypeId;
+          //if (!TbmCourseTypeExists(klcDataMaster.CourseType))
+          //{
+          //  TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType, CourseId = klcDataMaster.CourseId };
+          //  _context.TbmCourseTypes.Add(tbmCourseType);
+          //  await _context.SaveChangesAsync();
+          //  CourseTypeId = tbmCourseType.Id;
+          //}
+          //else
+          //{
+          //  TbmCourseType tbmCourseType = await _context.TbmCourseTypes.Where(w => w.CourseType == klcDataMaster.CourseType).FirstOrDefaultAsync();
+          //  CourseTypeId = tbmCourseType.Id;
+          //}
 
           if (!TbmCourseExists(klcDataMaster.CourseId))
           {
@@ -196,7 +196,7 @@ namespace Ema.Ijoins.Api.Services
             TbmSession tbmSession = new TbmSession
             {
               FileId = klcDataMaster.FileId,
-              CourseTypeId = CourseTypeId,
+              CourseType = klcDataMaster.CourseType,
 
               CompanyId = tbmKlcFileImport.CompanyId,
               CompanyCode = tbmKlcFileImport.CompanyCode,
@@ -224,7 +224,7 @@ namespace Ema.Ijoins.Api.Services
           {
             TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == klcDataMaster.SessionId).FirstOrDefaultAsync();
             tbmSession.FileId = klcDataMaster.FileId;
-            tbmSession.CourseTypeId = CourseTypeId;
+            tbmSession.CourseType = klcDataMaster.CourseType;
 
             tbmSession.CompanyId = tbmKlcFileImport.CompanyId;
             tbmSession.CompanyCode = tbmKlcFileImport.CompanyCode;

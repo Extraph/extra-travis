@@ -24,7 +24,7 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TbmCourseType>>> GetTbmCourseTypes()
     {
-      return await _context.TbmCourseTypes.ToListAsync();
+      return await _context.TbmCourseTypes.OrderBy(o => o.Id).ToListAsync();
     }
 
     // GET: api/CourseType/5

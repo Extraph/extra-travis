@@ -308,16 +308,28 @@ namespace Ema.Ijoins.Api.EfModels
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.CourseId)
+                entity.Property(e => e.CompletionStatus)
                     .IsRequired()
-                    .HasColumnName("course_id");
+                    .HasColumnName("completion_status");
 
                 entity.Property(e => e.CourseType)
                     .IsRequired()
                     .HasColumnName("course_type");
 
-                entity.Property(e => e.Createdatetime)
-                    .HasColumnName("createdatetime")
+                entity.Property(e => e.CreateBy).HasColumnName("create_by");
+
+                entity.Property(e => e.CreateDatetime)
+                    .HasColumnName("create_datetime")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasColumnName("description");
+
+                entity.Property(e => e.UpdateBy).HasColumnName("update_by");
+
+                entity.Property(e => e.UpdateDatetime)
+                    .HasColumnName("update_datetime")
                     .HasDefaultValueSql("now()");
             });
 
@@ -490,7 +502,9 @@ namespace Ema.Ijoins.Api.EfModels
                     .IsRequired()
                     .HasColumnName("course_owner_email");
 
-                entity.Property(e => e.CourseTypeId).HasColumnName("course_type_id");
+                entity.Property(e => e.CourseType)
+                    .IsRequired()
+                    .HasColumnName("course_type");
 
                 entity.Property(e => e.Createdatetime)
                     .HasColumnName("createdatetime")

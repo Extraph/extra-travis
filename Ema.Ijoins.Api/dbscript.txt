@@ -347,8 +347,12 @@ CREATE TABLE public."TBM_COURSE_TYPE"
 (
     id integer NOT NULL DEFAULT nextval('"TBM_COURSE_TYPE_id_seq"'::regclass),
     course_type text COLLATE pg_catalog."default" NOT NULL,
-    course_id text COLLATE pg_catalog."default" NOT NULL,
-    createdatetime timestamp without time zone NOT NULL DEFAULT now(),
+    completion_status text COLLATE pg_catalog."default" NOT NULL,
+    description text COLLATE pg_catalog."default" NOT NULL,
+    create_by text COLLATE pg_catalog."default",
+    create_datetime timestamp without time zone NOT NULL DEFAULT now(),
+    update_by text COLLATE pg_catalog."default",
+    update_datetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TBM_COURSE_TYPE_pkey" PRIMARY KEY (id)
 )
 
@@ -356,6 +360,27 @@ TABLESPACE pg_default;
 
 ALTER TABLE public."TBM_COURSE_TYPE"
     OWNER to ema_user;
+
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('In-house', 'In-house_Completed', 'Completed');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('In-house', 'In-house_Incompleted', 'Incompleted');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('In-house', 'In-house_No Show', 'No Show');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('In-house', 'In-house_Cancelled', 'Cancelled');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Dev. Activity - In-house', 'Activity-Inhouse_Completed', 'Completed');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Dev. Activity - In-house', 'Activity-Inhouse_Incompleted', 'Incompleted');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Dev. Activity - In-house', 'Activity-Inhouse_No Show', 'No Show');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Dev. Activity - In-house', 'Activity-Inhouse_Cancelled', 'Cancelled');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('On-the-Job Training', 'OJT_Completed', 'Completed');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('On-the-Job Training', 'OJT_Inompleted', 'Incompleted');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Webinar/ VR/ AR', 'Webinar/ VR/ AR_Completed', 'Completed');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Webinar/ VR/ AR', 'Webinar/ VR/ AR_Incompleted', 'Incompleted');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Webinar/ VR/ AR', 'Webinar/ VR/ AR_No Show', 'No Show');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Webinar/ VR/ AR', 'Webinar/ VR/ AR_Cancelled', 'Cancelled');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Coaching/ Mentoring', 'Coaching/ Mentoring_Completed', 'Completed');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Coaching/ Mentoring', 'Coaching/ Mentoring_Incomplete', 'Incompleted');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Coaching/ Mentoring', 'Coaching/ Mentoring_No Show', 'No Show');
+INSERT INTO public."TBM_COURSE_TYPE"(course_type, completion_status, description) VALUES ('Coaching/ Mentoring', 'Coaching/ Mentoring_Cancelled', 'Cancelled');
+
+
 
 -- Table: public.TBM_COURSE
 
@@ -413,7 +438,7 @@ ALTER TABLE public."TBM_REGISTRATION_STATUS"
 CREATE TABLE public."TBM_SESSION"
 (
     file_id integer NOT NULL,
-    course_type_id integer NOT NULL,
+    course_type text COLLATE pg_catalog."default" NOT NULL,
     company_id integer NOT NULL,
     company_code text COLLATE pg_catalog."default" NOT NULL,
     course_id text COLLATE pg_catalog."default" NOT NULL,
