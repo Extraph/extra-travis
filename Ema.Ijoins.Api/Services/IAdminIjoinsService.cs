@@ -952,16 +952,33 @@ namespace Ema.Ijoins.Api.Services
           .Where(
                  w => w.UserId == userId
                 )
+          .OrderByDescending(o => o.IsDefault)
           .ToListAsync();
 
-      var tbmCompanies = (
-            from c in _context.TbmCompanies
-            where tbUserCompanies.Select(x => x.CompanyId).Contains(c.CompanyId)
-            select c
-            );
+      var tbmCompanies = await _context.TbmCompanies.ToListAsync();
+
+      //var tbmCompanies = (
+      //      from c in _context.TbmCompanies
+      //      where tbUserCompanies.Select(x => x.CompanyId).Contains(c.CompanyId)
+      //      select c
+      //      );
+
+      //return tbUserCompanies;
+
+      var query = from UserCom in tbUserCompanies
+                  join Com in tbmCompanies on UserCom.CompanyId equals Com.CompanyId into UserComGroup
+                  from uc in UserComGroup.DefaultIfEmpty()
+                  select new { UserCom.CompanyId, uc.CompanyCode, UserCom.IsDefault }
+                  ;
+
+      List<TbmCompany> retUserCom = new List<TbmCompany>();
+      foreach (var v in query.OrderByDescending(o => o.IsDefault))
+      {
+        retUserCom.Add(new TbmCompany { CompanyId = v.CompanyId, CompanyCode = v.CompanyCode });
+      }
 
 
-      return tbmCompanies.ToList();
+      return retUserCom;
     }
   }
 

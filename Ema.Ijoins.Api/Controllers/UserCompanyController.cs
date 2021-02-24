@@ -24,14 +24,14 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TbUserCompany>>> GetTbUserCompanies()
     {
-      return await _context.TbUserCompanies.ToListAsync();
+      return await _context.TbUserCompanies.OrderBy(o => o.Id).ToListAsync();
     }
 
     // GET: api/UserCompany/5
     [HttpGet("{id}")]
     public async Task<ActionResult<IEnumerable<TbUserCompany>>> GetTbUserCompany(string id)
     {
-      var tbUserCompany = await _context.TbUserCompanies.Where(w => w.UserId == id).ToListAsync();
+      var tbUserCompany = await _context.TbUserCompanies.Where(w => w.UserId == id).OrderBy(o => o.Id).ToListAsync();
 
       if (tbUserCompany == null)
       {
@@ -51,10 +51,10 @@ namespace Ema.Ijoins.Api.Controllers
         return BadRequest();
       }
 
-      if (TbUserCompanyExists(tbUserCompany.UserId, tbUserCompany.CompanyId))
-      {
-        return Conflict();
-      }
+      //if (TbUserCompanyExists(tbUserCompany.UserId, tbUserCompany.CompanyId))
+      //{
+      //  return Conflict();
+      //}
 
       _context.Entry(tbUserCompany).State = EntityState.Modified;
 

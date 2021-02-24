@@ -248,6 +248,11 @@ namespace Ema.Ijoins.Api.EfModels
                     .HasColumnName("create_datetime")
                     .HasDefaultValueSql("now()");
 
+                entity.Property(e => e.IsDefault)
+                    .HasMaxLength(1)
+                    .HasColumnName("is_default")
+                    .HasDefaultValueSql("'0'::bpchar");
+
                 entity.Property(e => e.UserId)
                     .IsRequired()
                     .HasColumnName("user_id");

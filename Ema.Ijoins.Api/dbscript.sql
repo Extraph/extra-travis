@@ -188,7 +188,7 @@ CREATE TABLE public."TB_USER_COMPANY"
     id integer NOT NULL DEFAULT nextval('"TB_USER_COMPANY_id_seq"'::regclass),
 	user_id text COLLATE pg_catalog."default" NOT NULL,
     company_id integer NOT NULL,
-    isDefault character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT '0'::bpchar,
+    is_default character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT '0'::bpchar,
     create_by text COLLATE pg_catalog."default",
     create_datetime timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT "TB_USER_COMPANY_pkey" PRIMARY KEY (id)

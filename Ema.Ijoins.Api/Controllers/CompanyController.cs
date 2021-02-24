@@ -24,7 +24,7 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TbmCompany>>> GetTbmCompanies()
     {
-      return await _context.TbmCompanies.ToListAsync();
+      return await _context.TbmCompanies.OrderBy(o => o.CompanyId).ToListAsync();
     }
 
     // GET: api/Company/5
