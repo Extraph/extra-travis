@@ -789,9 +789,16 @@ namespace Ema.Ijoins.Api.Services
         List<ModelSegmentReport> segmentReports = new List<ModelSegmentReport>();
 
         double realMinuteAttend = 0;
+        double checkMinuteSegment = 0;
         double percentAttend = 0;
         foreach (VSegmentGenQr sg in segmentData)
         {
+          if (sg.StartDateTime.HasValue && sg.EndDateTime.HasValue)
+          {
+            TimeSpan ts = sg.EndDateTime.Value - sg.StartDateTime.Value;
+            checkMinuteSegment += ts.TotalMinutes;
+          }
+
           var userRegis = userRegistrations.Where(w => w.CheckInDate == sg.StartDateTime.Value.ToString("yyyyMMdd")).FirstOrDefault();
           if (userRegis != null)
           {
@@ -839,6 +846,11 @@ namespace Ema.Ijoins.Api.Services
               EndDateTime = sg.EndDateTime.Value.ToString("dd'/'MM'/'yyyy")
             });
           }
+        }
+
+        if (checkMinuteSegment > double.Parse(sessionData.CourseCreditHours) * 60)
+        {
+          realMinuteAttend -= checkMinuteSegment - (double.Parse(sessionData.CourseCreditHours) * 60);
         }
         percentAttend = (realMinuteAttend / (double.Parse(sessionData.CourseCreditHours) * 60)) * 100;
         if (percentAttend >= (double.Parse(sessionData.PassingCriteriaException) * 100))
