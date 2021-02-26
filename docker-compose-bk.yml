@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  ema.contentdata.api:
+    image: ${DOCKER_REGISTRY-}emacontentdata
+    build:
+      context: .
+      dockerfile: Ema.ContentData.Api/Dockerfile
+
+  ema.hrservices.api:
+    image: ${DOCKER_REGISTRY-}emahrservices
+    build:
+      context: .
+      dockerfile: Ema.HrServices.Api/Dockerfile
+
+
+  ema.ijoins.api:
+    image: ${DOCKER_REGISTRY-}emaijoins
+    build:
+      context: .
+      dockerfile: Ema.Ijoins.Api/Dockerfile
+
