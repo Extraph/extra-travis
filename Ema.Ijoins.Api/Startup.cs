@@ -15,6 +15,7 @@ using Ema.Ijoins.Api.EfModels;
 using Ema.Ijoins.Api.Services;
 using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Helpers;
+using System;
 
 namespace Ema.Ijoins.Api
 {
@@ -42,7 +43,10 @@ namespace Ema.Ijoins.Api
 
       services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
 
-      services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
+      var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+      services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(connectionString));
+
+      //services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
 
       services.AddScoped<UserIjoinsService>();
 
