@@ -5,8 +5,8 @@ networks:
     driver: bridge
 
 services:
-  webapi:
-    image: api/web:latest
+  apiweb:
+    image: ijoin/apiweb:latest
     depends_on:
       - 'postgres_image'
     build:
