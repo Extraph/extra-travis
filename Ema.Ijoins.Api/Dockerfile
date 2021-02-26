@@ -7,10 +7,10 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
-COPY Ema.Ijoins.Api/Ema.Ijoins.Api.csproj Ema.Ijoins.Api/
-RUN dotnet restore "Ema.Ijoins.Api/Ema.Ijoins.Api.csproj"
+COPY ["Ema.Ijoins.Api.csproj", ""]
+RUN dotnet restore "Ema.Ijoins.Api.csproj"
 COPY . .
-WORKDIR "/src/Ema.Ijoins.Api"
+WORKDIR "/src"
 RUN dotnet build "Ema.Ijoins.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish

@@ -1,22 +1,37 @@
 version: '3.4'
 
+networks:
+  ijoin-api:
+    driver: bridge
+
 services:
-  ema.contentdata.api:
-    image: ${DOCKER_REGISTRY-}emacontentdata
+  webapi:
+    image: api/web:latest
+    depends_on:
+      - 'postgres_image'
     build:
-      context: .
-      dockerfile: Ema.ContentData.Api/Dockerfile
+      dockerfile: Dockerfile
+      context: ./Ema.Ijoins.Api
+    ports:
+      - '5000:80'
+    environment:
+      DB_CONNECTION_STRING: 'host=postgres_image;port=5432;database=ema_database;username=ema_user;password=magical_password'
+    networks:
+      - ijoin-api
 
-  ema.hrservices.api:
-    image: ${DOCKER_REGISTRY-}emahrservices
-    build:
-      context: .
-      dockerfile: Ema.HrServices.Api/Dockerfile
-
-
-  ema.ijoins.api:
-    image: ${DOCKER_REGISTRY-}emaijoins
-    build:
-      context: .
-      dockerfile: Ema.Ijoins.Api/Dockerfile
-
+  postgres_image:
+    image: postgres:latest
+    ports:
+      - '5432'
+    restart: always
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+      - ./Ema.postgresql/dbscript.sql :/docker-entrypoint-initdb.d/dbscript.sql
+    environment:
+      POSTGRES_USER: 'ema_user'
+      POSTGRES_PASSWORD: 'magical_password'
+      POSTGRES_DB: 'ema_database'
+    networks:
+      - ijoin-api
+volumes:
+  db_volume:
