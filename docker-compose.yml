@@ -9,6 +9,7 @@ services:
     image: ijoin/apiweb:latest
     depends_on:
       - 'postgres_image'
+      - 'mongodb_image'
     build:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
@@ -33,5 +34,18 @@ services:
       POSTGRES_DB: 'ema_database'
     networks:
       - ijoin-api
+
+  mongodb_image:
+    image: mongo:latest
+    ports:
+      - '27017'
+    volumes:
+      - db_volume:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    networks:
+      - ijoin-api
+
 volumes:
   db_volume:

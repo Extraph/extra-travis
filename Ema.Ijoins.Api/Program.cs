@@ -18,8 +18,9 @@ namespace Ema.Ijoins.Api
         .ConfigureLogging((hostingContext, logging) =>
                 {
                   logging.ClearProviders();
-                  logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                  logging.AddNLog();
+                  logging.AddConsole();
+                  //logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                  //logging.AddNLog();
                 })
             .ConfigureWebHostDefaults(webBuilder =>
             {

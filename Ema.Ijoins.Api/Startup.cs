@@ -31,6 +31,15 @@ namespace Ema.Ijoins.Api
     public void ConfigureServices(IServiceCollection services)
     {
 
+      //services.AddCors(options =>
+      //{
+      //  options.AddDefaultPolicy(
+      //      builder =>
+      //      {
+      //        builder.WithOrigins("http://localhost:3000", "http://localhost:5000");
+      //      });
+      //});
+
       services.AddControllers();
       services.AddSwaggerGen(c =>
       {
@@ -61,6 +70,7 @@ namespace Ema.Ijoins.Api
         options.MultipartBodyLengthLimit = 268435456;
       });
 
+      
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,15 +83,13 @@ namespace Ema.Ijoins.Api
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ema.Ijoins.Api v1"));
       }
 
-      app.UseCors(x => x
-          .AllowAnyOrigin()
-          .AllowAnyMethod()
-          .AllowAnyHeader()
-          );
-
       app.UseRouting();
 
-      //app.UseAuthorization();
+      app.UseCors(x => x
+         .AllowAnyOrigin()
+         .AllowAnyMethod()
+         .AllowAnyHeader()
+         );
 
       app.UseMiddleware<JwtMiddleware>();
 
