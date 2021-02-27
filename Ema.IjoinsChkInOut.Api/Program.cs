@@ -2,10 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using NLog.Extensions.Logging;
 
 namespace Ema.IjoinsChkInOut.Api
 {
@@ -18,6 +15,13 @@ namespace Ema.IjoinsChkInOut.Api
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .ConfigureLogging((hostingContext, logging) =>
+            {
+              logging.ClearProviders();
+              logging.AddConsole();
+              logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+              logging.AddNLog();
+            })
             .ConfigureWebHostDefaults(webBuilder =>
             {
               webBuilder.UseStartup<Startup>();

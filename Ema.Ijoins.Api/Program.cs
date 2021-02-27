@@ -15,12 +15,12 @@ namespace Ema.Ijoins.Api
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-        .ConfigureLogging((hostingContext, logging) =>
+            .ConfigureLogging((hostingContext, logging) =>
                 {
                   logging.ClearProviders();
                   logging.AddConsole();
-                  //logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                  //logging.AddNLog();
+                  logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                  logging.AddNLog();
                 })
             .ConfigureWebHostDefaults(webBuilder =>
             {
