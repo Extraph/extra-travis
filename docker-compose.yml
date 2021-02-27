@@ -8,26 +8,38 @@ services:
   apiweb:
     image: ijoin/apiweb:latest
     depends_on:
-      - 'postgres_image'
-      - 'mongodb_image'
+      - 'postgres_db'
+      - 'mongodb_db'
     build:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
     ports:
       - '5000:80'
     environment:
-      DB_CONNECTION_STRING: 'host=postgres_image;port=5432;database=ema_database;username=ema_user;password=magical_password'
+      DB_CONNECTION_STRING: 'host=postgres_db;port=5432;database=ema_database;username=ema_user;password=magical_password'
     networks:
       - ijoin-api
 
-  postgres_image:
+  apimobile:
+    image: ijoin/apimobile:latest
+    depends_on:
+      - 'mongodb_db'
+    build:
+      dockerfile: Dockerfile
+      context: ./Ema.IjoinsChkInOut.Api
+    ports:
+      - '5050:80'
+    networks:
+      - ijoin-api
+
+  postgres_db:
     image: postgres:latest
     ports:
       - '5432'
     restart: always
     volumes:
       - db_volume:/var/lib/postgresql/data
-      - ./Ema.postgresql/dbscript.sql :/docker-entrypoint-initdb.d/dbscript.sql
+      - ./Ema.Database/dbscript.sql :/docker-entrypoint-initdb.d/dbscript.sql
     environment:
       POSTGRES_USER: 'ema_user'
       POSTGRES_PASSWORD: 'magical_password'
@@ -35,7 +47,7 @@ services:
     networks:
       - ijoin-api
 
-  mongodb_image:
+  mongodb_db:
     image: mongo:latest
     ports:
       - '27017'
