@@ -33,6 +33,7 @@
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 
+ALTER DATABASE ema_database SET timezone TO 'Asia/Bangkok';
 
 CREATE SEQUENCE public."TBM_KLC_FILE_IMPORT_id_seq"
     INCREMENT 1

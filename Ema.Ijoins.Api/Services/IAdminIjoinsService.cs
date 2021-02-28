@@ -805,8 +805,8 @@ namespace Ema.Ijoins.Api.Services
 
             segmentReports.Add(new ModelSegmentReport
             {
-              CheckInDateTime = userRegis.IsCheckIn == '1' ? userRegis.CheckInDateTime.ToLocalTime().ToString("HH:mm") : "",
-              CheckOutDateTime = userRegis.IsCheckOut == '1' ? userRegis.CheckOutDateTime.ToLocalTime().ToString("HH:mm") : "",
+              CheckInDateTime = userRegis.IsCheckIn == '1' ? userRegis.CheckInDateTime.ToLocalTime().ToString("hh:mm tt") : "",
+              CheckOutDateTime = userRegis.IsCheckOut == '1' ? userRegis.CheckOutDateTime.ToLocalTime().ToString("hh:mm tt") : "",
               StartDateTime = sg.StartDateTime.Value.ToString("dd'/'MM'/'yyyy"),
               EndDateTime = sg.EndDateTime.Value.ToString("dd'/'MM'/'yyyy")
             });
