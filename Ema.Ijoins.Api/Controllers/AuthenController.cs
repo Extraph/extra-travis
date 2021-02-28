@@ -5,7 +5,7 @@ using Ema.Ijoins.Api.Services;
 namespace Ema.Ijoins.Api.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   public class AuthenController : ControllerBase
   {
     private IUserService _userService;

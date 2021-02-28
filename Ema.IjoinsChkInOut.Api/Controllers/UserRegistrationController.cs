@@ -10,7 +10,7 @@ using Ema.IjoinsChkInOut.Api.Helpers;
 
 namespace Ema.IjoinsChkInOut.Api.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [ApiController]
   public class UserRegistrationController : ControllerBase
   {
@@ -42,7 +42,7 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
       urIn.CheckInDate = Utility.GetStryyyyMMddNow();
       urIn.CheckInTime = int.Parse(Utility.GetStrHHmmNow());
       urIn.IsCheckIn = '1';
-      
+
       return Ok(await _userIjoinsService.CheckIn(urIn));
     }
 
@@ -53,7 +53,7 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
       urIn.CheckOutDate = Utility.GetStryyyyMMddNow();
       urIn.CheckOutTime = int.Parse(Utility.GetStrHHmmNow());
       urIn.IsCheckOut = '1';
-      
+
       return Ok(await _userIjoinsService.CheckOut(urIn));
     }
 

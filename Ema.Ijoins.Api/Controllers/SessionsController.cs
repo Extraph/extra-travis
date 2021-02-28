@@ -11,7 +11,7 @@ using System.Security.Claims;
 
 namespace Ema.Ijoins.Api.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [ApiController]
   public class SessionsController : BaseController
   {
@@ -21,7 +21,7 @@ namespace Ema.Ijoins.Api.Controllers
     {
       _ijoinsService = ijoinsService;
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<List<ModelSessionsQR>>> SearchSession(TbmSession tbmSession)
     {
@@ -118,7 +118,7 @@ namespace Ema.Ijoins.Api.Controllers
     [HttpPost("Report")]
     public async Task<ActionResult<List<ModelReport>>> GetReport(TbmSession tbmSession)
     {
-      
+
       var tbmSessions = await _ijoinsService.GetReport(tbmSession);
 
       if (tbmSessions == null)

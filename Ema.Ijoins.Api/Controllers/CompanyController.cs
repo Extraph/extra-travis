@@ -9,7 +9,7 @@ using Ema.Ijoins.Api.EfModels;
 
 namespace Ema.Ijoins.Api.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [ApiController]
   public class CompanyController : BaseController
   {

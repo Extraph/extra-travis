@@ -12,7 +12,7 @@ using Ema.Ijoins.Api.Models;
 
 namespace Ema.Ijoins.Api.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [ApiController]
   public class ParticipantController : BaseController
   {

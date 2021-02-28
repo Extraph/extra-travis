@@ -5,6 +5,20 @@ networks:
     driver: bridge
 
 services:
+  nginx:
+    depends_on:
+      - apiweb
+      - apimobile
+      - client
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./Ema.Nginx
+    ports:
+      - '3050:80'
+    networks:
+      - ijoin-api
+
   apiweb:
     image: ijoin/apiweb:latest
     depends_on:
@@ -13,8 +27,6 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
-    ports:
-      - '5000:80'
     environment:
       DB_CONNECTION_STRING: 'host=postgres_db;port=5432;database=ema_database;username=ema_user;password=magical_password'
     networks:
@@ -27,8 +39,17 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./Ema.IjoinsChkInOut.Api
-    ports:
-      - '5050:80'
+    networks:
+      - ijoin-api
+
+  client:
+    stdin_open: true
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./Ema.Admin.Web
+    volumes:
+      - /app/node_modules
+      - ./Ema.Admin.Web:/app
     networks:
       - ijoin-api
 
@@ -37,7 +58,6 @@ services:
     ports:
       - '5432'
     volumes:
-      - db_volume:/var/lib/postgresql/data
       - ./Ema.Database/dbscript.sql :/docker-entrypoint-initdb.d/dbscript.sql
     environment:
       POSTGRES_USER: 'ema_user'
@@ -50,13 +70,8 @@ services:
     image: mongo:latest
     ports:
       - '27017'
-    volumes:
-      - db_volume:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     networks:
       - ijoin-api
-
-volumes:
-  db_volume:

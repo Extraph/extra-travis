@@ -9,7 +9,7 @@ using Ema.IjoinsChkInOut.Api.Models;
 
 namespace Ema.IjoinsChkInOut.Api.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [ApiController]
   public class ParticipantController : ControllerBase
   {

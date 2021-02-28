@@ -4,7 +4,7 @@ using Ema.Ijoins.Api.EfModels;
 namespace Ema.Ijoins.Api.Controllers
 {
   [Authorize]
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   [ApiController]
   public class BaseController : ControllerBase
   {
