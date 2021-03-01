@@ -56,7 +56,7 @@ services:
   postgres_db:
     image: postgres:latest
     ports:
-      - '5432'
+      - '5432:5432'
     volumes:
       - ./Ema.Database/dbscript.sql :/docker-entrypoint-initdb.d/dbscript.sql
     environment:
