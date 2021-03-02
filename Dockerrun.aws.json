@@ -1,0 +1,40 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "client",
+      "image": "rattawitdev/multi-client",
+      "hostname": "client",
+      "essential": false,
+      "memory": 128
+    },
+    {
+      "name": "serverweb",
+      "image": "rattawitdev/multi-server-web",
+      "hostname": "apiweb",
+      "essential": false,
+      "memory": 128
+    },
+    {
+      "name": "servermobile",
+      "image": "rattawitdev/multi-server-mobile",
+      "hostname": "apimobile",
+      "essential": false,
+      "memory": 128
+    },
+    {
+      "name": "nginx",
+      "image": "rattawitdev/multi-nginx",
+      "hostname": "nginx",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": ["client", "serverweb", "servermobile"],
+      "memory": 128
+    }
+  ]
+}

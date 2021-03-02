@@ -1,0 +1,36 @@
+sudo: required
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - docker build -t rattawitdev/react-test -f ./Ema.Admin.Web/Dockerfile.dev ./Ema.Admin.Web
+
+script:
+  - docker run -e CI=true rattawitdev/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t rattawitdev/multi-client ./Ema.Admin.Web
+  - docker build -t rattawitdev/multi-nginx ./Ema.Nginx
+  - docker build -t rattawitdev/multi-server-web ./Ema.Ijoins.Api
+  - docker build -t rattawitdev/multi-server-mobile ./Ema.IjoinsChkInOut.Api
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push rattawitdev/multi-client
+  - docker push rattawitdev/multi-nginx
+  - docker push rattawitdev/multi-server-web
+  - docker push rattawitdev/multi-server-mobile
+
+deploy:
+  provider: elasticbeanstalk
+  region: 'ap-southeast-1'
+  app: 'ema-backend-dev'
+  env: 'Emabackenddev-env'
+  bucket_name: 'elasticbeanstalk-ap-southeast-1-712655197802'
+  bucket_path: 'backend-ema'
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
