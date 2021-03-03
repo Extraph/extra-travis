@@ -55,18 +55,6 @@ const SessionList = ({
   onTableCoverPhoto
 }) => {
   var columns = [
-    {
-      title: 'Cover Photo',
-      field: 'coverPhotoUrl',
-      align: 'center',
-      render: (rowData) => (
-        <img
-          src={rowData.coverPhotoUrl}
-          style={{ width: 80, borderRadius: '5%' }}
-          alt=""
-        />
-      )
-    },
     { field: 'courseId', title: 'Course ID', searchable: true },
     { field: 'sessionId', title: 'Session ID', searchable: true },
     { field: 'courseName', title: 'Course Name', searchable: false },
@@ -92,6 +80,18 @@ const SessionList = ({
       render: (rowData) =>
         moment(rowData.endDateTime).format('DD/MM/YYYY hh:mm A'),
       searchable: false
+    },
+    {
+      title: 'Cover Photo',
+      field: 'coverPhotoUrl',
+      align: 'center',
+      render: (rowData) => (
+        <img
+          src={rowData.coverPhotoUrl}
+          style={{ width: 80, borderRadius: '5%' }}
+          alt=""
+        />
+      )
     }
   ];
 
@@ -127,7 +127,7 @@ const SessionList = ({
           })
         ]}
         options={{
-          actionsColumnIndex: -1,
+          // actionsColumnIndex: -1,
           searchFieldAlignment: 'left',
           searchFieldStyle: {
             width: 600
@@ -148,14 +148,6 @@ const SessionList = ({
           }
         }}
       />
-      {/* <Table
-        tableHeaderColor="info"
-        tableHead={tableHead}
-        tableData={session}
-        onTablePrint={onTablePrint}
-        onTableCancel={onTableCancel}
-        onTableUndoCancel={onTableUndoCancel}
-      /> */}
     </React.Fragment>
   );
 };
