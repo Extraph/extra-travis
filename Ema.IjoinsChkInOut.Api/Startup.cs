@@ -35,29 +35,29 @@ namespace Ema.IjoinsChkInOut.Api
 
       services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
-      // var envAwsAccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY");
-      // var envAwsAccessSecret = Environment.GetEnvironmentVariable("AWS_ACCESS_SECRET");
-      // var envAwsBucket = Environment.GetEnvironmentVariable("AWS_BUCKET");
-      // services.Configure<AWSSetting>(
-      // options =>
-      // {
-      //   options.AccessKey = envAwsAccessKey;
-      //   options.AccessSecret = envAwsAccessSecret;
-      //   options.Bucket = envAwsBucket;
-      // });
-
+      var envAwsAccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY");
+      var envAwsAccessSecret = Environment.GetEnvironmentVariable("AWS_ACCESS_SECRET");
+      var envAwsBucket = Environment.GetEnvironmentVariable("AWS_BUCKET");
       services.Configure<AWSSetting>(
       options =>
       {
-        options.AccessKey = Configuration["AWSSetting:AccessKey"];
-        options.AccessSecret = Configuration["AWSSetting:AccessSecret"];
-        options.Bucket = Configuration["AWSSetting:Bucket"];
+        options.AccessKey = envAwsAccessKey;
+        options.AccessSecret = envAwsAccessSecret;
+        options.Bucket = envAwsBucket;
       });
 
-      //var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
-      //services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
+      // services.Configure<AWSSetting>(
+      // options =>
+      // {
+      //   options.AccessKey = Configuration["AWSSetting:AccessKey"];
+      //   options.AccessSecret = Configuration["AWSSetting:AccessSecret"];
+      //   options.Bucket = Configuration["AWSSetting:Bucket"];
+      // });
 
-      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
+      var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
+
+      // services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
 
       services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 
