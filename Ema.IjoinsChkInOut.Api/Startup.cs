@@ -9,6 +9,7 @@ using Ema.IjoinsChkInOut.Api.Models;
 using Ema.IjoinsChkInOut.Api.EfUserModels;
 using Ema.IjoinsChkInOut.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Ema.IjoinsChkInOut.Api
 {
@@ -25,7 +26,10 @@ namespace Ema.IjoinsChkInOut.Api
     public void ConfigureServices(IServiceCollection services)
     {
 
-      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
+      var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
+
+      // services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
 
       services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 

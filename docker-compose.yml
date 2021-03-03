@@ -22,23 +22,26 @@ services:
   apiweb:
     image: ijoin/apiweb:latest
     depends_on:
-      - 'postgres_db'
-      - 'mongodb_db'
+      - 'adminijoin_db'
+      - 'userijoin_db'
     build:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
     environment:
-      DB_CONNECTION_STRING: 'host=postgres_db;port=5432;database=ema_database;username=ema_user;password=magical_password'
+      DB_ADMIN_CONNECTION_STRING: 'host=adminijoin_db;port=5432;database=adminijoin_database;username=adminijoin_user;password=adminijoin_password'
+      DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
     networks:
       - ijoin-api
 
   apimobile:
     image: ijoin/apimobile:latest
     depends_on:
-      - 'mongodb_db'
+      - 'userijoin_db'
     build:
       dockerfile: Dockerfile
       context: ./Ema.IjoinsChkInOut.Api
+    environment:
+      DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
     networks:
       - ijoin-api
 
@@ -53,25 +56,28 @@ services:
     networks:
       - ijoin-api
 
-  postgres_db:
+  adminijoin_db:
     image: postgres:latest
     ports:
       - '5432:5432'
     volumes:
       - ./Ema.Database/adminijoin.sql :/docker-entrypoint-initdb.d/adminijoin.sql
     environment:
-      POSTGRES_USER: 'ema_user'
-      POSTGRES_PASSWORD: 'magical_password'
-      POSTGRES_DB: 'ema_database'
+      POSTGRES_USER: 'adminijoin_user'
+      POSTGRES_PASSWORD: 'adminijoin_password'
+      POSTGRES_DB: 'adminijoin_database'
     networks:
       - ijoin-api
 
-  mongodb_db:
-    image: mongo:latest
+  userijoin_db:
+    image: postgres:latest
     ports:
-      - '27017'
+      - '5433:5432'
+    volumes:
+      - ./Ema.Database/userijoin.sql :/docker-entrypoint-initdb.d/userijoin.sql
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      POSTGRES_USER: 'userijoin_user'
+      POSTGRES_PASSWORD: 'userijoin_password'
+      POSTGRES_DB: 'userijoin_database'
     networks:
       - ijoin-api

@@ -37,15 +37,18 @@ namespace Ema.Ijoins.Api
       {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ema.Ijoins.Api", Version = "v1" });
       });
-      
-      services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-      
-      //var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-      //services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(connectionString));
-      services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:adminIJoinDbConnection"]));
-      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
 
-      
+      services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+      var connectionAdminString = Environment.GetEnvironmentVariable("DB_ADMIN_CONNECTION_STRING");
+      var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
+      services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(connectionAdminString));
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
+
+      // services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:adminIJoinDbConnection"]));
+      // services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
+
+
       services.AddScoped<IAdminIjoinsService, AdminIjoinsService>();
 
       services.AddScoped<IUserService, UserService>();
