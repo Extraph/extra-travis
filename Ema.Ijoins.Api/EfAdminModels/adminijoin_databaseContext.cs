@@ -511,6 +511,10 @@ namespace Ema.Ijoins.Api.EfAdminModels
                     .IsRequired()
                     .HasColumnName("course_type");
 
+                entity.Property(e => e.CoverPhotoName).HasColumnName("cover_photo_name");
+
+                entity.Property(e => e.CoverPhotoUrl).HasColumnName("cover_photo_url");
+
                 entity.Property(e => e.Createdatetime)
                     .HasColumnName("createdatetime")
                     .HasDefaultValueSql("now()");

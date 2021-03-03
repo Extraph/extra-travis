@@ -459,6 +459,8 @@ CREATE TABLE public."TBM_SESSION"
     course_credit_hours text COLLATE pg_catalog."default",
     passing_criteria_exception text COLLATE pg_catalog."default",
     is_cancel character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT '0'::bpchar,
+    cover_photo_name text COLLATE pg_catalog."default",
+    cover_photo_url text COLLATE pg_catalog."default",
     createdatetime timestamp without time zone NOT NULL DEFAULT now(),
     update_by text COLLATE pg_catalog."default",
     update_datetime timestamp without time zone NOT NULL DEFAULT now(),

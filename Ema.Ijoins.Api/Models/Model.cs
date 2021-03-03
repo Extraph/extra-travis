@@ -12,6 +12,11 @@ namespace Ema.Ijoins.Api.Models
   {
   }
 
+  public class CoverPhotoRequest
+  {
+    public int Id { get; set; }
+    public string SessionId { get; set; }
+  }
   public class KlcFileImportRequest
   {
     public int Id { get; set; }

@@ -169,6 +169,10 @@ namespace Ema.IjoinsChkInOut.Api.EfUserModels
                     .IsRequired()
                     .HasColumnName("course_owner_email");
 
+                entity.Property(e => e.CoverPhotoName).HasColumnName("cover_photo_name");
+
+                entity.Property(e => e.CoverPhotoUrl).HasColumnName("cover_photo_url");
+
                 entity.Property(e => e.Createdatetime)
                     .HasColumnName("createdatetime")
                     .HasDefaultValueSql("now()");

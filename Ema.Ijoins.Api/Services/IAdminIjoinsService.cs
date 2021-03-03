@@ -11,6 +11,9 @@ using Ema.Ijoins.Api.EfUserModels;
 using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Services;
 using System.Globalization;
+using Microsoft.Extensions.Options;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 
 namespace Ema.Ijoins.Api.Services
@@ -18,6 +21,8 @@ namespace Ema.Ijoins.Api.Services
   public interface IAdminIjoinsService
   {
     Task<object> UploadFileKlc(IFormFile file);
+    Task<object> UploadCoverPhoto(IFormFile file);
+    Task<object> UpdateSessionCoverPhoto(CoverPhotoRequest coverPhotoRequest);
     Task<object> ImportKlcData(KlcFileImportRequest tbmKlcFileImport);
     Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession, string userId);
     Task<List<ModelNextSixDayDash>> GetNextSixDayDashs(string userId);
@@ -41,10 +46,16 @@ namespace Ema.Ijoins.Api.Services
   {
     private readonly adminijoin_databaseContext _admincontext;
     private readonly userijoin_databaseContext _usercontext;
-    public AdminIjoinsService(adminijoin_databaseContext admincontext, userijoin_databaseContext usercontext)
+    private readonly string _accessKey;
+    private readonly string _accessSecret;
+    private readonly string _bucket;
+    public AdminIjoinsService(adminijoin_databaseContext admincontext, userijoin_databaseContext usercontext, IOptions<AWSSetting> AWSSettings)
     {
       _admincontext = admincontext;
       _usercontext = usercontext;
+      _accessKey = AWSSettings.Value.AccessKey;
+      _accessSecret = AWSSettings.Value.AccessSecret;
+      _bucket = AWSSettings.Value.Bucket;
     }
     public async Task<object> UploadFileKlc(IFormFile file)
     {
@@ -122,7 +133,103 @@ namespace Ema.Ijoins.Api.Services
         };
       }
     }
+    public async Task<object> UploadCoverPhoto(IFormFile file)
+    {
+      using var transaction = _admincontext.Database.BeginTransaction();
+      try
+      {
+        if (file == null || file.Length == 0) return new { Message = "file not selected" };
 
+        Guid guid = Guid.NewGuid();
+        var ext = Path.GetExtension(file.GetFilename()).ToLowerInvariant();
+        TbmKlcFileImport attachFiles;
+        var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
+        await transaction.CreateSavepointAsync("UploadFileSuccess");
+
+
+        byte[] fileBytes = new Byte[file.Length];
+        file.OpenReadStream().Read(fileBytes, 0, Int32.Parse(file.Length.ToString()));
+        using (var stream = new MemoryStream(fileBytes))
+        {
+          PutObjectResponse response = null;
+          var request = new PutObjectRequest
+          {
+            BucketName = _bucket,
+            Key = guid.ToString() + ext,
+            InputStream = stream,
+            ContentType = file.ContentType,
+            CannedACL = S3CannedACL.PublicRead
+          };
+          response = await client.PutObjectAsync(request);
+
+          attachFiles = new TbmKlcFileImport
+          {
+            FileName = file.GetFilename(),
+            GuidName = guid.ToString() + ext,
+            Status = response.HttpStatusCode == System.Net.HttpStatusCode.OK ? "upload success" : "upload fail",
+            ImportBy = "รัฐวิชญ์"
+          };
+          _admincontext.TbmKlcFileImports.Add(attachFiles);
+          await _admincontext.SaveChangesAsync();
+        }
+
+        var preSignedURL = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = guid.ToString() + ext, Expires = DateTime.Now.AddMinutes(60) });
+
+        await transaction.CommitAsync();
+        return new
+        {
+          Success = true,
+          FileUploadId = attachFiles.Id,
+          AwsImageUrl = preSignedURL
+        };
+      }
+      catch (System.Exception e)
+      {
+        await transaction.RollbackToSavepointAsync("UploadFileSuccess");
+        return new
+        {
+          Success = false,
+          Message = e.Message
+        };
+      }
+    }
+    public async Task<object> UpdateSessionCoverPhoto(CoverPhotoRequest coverPhotoRequest)
+    {
+      try
+      {
+        TbmKlcFileImport tbmKlcFileImport = await _admincontext.TbmKlcFileImports.Where(w => w.Id == coverPhotoRequest.Id).FirstOrDefaultAsync();
+
+        TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == coverPhotoRequest.SessionId).FirstOrDefaultAsync();
+        if(tbmSession != null)
+        {
+          tbmSession.CoverPhotoName = tbmKlcFileImport.GuidName;
+          _admincontext.Entry(tbmSession).State = EntityState.Modified;
+          await _admincontext.SaveChangesAsync();
+
+          var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
+          tbmSession.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = tbmKlcFileImport.GuidName, Expires = DateTime.Now.AddMinutes(60) }); ;
+          tbmSession.File = null;
+          tbmSession.TbmSegments = null;
+          tbmSession.TbmSessionUserHis = null;
+          tbmSession.TbmSessionUsers = null;
+        }
+
+        return new
+        {
+          success = true,
+          message = "",
+          sessionData = tbmSession
+        };
+      }
+      catch (System.Exception e)
+      {
+        return new
+        {
+          success = false,
+          message = e.Message
+        };
+      }
+    }
     public async Task<object> ImportKlcData(KlcFileImportRequest tbmKlcFileImport)
     {
       using var transactionAdmin = _admincontext.Database.BeginTransaction();
@@ -131,7 +238,7 @@ namespace Ema.Ijoins.Api.Services
       try
       {
         await transactionAdmin.CreateSavepointAsync("BeginImport");
-        await transactionUser.CreateSavepointAsync("BeginImport"); 
+        await transactionUser.CreateSavepointAsync("BeginImport");
 
         IEnumerable<TbKlcDataMaster> tbKlcDataMasters = await _admincontext.TbKlcDataMasters.Where(w => w.FileId == tbmKlcFileImport.Id).ToListAsync();
 
@@ -919,7 +1026,7 @@ namespace Ema.Ijoins.Api.Services
         DateTime CheckInDateTime = DateTime.MinValue;
         DateTime CheckOutDateTime = DateTime.MinValue;
         var userRegistrations = await _usercontext.TbUserRegistrations.Where(w => w.SessionId == su.SessionId && w.UserId == su.UserId).ToListAsync();
-          //await _userIjoinsService.GetUserRegistration(new UserRegistration { SessionId = su.SessionId, UserId = su.UserId });
+        //await _userIjoinsService.GetUserRegistration(new UserRegistration { SessionId = su.SessionId, UserId = su.UserId });
 
         List<ModelSegmentReport> segmentReports = new List<ModelSegmentReport>();
 

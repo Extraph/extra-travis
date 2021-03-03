@@ -29,6 +29,8 @@ namespace Ema.IjoinsChkInOut.Api.EfUserModels
         public string CourseCreditHours { get; set; }
         public string PassingCriteriaException { get; set; }
         public char IsCancel { get; set; }
+        public string CoverPhotoName { get; set; }
+        public string CoverPhotoUrl { get; set; }
         public DateTime Createdatetime { get; set; }
         public string UpdateBy { get; set; }
         public DateTime UpdateDatetime { get; set; }
