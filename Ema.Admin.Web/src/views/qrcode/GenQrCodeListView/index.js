@@ -394,7 +394,7 @@ const GenQrCodeListView = () => {
           </DialogContent>
           <DialogActions>
             <Button
-              disabled={uploadFileCoverResponse.awsImageUrl === ''}
+              disabled={uploadFileCoverResponse.coverPhotoUrl === ''}
               autoFocus
               onClick={handleCoverPhotoMobile}
               color="primary"
