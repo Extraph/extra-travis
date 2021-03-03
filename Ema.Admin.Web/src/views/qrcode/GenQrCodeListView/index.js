@@ -278,10 +278,22 @@ const GenQrCodeListView = () => {
         );
         setUpLoading(false);
         setOpenCover(false);
+        setUploadFileCoverResponse({
+          success: false,
+          fileUploadId: '',
+          coverPhotoUrl: '',
+          coverPhotoName: ''
+        });
       })
       .catch((err) => {
         console.log(err.message);
         setUpLoading(false);
+        setUploadFileCoverResponse({
+          success: false,
+          fileUploadId: '',
+          coverPhotoUrl: '',
+          coverPhotoName: ''
+        });
       });
   };
 
