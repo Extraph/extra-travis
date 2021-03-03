@@ -41,13 +41,13 @@ namespace Ema.Ijoins.Api.Controllers
       return Ok(oRet);
     }
 
-    [HttpPost("UpdateSessionCoverPhoto")]
-    public async Task<IActionResult> UpdateSessionCoverPhoto(CoverPhotoRequest coverPhotoRequest)
-    {
-      object oRet = await _ijoinsService.UpdateSessionCoverPhoto(coverPhotoRequest);
+    //[HttpPost("UpdateSessionCoverPhoto")]
+    //public async Task<IActionResult> UpdateSessionCoverPhoto(CoverPhotoRequest coverPhotoRequest)
+    //{
+    //  object oRet = await _ijoinsService.UpdateSessionCoverPhoto(coverPhotoRequest);
 
-      return Ok(oRet);
-    }
+    //  return Ok(oRet);
+    //}
 
     [HttpPost("ImportKlcData")]
     public async Task<IActionResult> ImportKlcData(KlcFileImportRequest tbmKlcFileImport)

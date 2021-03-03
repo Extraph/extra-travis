@@ -116,9 +116,7 @@ const SessionCard = ({ className, cardData, ...rest }) => {
       <CardMedia
         className={classes.media}
         //image={'/static/images/products/ezgif-3-52499cde7dbe.png'}
-        image={
-          '/static/images/products/26035E25-E0B6-47A3-A617-EF53159D6559.PNG'
-        }
+        image={cardData.coverPhotoUrl}
         title=""
       />
       <CardContent className={classes.content}>

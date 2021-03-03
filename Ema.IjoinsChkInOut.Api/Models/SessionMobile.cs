@@ -38,5 +38,8 @@ namespace Ema.IjoinsChkInOut.Api.Models
     public string CourseCreditHours { get; set; }
     public string PassingCriteriaException { get; set; }
     public char IsCancel { get; set; }
+
+    public string CoverPhotoName { get; set; }
+    public string CoverPhotoUrl { get; set; }
   }
 }

@@ -54,10 +54,10 @@ namespace Ema.IjoinsChkInOut.Api
         options.Bucket = Configuration["AWSSetting:Bucket"];
       });
 
-      var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
-      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
+      //var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
+      //services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
 
-      // services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
 
       services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 

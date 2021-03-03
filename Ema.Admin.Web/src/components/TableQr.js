@@ -70,12 +70,12 @@ function Row(props) {
 
   const StyledMenuItem = withStyles((theme) => ({
     root: {
-      '&:focus': {
-        backgroundColor: theme.palette.error.main,
-        '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-          color: theme.palette.common.white
-        }
-      }
+      // '&:focus': {
+      //   backgroundColor: theme.palette.error.main,
+      //   '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+      //     color: theme.palette.common.white
+      //   }
+      // }
     }
   }))(MenuItem);
 

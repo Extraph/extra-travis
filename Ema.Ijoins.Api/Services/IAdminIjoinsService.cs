@@ -173,14 +173,14 @@ namespace Ema.Ijoins.Api.Services
           await _admincontext.SaveChangesAsync();
         }
 
-        var preSignedURL = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = guid.ToString() + ext, Expires = DateTime.Now.AddMinutes(60) });
+        var preSignedURL = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = guid.ToString() + ext, Expires = DateTime.Now.AddMinutes(5) });
 
         await transaction.CommitAsync();
         return new
         {
           Success = true,
-          FileUploadId = attachFiles.Id,
-          AwsImageUrl = preSignedURL
+          coverPhotoUrl = preSignedURL,
+          coverPhotoName = guid.ToString() + ext
         };
       }
       catch (System.Exception e)
@@ -200,14 +200,14 @@ namespace Ema.Ijoins.Api.Services
         TbmKlcFileImport tbmKlcFileImport = await _admincontext.TbmKlcFileImports.Where(w => w.Id == coverPhotoRequest.Id).FirstOrDefaultAsync();
 
         TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == coverPhotoRequest.SessionId).FirstOrDefaultAsync();
-        if(tbmSession != null)
+        if (tbmSession != null)
         {
           tbmSession.CoverPhotoName = tbmKlcFileImport.GuidName;
           _admincontext.Entry(tbmSession).State = EntityState.Modified;
           await _admincontext.SaveChangesAsync();
 
           var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
-          tbmSession.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = tbmKlcFileImport.GuidName, Expires = DateTime.Now.AddMinutes(60) }); ;
+          tbmSession.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = tbmKlcFileImport.GuidName, Expires = DateTime.Now.AddMinutes(5) }); ;
           tbmSession.File = null;
           tbmSession.TbmSegments = null;
           tbmSession.TbmSessionUserHis = null;
@@ -760,6 +760,7 @@ namespace Ema.Ijoins.Api.Services
       //var sess = tbmSessionsCompanies.ToList();
 
       List<ModelSessionsQR> segmentsQRs = new List<ModelSessionsQR>();
+      var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
       foreach (TbmSession session in tbmSessionsCompanies.ToList())
       {
 
@@ -787,6 +788,8 @@ namespace Ema.Ijoins.Api.Services
           CourseCreditHours = session.CourseCreditHours,
           PassingCriteriaException = session.PassingCriteriaException,
           IsCancel = session.IsCancel,
+          CoverPhotoName = session.CoverPhotoName,
+          CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = session.CoverPhotoName, Expires = DateTime.Now.AddMinutes(5) }),
           Createdatetime = session.Createdatetime,
           UpdateBy = session.UpdateBy,
           UpdateDatetime = session.UpdateDatetime,
@@ -859,6 +862,7 @@ namespace Ema.Ijoins.Api.Services
             select s
             );
 
+      var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
       foreach (TbmSession sessionItem in tbmSessionsCompanies.ToList())
       {
         var segment = await _admincontext.TbmSegments.Where(
@@ -872,6 +876,8 @@ namespace Ema.Ijoins.Api.Services
 
         sessionItem.Createdatetime = DateTime.Now.AddDays(tbmSession.AddDay);
         sessionItem.TbmSegments = null;
+
+        sessionItem.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = sessionItem.CoverPhotoName, Expires = DateTime.Now.AddMinutes(5) });
       }
 
       return tbmSessionsCompanies.ToList();
@@ -901,6 +907,12 @@ namespace Ema.Ijoins.Api.Services
             where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
             select s
             );
+
+      var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
+      foreach (TbmSession sessionItem in tbmSessionsCompanies.ToList())
+      {
+        sessionItem.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = sessionItem.CoverPhotoName, Expires = DateTime.Now.AddMinutes(5) });
+      }
 
       return tbmSessionsCompanies.ToList();
     }

@@ -6,6 +6,9 @@ using Ema.IjoinsChkInOut.Api.EfUserModels;
 using Ema.IjoinsChkInOut.Api.Helpers;
 using Ema.IjoinsChkInOut.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace Ema.IjoinsChkInOut.Api.Services
 {
@@ -23,9 +26,15 @@ namespace Ema.IjoinsChkInOut.Api.Services
   public class UserIjoinsService : IUserIjoinsService
   {
     private readonly userijoin_databaseContext _usercontext;
-    public UserIjoinsService(userijoin_databaseContext usercontext)
+    private readonly string _accessKey;
+    private readonly string _accessSecret;
+    private readonly string _bucket;
+    public UserIjoinsService(userijoin_databaseContext usercontext, IOptions<AWSSetting> AWSSettings)
     {
       _usercontext = usercontext;
+      _accessKey = AWSSettings.Value.AccessKey;
+      _accessSecret = AWSSettings.Value.AccessSecret;
+      _bucket = AWSSettings.Value.Bucket;
     }
 
     public async Task CreateSessionUser(TbmUserSessionUser suIn)
@@ -68,7 +77,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
       List<SessionMobile> sessionMobiles = new List<SessionMobile>();
       //var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == userId).ToListAsync();
       var sessionUsers = await _usercontext.TbmUserSessionUsers.Where(w => w.UserId == userId).ToListAsync();
-
+      var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
       foreach (TbmUserSessionUser su in sessionUsers)
       {
         //var session = await _sessions.Find<Session>(w =>
@@ -87,13 +96,13 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
         if (session != null)
         {
-          await GenSessionsTodayForDisplay(sessionMobiles, su, session);
+          await GenSessionsTodayForDisplay(sessionMobiles, su, session, client);
         }
       }
 
       return sessionMobiles.OrderBy(o => o.StartDateTime).ThenBy(o => o.SessionId).ToList();
     }
-    private async Task<List<SessionMobile>> GenSessionsTodayForDisplay(List<SessionMobile> sessionMobiles, TbmUserSessionUser su, TbmUserSession s)
+    private async Task<List<SessionMobile>> GenSessionsTodayForDisplay(List<SessionMobile> sessionMobiles, TbmUserSessionUser su, TbmUserSession s, AmazonS3Client client)
     {
       //var segment = await _segments.Find<Segment>(
       //  w => w.SessionId == s.SessionId &&
@@ -198,6 +207,9 @@ namespace Ema.IjoinsChkInOut.Api.Services
         sessionMobile.PassingCriteriaException = s.PassingCriteriaException;
         sessionMobile.IsCancel = s.IsCancel;
 
+        sessionMobile.CoverPhotoName = s.CoverPhotoName;
+        sessionMobile.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = sessionMobile.CoverPhotoName, Expires = DateTime.Now.AddMinutes(5) });//s.CoverPhotoUrl;
+
         sessionMobiles.Add(sessionMobile);
       }
       else
@@ -242,7 +254,7 @@ namespace Ema.IjoinsChkInOut.Api.Services
       List<SessionMobile> sessionMobiles = new List<SessionMobile>();
       //var sessionUsers = await _sessionusers.Find<SessionUser>(w => w.UserId == userId).ToListAsync();
       var sessionUsers = await _usercontext.TbmUserSessionUsers.Where(w => w.UserId == userId).ToListAsync();
-
+      var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
       foreach (TbmUserSessionUser su in sessionUsers)
       {
         var session = await _usercontext.TbmUserSessions.Where(w =>
@@ -253,13 +265,13 @@ namespace Ema.IjoinsChkInOut.Api.Services
 
         if (session != null)
         {
-          GenSessionsSevendayForDisplay(sessionMobiles, su, session);
+          GenSessionsSevendayForDisplay(sessionMobiles, su, session, client);
         }
       }
 
       return sessionMobiles.OrderBy(o => o.StartDateTime).ThenBy(o => o.SessionId).ToList();
     }
-    private List<SessionMobile> GenSessionsSevendayForDisplay(List<SessionMobile> sessionMobiles, TbmUserSessionUser su, TbmUserSession s)
+    private List<SessionMobile> GenSessionsSevendayForDisplay(List<SessionMobile> sessionMobiles, TbmUserSessionUser su, TbmUserSession s, AmazonS3Client client)
     {
 
       SessionMobile sessionMobile = new SessionMobile();
@@ -285,6 +297,9 @@ namespace Ema.IjoinsChkInOut.Api.Services
       sessionMobile.CourseCreditHours = s.CourseCreditHours;
       sessionMobile.PassingCriteriaException = s.PassingCriteriaException;
       sessionMobile.IsCancel = s.IsCancel;
+
+      sessionMobile.CoverPhotoName = s.CoverPhotoName;
+      sessionMobile.CoverPhotoUrl = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = sessionMobile.CoverPhotoName, Expires = DateTime.Now.AddMinutes(5) });//s.CoverPhotoUrl;
 
       sessionMobiles.Add(sessionMobile);
 
