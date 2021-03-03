@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Ema.IjoinsChkInOut.Api.Models;
 using Ema.IjoinsChkInOut.Api.EfUserModels;
 using Ema.IjoinsChkInOut.Api.Services;
+using Ema.IjoinsChkInOut.Api.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -26,6 +27,14 @@ namespace Ema.IjoinsChkInOut.Api
     public void ConfigureServices(IServiceCollection services)
     {
 
+      services.AddControllers();
+      services.AddSwaggerGen(c =>
+      {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ema.IjoinsChkInOut.Api", Version = "v1" });
+      });
+
+      services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
       var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
       services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
 
@@ -33,11 +42,6 @@ namespace Ema.IjoinsChkInOut.Api
 
       services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 
-      services.AddControllers();
-      services.AddSwaggerGen(c =>
-      {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ema.IjoinsChkInOut.Api", Version = "v1" });
-      });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
