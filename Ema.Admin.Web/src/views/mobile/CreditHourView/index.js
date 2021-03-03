@@ -116,6 +116,9 @@ const CreditHourView = () => {
       });
   };
 
+  const auth = useSelector((state) => state.auth);
+  const { roleName } = auth.authenticated;
+
   return (
     <Page className={classes.root} title="Edit Credit Hour">
       <Box
@@ -189,7 +192,10 @@ const CreditHourView = () => {
                   onChange={handleChange}
                   value={values.courseCreditHoursInit}
                   variant="outlined"
-                  inputProps={{ maxLength: 3 }}
+                  inputProps={{
+                    maxLength: 3,
+                    readOnly: roleName === 'Instructor' ? true : false
+                  }}
                 />
                 <TextField
                   error={Boolean(
@@ -208,7 +214,10 @@ const CreditHourView = () => {
                   onChange={handleChange}
                   value={values.passingCriteriaException}
                   variant="outlined"
-                  inputProps={{ maxLength: 3 }}
+                  inputProps={{
+                    maxLength: 3,
+                    readOnly: roleName === 'Instructor' ? true : false
+                  }}
                 />
 
                 <TextField
@@ -226,7 +235,10 @@ const CreditHourView = () => {
                   onChange={handleChange}
                   value={values.courseCreditHours}
                   variant="outlined"
-                  inputProps={{ maxLength: 3 }}
+                  inputProps={{
+                    maxLength: 3,
+                    readOnly: roleName === 'Instructor' ? true : false
+                  }}
                 />
 
                 <Box mt={3} mb={3}>
@@ -253,14 +265,16 @@ const CreditHourView = () => {
                     <ArrowBackIos />
                   </Fab>
 
-                  <Fab
-                    color="primary"
-                    className={classes.add}
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    <Save />
-                  </Fab>
+                  {roleName !== 'Instructor' && (
+                    <Fab
+                      color="primary"
+                      className={classes.add}
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      <Save />
+                    </Fab>
+                  )}
                 </Box>
               </form>
             )}

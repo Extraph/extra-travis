@@ -10,7 +10,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
+  // DialogTitle,
   Button,
   LinearProgress
 } from '@material-ui/core';
@@ -355,8 +355,7 @@ const GenQrCodeListView = () => {
           />
         )}
         <Dialog onClose={handleCoverClose} open={openCover}>
-          <DialogTitle onClose={handleCoverClose}>Cover Photo</DialogTitle>
-          <DialogContent dividers>
+          <DialogContent>
             <DropzoneArea
               filesLimit={1}
               onChange={handleCoverChange.bind(this)}
@@ -379,7 +378,7 @@ const GenQrCodeListView = () => {
                   onClick={handleUpload}
                   className={classes.button}
                 >
-                  UPLOAD DATA
+                  UPLOAD
                 </Button>
                 {upLoading && (
                   <>
@@ -400,7 +399,7 @@ const GenQrCodeListView = () => {
               onClick={handleCoverPhotoMobile}
               color="primary"
             >
-              Save
+              SAVE
             </Button>
           </DialogActions>
         </Dialog>

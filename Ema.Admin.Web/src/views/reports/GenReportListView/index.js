@@ -96,22 +96,25 @@ const GenReportListView = () => {
   const [reportDataList, setReportDataList] = React.useState([]);
 
   var columns = [
-    { field: 'courseId', title: 'Course ID' },
-    { field: 'sessionId', title: 'Session ID' },
-    { field: 'courseName', title: 'Course Name' },
-    { field: 'sessionName', title: 'Session Name' },
-    { field: 'companyCode', title: 'Company' },
+    { field: 'courseId', title: 'Course ID', searchable: true },
+    { field: 'sessionId', title: 'Session ID', searchable: true },
+    { field: 'courseName', title: 'Course Name', searchable: true },
+    { field: 'sessionName', title: 'Session Name', searchable: true },
+    { field: 'companyCode', title: 'Company', searchable: true },
     {
       field: 'startDateTime',
       title: 'Start Date Time',
+
       render: (rowData) =>
-        moment(rowData.startDateTime).format('DD/MM/YYYY hh:mm A')
+        moment(rowData.startDateTime).format('DD/MM/YYYY hh:mm A'),
+      searchable: false
     },
     {
       field: 'endDateTime',
       title: 'End Date Time',
       render: (rowData) =>
-        moment(rowData.endDateTime).format('DD/MM/YYYY hh:mm A')
+        moment(rowData.endDateTime).format('DD/MM/YYYY hh:mm A'),
+      searchable: false
     }
   ];
 
@@ -171,17 +174,6 @@ const GenReportListView = () => {
             ) : (
               <React.Fragment>
                 {report.length > 0 ? (
-                  // <Card elevation={5}>
-                  //   <CardContent className={classes.content}>
-                  //     <PerfectScrollbar>
-                  //       <ReportList
-                  //         report={report}
-                  //         onReportView={handleOpenReport}
-                  //       />
-                  //     </PerfectScrollbar>
-                  //   </CardContent>
-                  //   <CardActions className={classes.actions}></CardActions>
-                  // </Card>
                   <MaterialTable
                     title=""
                     columns={columns}
@@ -197,7 +189,10 @@ const GenReportListView = () => {
                     ]}
                     options={{
                       actionsColumnIndex: -1,
-                      exportButton: true
+                      searchFieldAlignment: 'left',
+                      searchFieldStyle: {
+                        width: 700
+                      }
                     }}
                     components={{
                       Pagination: (props) => (
@@ -206,6 +201,14 @@ const GenReportListView = () => {
                           ActionsComponent={TablePaginationActions}
                         />
                       )
+                    }}
+                    localization={{
+                      toolbar: {
+                        searchTooltip:
+                          'Search By : Course ID, Session ID, Course Name, Session Name, Company',
+                        searchPlaceholder:
+                          'Search By : Course ID, Session ID, Course Name, Session Name, Company'
+                      }
                     }}
                   />
                 ) : (

@@ -28,6 +28,7 @@ import {
   fetchParticipant,
   fetchUserRegistration
 } from 'src/actions/participant';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -110,6 +111,10 @@ const SessionCard = ({ className, cardData, ...rest }) => {
           endDateTime
         ).format('DD/MM/YYYY')}`;
 
+  const auth = useSelector((state) => state.auth);
+
+  const { roleName } = auth.authenticated;
+
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
       {/* <CardActionArea> */}
@@ -172,9 +177,11 @@ const SessionCard = ({ className, cardData, ...rest }) => {
         <IconButton onClick={handleCreditHourClick}>
           <QueryBuilder className={classes.iconAction} />
         </IconButton>
-        <IconButton onClick={handleAddClick}>
-          <GroupAdd className={classes.iconAction} />
-        </IconButton>
+        {roleName !== 'Instructor' && (
+          <IconButton onClick={handleAddClick}>
+            <GroupAdd className={classes.iconAction} />
+          </IconButton>
+        )}
       </CardActions>
     </Card>
   );
