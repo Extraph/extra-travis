@@ -135,16 +135,16 @@ namespace Ema.Ijoins.Api.Services
     }
     public async Task<object> UploadCoverPhoto(IFormFile file)
     {
-      using var transaction = _admincontext.Database.BeginTransaction();
+      // using var transaction = _admincontext.Database.BeginTransaction();
       try
       {
         if (file == null || file.Length == 0) return new { Message = "file not selected" };
 
         Guid guid = Guid.NewGuid();
         var ext = Path.GetExtension(file.GetFilename()).ToLowerInvariant();
-        TbmKlcFileImport attachFiles;
+        // TbmKlcFileImport attachFiles;
         var client = new AmazonS3Client(_accessKey, _accessSecret, Amazon.RegionEndpoint.APSoutheast1);
-        await transaction.CreateSavepointAsync("UploadFileSuccess");
+        // await transaction.CreateSavepointAsync("UploadFileSuccess");
 
 
         byte[] fileBytes = new Byte[file.Length];
@@ -162,20 +162,20 @@ namespace Ema.Ijoins.Api.Services
           };
           response = await client.PutObjectAsync(request);
 
-          attachFiles = new TbmKlcFileImport
-          {
-            FileName = file.GetFilename(),
-            GuidName = guid.ToString() + ext,
-            Status = response.HttpStatusCode == System.Net.HttpStatusCode.OK ? "upload success" : "upload fail",
-            ImportBy = "รัฐวิชญ์"
-          };
-          _admincontext.TbmKlcFileImports.Add(attachFiles);
-          await _admincontext.SaveChangesAsync();
+          // attachFiles = new TbmKlcFileImport
+          // {
+          //   FileName = file.GetFilename(),
+          //   GuidName = guid.ToString() + ext,
+          //   Status = response.HttpStatusCode == System.Net.HttpStatusCode.OK ? "upload success" : "upload fail",
+          //   ImportBy = "รัฐวิชญ์"
+          // };
+          // _admincontext.TbmKlcFileImports.Add(attachFiles);
+          // await _admincontext.SaveChangesAsync();
         }
 
         var preSignedURL = client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucket, Key = guid.ToString() + ext, Expires = DateTime.Now.AddMinutes(5) });
 
-        await transaction.CommitAsync();
+        // await transaction.CommitAsync();
         return new
         {
           Success = true,
@@ -185,7 +185,7 @@ namespace Ema.Ijoins.Api.Services
       }
       catch (System.Exception e)
       {
-        await transaction.RollbackToSavepointAsync("UploadFileSuccess");
+        // await transaction.RollbackToSavepointAsync("UploadFileSuccess");
         return new
         {
           Success = false,
