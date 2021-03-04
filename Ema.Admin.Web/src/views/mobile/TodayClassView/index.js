@@ -5,7 +5,8 @@ import {
   GridList,
   GridListTile,
   makeStyles,
-  Typography
+  Typography,
+  Hidden
 } from '@material-ui/core';
 import Page from 'src/components/Page';
 // import TodayCard from './TodayCard';
@@ -92,23 +93,54 @@ const TodayClass = (props) => {
           {loading ? (
             <Spinner />
           ) : (
-            <div className={classes.rootGridList}>
-              <GridList
-                className={classes.gridList}
-                cellHeight={'auto'}
-                cols={today.length === 1 ? 1 : 1.5}
-                spacing={1}
-              >
-                {today.map((data, index) => (
-                  <GridListTile key={index}>
-                    <SessionCard
-                      className={classes.productCard}
-                      cardData={data}
-                    />
-                  </GridListTile>
-                ))}
-              </GridList>
-            </div>
+            <>
+              <Hidden lgUp>
+                {/* Mobile View */}
+                <div className={classes.rootGridList}>
+                  <GridList
+                    className={classes.gridList}
+                    cellHeight={'auto'}
+                    cols={today.length === 1 ? 1 : 1.5}
+                    spacing={1}
+                  >
+                    {today.map((data, index) => (
+                      <GridListTile key={index}>
+                        <SessionCard
+                          className={classes.productCard}
+                          cardData={data}
+                        />
+                      </GridListTile>
+                    ))}
+                  </GridList>
+                </div>
+              </Hidden>
+              <Hidden mdDown>
+                {/* Desktop View */}
+                <div className={classes.rootGridList}>
+                  <GridList
+                    className={classes.gridList}
+                    cellHeight={'auto'}
+                    cols={
+                      today.length === 1
+                        ? 1
+                        : today.length > 6
+                        ? 6
+                        : today.length
+                    }
+                    spacing={10}
+                  >
+                    {today.map((data, index) => (
+                      <GridListTile key={index}>
+                        <SessionCard
+                          className={classes.productCard}
+                          cardData={data}
+                        />
+                      </GridListTile>
+                    ))}
+                  </GridList>
+                </div>
+              </Hidden>
+            </>
           )}
         </Box>
       </Container>

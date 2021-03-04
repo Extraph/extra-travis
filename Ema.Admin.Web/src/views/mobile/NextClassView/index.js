@@ -4,7 +4,8 @@ import {
   Container,
   GridList,
   GridListTile,
-  makeStyles
+  makeStyles,
+  Hidden
 } from '@material-ui/core';
 import Page from 'src/components/Page';
 // import NextCard from './NextCard';
@@ -72,23 +73,54 @@ const NextClass = (props) => {
           {loading ? (
             <Spinner />
           ) : (
-            <div className={classes.rootGridList}>
-              <GridList
-                className={classes.gridList}
-                cellHeight={'auto'}
-                cols={sevenday.length === 1 ? 1 : 1.5}
-                spacing={1}
-              >
-                {sevenday.map((data, index) => (
-                  <GridListTile key={index}>
-                    <SessionCard
-                      className={classes.productCard}
-                      cardData={data}
-                    />
-                  </GridListTile>
-                ))}
-              </GridList>
-            </div>
+            <>
+              <Hidden lgUp>
+                {/* Mobile View */}
+                <div className={classes.rootGridList}>
+                  <GridList
+                    className={classes.gridList}
+                    cellHeight={'auto'}
+                    cols={sevenday.length === 1 ? 1 : 1.5}
+                    spacing={1}
+                  >
+                    {sevenday.map((data, index) => (
+                      <GridListTile key={index}>
+                        <SessionCard
+                          className={classes.productCard}
+                          cardData={data}
+                        />
+                      </GridListTile>
+                    ))}
+                  </GridList>
+                </div>
+              </Hidden>
+              <Hidden mdDown>
+                {/* Desktop View */}
+                <div className={classes.rootGridList}>
+                  <GridList
+                    className={classes.gridList}
+                    cellHeight={'auto'}
+                    cols={
+                      sevenday.length === 1
+                        ? 1
+                        : sevenday.length > 6
+                        ? 6
+                        : sevenday.length
+                    }
+                    spacing={10}
+                  >
+                    {sevenday.map((data, index) => (
+                      <GridListTile key={index}>
+                        <SessionCard
+                          className={classes.productCard}
+                          cardData={data}
+                        />
+                      </GridListTile>
+                    ))}
+                  </GridList>
+                </div>
+              </Hidden>
+            </>
           )}
         </Box>
       </Container>
