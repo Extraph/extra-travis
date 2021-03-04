@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Spinner from 'src/components/Spinner';
 import AlertMessage from 'src/components/AlertMessage';
 import SessionList from './SessionList';
-import PerfectScrollbar from 'react-perfect-scrollbar';
+// import PerfectScrollbar from 'react-perfect-scrollbar';
 import QrCodeView from '../QrCodeView';
 import { useReactToPrint } from 'react-to-print';
 import adminIJoin from 'src/api/adminIJoin';
@@ -370,20 +370,20 @@ const GenQrCodeListView = () => {
             ) : (
               <React.Fragment>
                 {session.length > 0 ? (
-                  <Card elevation={5}>
-                    <CardContent className={classes.content}>
-                      <PerfectScrollbar>
-                        <SessionList
-                          session={session}
-                          onTablePrint={onTablePrint}
-                          onTableCancel={onTableCancel}
-                          onTableUndoCancel={onTableUndoCancel}
-                          onTableCoverPhoto={onTableCoverPhoto}
-                        />
-                      </PerfectScrollbar>
-                    </CardContent>
-                    <CardActions className={classes.actions}></CardActions>
-                  </Card>
+                  // <Card elevation={5}>
+                  //   <CardContent className={classes.content}>
+                  //     <PerfectScrollbar>
+                  //     </PerfectScrollbar>
+                  //   </CardContent>
+                  //   <CardActions className={classes.actions}></CardActions>
+                  // </Card>
+                  <SessionList
+                    session={session}
+                    onTablePrint={onTablePrint}
+                    onTableCancel={onTableCancel}
+                    onTableUndoCancel={onTableUndoCancel}
+                    onTableCoverPhoto={onTableCoverPhoto}
+                  />
                 ) : (
                   <Typography color="error" gutterBottom variant="h5">
                     {`ไม่พบข้อมูลที่ค้นหา`}

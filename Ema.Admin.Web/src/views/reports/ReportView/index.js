@@ -20,7 +20,7 @@ import {
   TextField,
   DialogContent
 } from '@material-ui/core';
-import PerfectScrollbar from 'react-perfect-scrollbar';
+// import PerfectScrollbar from 'react-perfect-scrollbar';
 import ReportList from './ReportList';
 
 const useStyles = makeStyles((theme) => ({
@@ -415,14 +415,14 @@ export default function FullScreenReport({
           </Box>
 
           <Box mt={3} ml={1} mr={1} mb={1}>
-            <Card elevation={5}>
+            {/* <Card elevation={5}>
               <CardContent className={classes.content}>
                 <PerfectScrollbar>
-                  <ReportList data={reportListData} />
                 </PerfectScrollbar>
               </CardContent>
               <CardActions className={classes.actions}></CardActions>
-            </Card>
+            </Card> */}
+            <ReportList data={reportListData} />
           </Box>
         </DialogContentStyle>
       </Dialog>
