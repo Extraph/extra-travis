@@ -8,8 +8,8 @@ import {
   CardActions,
   Typography,
   Dialog,
-  DialogActions,
-  DialogContent,
+  // DialogActions,
+  // DialogContent,
   // DialogTitle,
   Button,
   LinearProgress
@@ -29,6 +29,13 @@ import BackdropSpinner from 'src/components/Backdrop';
 import userIJoin from 'src/api/userIJoin';
 import { DropzoneArea } from 'material-ui-dropzone';
 // import DescriptionIcon from '@material-ui/icons/Description';
+import { withStyles } from '@material-ui/core/styles';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogActions from '@material-ui/core/DialogActions';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+
 import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
@@ -71,6 +78,50 @@ function LinearProgressWithLabel(props) {
     </Box>
   );
 }
+
+const styles = (theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(2)
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500]
+  }
+});
+
+const DialogTitle = withStyles(styles)((props) => {
+  const { children, classes, onClose, ...other } = props;
+  return (
+    <MuiDialogTitle disableTypography className={classes.root} {...other}>
+      <Typography variant="h4">{children}</Typography>
+      {onClose ? (
+        <IconButton
+          aria-label="close"
+          className={classes.closeButton}
+          onClick={onClose}
+        >
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </MuiDialogTitle>
+  );
+});
+
+const DialogContent = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(2)
+  }
+}))(MuiDialogContent);
+
+const DialogActions = withStyles((theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(1)
+  }
+}))(MuiDialogActions);
 
 const GenQrCodeListView = () => {
   const classes = useStyles();
@@ -354,14 +405,18 @@ const GenQrCodeListView = () => {
             severity={'error'}
           />
         )}
+
         <Dialog onClose={handleCoverClose} open={openCover}>
-          <DialogContent>
+          <DialogTitle onClose={handleCoverClose}>
+            Manage Cover Photo
+          </DialogTitle>
+          <DialogContent dividers>
             <DropzoneArea
               filesLimit={1}
               onChange={handleCoverChange.bind(this)}
               dropzoneText={'Drag and drop a Cover Photo for Session.'}
               // showFileNames={true}
-              showPreviews={true}
+              // showPreviews={true}
               acceptedFiles={['image/jpeg', 'image/png', 'image/bmp']}
               // getPreviewIcon={handlePreviewIcon}
             />
