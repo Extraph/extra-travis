@@ -5,19 +5,19 @@ networks:
     driver: bridge
 
 services:
-  # nginx:
-  #   depends_on:
-  #     - apiweb
-  #     - apimobile
-  #     - client
-  #   restart: always
-  #   build:
-  #     dockerfile: Dockerfile.dev
-  #     context: ./Ema.Nginx
-  #   ports:
-  #     - '3050:80'
-  #   networks:
-  #     - ijoin-api
+  nginx:
+    depends_on:
+      - apiweb
+      - apimobile
+      - client
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./Ema.Nginx
+    ports:
+      - '3050:80'
+    networks:
+      - ijoin-api
 
   apiweb:
     image: ijoin/apiweb:latest
@@ -27,8 +27,6 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
-    ports:
-      - '5000:80'
     environment:
       DB_ADMIN_CONNECTION_STRING: 'host=adminijoin_db;port=5432;database=adminijoin_database;username=adminijoin_user;password=adminijoin_password'
       DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
@@ -45,8 +43,6 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./Ema.IjoinsChkInOut.Api
-    ports:
-      - '5050:80'
     environment:
       DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
       AWS_ACCESS_KEY: 'AKIA2L3MPKZVCWVCUPGO'
@@ -55,16 +51,16 @@ services:
     networks:
       - ijoin-api
 
-  # client:
-  #   stdin_open: true
-  #   build:
-  #     dockerfile: Dockerfile.dev
-  #     context: ./Ema.Admin.Web
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./Ema.Admin.Web:/app
-  #   networks:
-  #     - ijoin-api
+  client:
+    stdin_open: true
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./Ema.Admin.Web
+    volumes:
+      - /app/node_modules
+      - ./Ema.Admin.Web:/app
+    networks:
+      - ijoin-api
 
   adminijoin_db:
     image: postgres:latest
