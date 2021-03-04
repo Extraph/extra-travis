@@ -18,7 +18,7 @@ export const signin = (loginTerm, callback) => async (dispatch) => {
       console.log('JWT Token From Server : ' + token);
 
       localStorage.setItem('token', token);
-      callback();
+      callback(response.data.response);
     } else dispatch({ type: AUTH_ERROR, payload: response.data.message });
   } catch (e) {
     dispatch({ type: AUTH_ERROR, payload: e.message });

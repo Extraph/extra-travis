@@ -44,8 +44,11 @@ const LoginView = () => {
     // console.log(values);
 
     dispatch(
-      signin(values, () => {
-        navigate('/app/today');
+      signin(values, (response) => {
+        console.log(response);
+        // { roleId: 3, roleName: 'Report Admin' },
+        if (response.roleId === 3) navigate('/app/report');
+        else navigate('/app/today');
       })
     );
 
