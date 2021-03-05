@@ -19,4 +19,7 @@ RUN dotnet publish "Ema.IjoinsChkInOut.Api.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+ENV TZ='Asia/Bangkok'
+
 ENTRYPOINT ["dotnet", "Ema.IjoinsChkInOut.Api.dll"]
