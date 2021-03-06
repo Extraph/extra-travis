@@ -272,38 +272,25 @@ namespace Ema.Ijoins.Api.Services
           await _admincontext.SaveChangesAsync();
         }
 
-
-
-        foreach (TbKlcDataMaster klcDataMaster in tbKlcDataMasters)
+        //Add Update New Session From Klc
+        var klcSession = tbKlcDataMasters.Select(d => new
         {
-          //int CourseTypeId;
-          //if (!TbmCourseTypeExists(klcDataMaster.CourseType))
-          //{
-          //  TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType, CourseId = klcDataMaster.CourseId };
-          //  _admincontext.TbmCourseTypes.Add(tbmCourseType);
-          //  await _admincontext.SaveChangesAsync();
-          //  CourseTypeId = tbmCourseType.Id;
-          //}
-          //else
-          //{
-          //  TbmCourseType tbmCourseType = await _admincontext.TbmCourseTypes.Where(w => w.CourseType == klcDataMaster.CourseType).FirstOrDefaultAsync();
-          //  CourseTypeId = tbmCourseType.Id;
-          //}
-
-          if (!TbmCourseExists(klcDataMaster.CourseId))
-          {
-            TbmCourse tbmCourse = new TbmCourse { CourseId = klcDataMaster.CourseId, CourseName = klcDataMaster.CourseName, CourseNameTh = klcDataMaster.CourseNameTh };
-            _admincontext.TbmCourses.Add(tbmCourse);
-            await _admincontext.SaveChangesAsync();
-          }
-          else
-          {
-            TbmCourse tbmCourse = await _admincontext.TbmCourses.Where(w => w.CourseId == klcDataMaster.CourseId).FirstOrDefaultAsync();
-            tbmCourse.CourseName = klcDataMaster.CourseName;
-            tbmCourse.CourseNameTh = klcDataMaster.CourseNameTh;
-            _admincontext.Entry(tbmCourse).State = EntityState.Modified;
-            await _admincontext.SaveChangesAsync();
-          }
+          d.FileId,
+          d.CourseType,
+          d.CourseId,
+          d.CourseName,
+          d.CourseNameTh,
+          d.SessionId,
+          d.SessionName,
+          d.CourseOwnerEmail,
+          d.CourseOwnerContactNo,
+          d.Venue,
+          d.Instructor,
+          d.CourseCreditHours,
+          d.PassingCriteriaException
+        }).Distinct().ToList();
+        foreach (var klcDataMaster in klcSession)
+        {
 
           if (!TbmSessionExists(klcDataMaster.SessionId))
           {
@@ -365,80 +352,77 @@ namespace Ema.Ijoins.Api.Services
             await _admincontext.SaveChangesAsync();
           }
 
-          if (!TbmSegmentExists(klcDataMaster.StartDateTime, klcDataMaster.EndDateTime, klcDataMaster.SessionId))
-          {
-            TbmSegment tbmSegment = new TbmSegment
-            {
-              SessionId = klcDataMaster.SessionId,
-              SegmentNo = klcDataMaster.SegmentNo,
-              SegmentName = klcDataMaster.SegmentName,
-
-              StartDate = klcDataMaster.StartDateTime.ToString("yyyyMMdd"),
-              EndDate = klcDataMaster.EndDateTime.ToString("yyyyMMdd"),
-
-              StartTime = klcDataMaster.StartDateTime.ToString("HHmm"),
-              EndTime = klcDataMaster.EndDateTime.ToString("HHmm"),
-
-              StartDateTime = klcDataMaster.StartDateTime,
-              EndDateTime = klcDataMaster.EndDateTime,
-              Venue = klcDataMaster.Venue,
-            };
-            _admincontext.TbmSegments.Add(tbmSegment);
-            await _admincontext.SaveChangesAsync();
-          }
-          else
-          {
-            TbmSegment tbmSegment = await _admincontext.TbmSegments.Where(
-              w =>
-              w.SessionId == klcDataMaster.SessionId &&
-              w.StartDateTime == klcDataMaster.StartDateTime &&
-              w.EndDateTime == klcDataMaster.EndDateTime
-            )
-              .FirstOrDefaultAsync();
-            tbmSegment.SegmentNo = klcDataMaster.SegmentNo;
-            tbmSegment.SegmentName = klcDataMaster.SegmentName;
-
-            tbmSegment.StartDate = klcDataMaster.StartDateTime.ToString("yyyyMMdd");
-            tbmSegment.EndDate = klcDataMaster.EndDateTime.ToString("yyyyMMdd");
-
-            tbmSegment.StartTime = klcDataMaster.StartDateTime.ToString("HHmm");
-            tbmSegment.EndTime = klcDataMaster.EndDateTime.ToString("HHmm");
-
-            tbmSegment.Venue = klcDataMaster.Venue;
-            _admincontext.Entry(tbmSegment).State = EntityState.Modified;
-            await _admincontext.SaveChangesAsync();
-          }
-
-          if (!TbmRegistrationStatusExists(klcDataMaster.RegistrationStatus))
-          {
-            TbmRegistrationStatus tbmRegistrationStatus = new TbmRegistrationStatus { RegistrationStatus = klcDataMaster.RegistrationStatus };
-            _admincontext.TbmRegistrationStatuses.Add(tbmRegistrationStatus);
-            await _admincontext.SaveChangesAsync();
-          }
-
-          if (!TbmSessionUsersExists(klcDataMaster.SessionId, klcDataMaster.UserId))
-          {
-            TbmSessionUser tbmSessionUser = new TbmSessionUser
-            {
-              SessionId = klcDataMaster.SessionId,
-              UserId = klcDataMaster.UserId,
-              RegistrationStatus = klcDataMaster.RegistrationStatus
-            };
-            _admincontext.TbmSessionUsers.Add(tbmSessionUser);
-            await _admincontext.SaveChangesAsync();
-          }
-          else
-          {
-            TbmSessionUser tbmSessionUser = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == klcDataMaster.SessionId && w.UserId == klcDataMaster.UserId).FirstOrDefaultAsync();
-            tbmSessionUser.RegistrationStatus = klcDataMaster.RegistrationStatus;
-            tbmSessionUser.UpdateDatetime = DateTime.Now;
-            _admincontext.Entry(tbmSessionUser).State = EntityState.Modified;
-            await _admincontext.SaveChangesAsync();
-          }
         }
 
 
+        //Add New Segment From Klc
+        var klcSegment = tbKlcDataMasters.Select(d => new
+        {
+          d.SessionId,
+          d.SegmentNo,
+          d.SegmentName,
+          d.StartDateTime,
+          d.EndDateTime,
+          d.Venue
+        }).Distinct().ToList();
+        List<TbmSegment> segmentNew = new List<TbmSegment>();
+        foreach (var item in klcSegment)
+        {
+          segmentNew.Add(new TbmSegment
+          {
+            SessionId = item.SessionId,
+            SegmentNo = item.SegmentNo,
+            SegmentName = item.SegmentName,
 
+            StartDate = item.StartDateTime.ToString("yyyyMMdd"),
+            EndDate = item.EndDateTime.ToString("yyyyMMdd"),
+
+            StartTime = item.StartDateTime.ToString("HHmm"),
+            EndTime = item.EndDateTime.ToString("HHmm"),
+
+            StartDateTime = item.StartDateTime,
+            EndDateTime = item.EndDateTime,
+            Venue = item.Venue,
+          });
+        }
+        _admincontext.TbmSegments.AddRange(segmentNew);
+        await _admincontext.SaveChangesAsync();
+
+        //Remove Old Data And Save New Session User From Klc
+        foreach (TbKlcDataMaster ts in tbKlcDataMastersGroupsBySessionId)
+        {
+          var sessionUserExists = (
+                      from su in await _admincontext.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync()
+                      where tbKlcDataMasters.Where(w => w.SessionId == ts.SessionId).Select(x => x.UserId).Contains(su.UserId)
+                      select su
+                      ).ToList();
+
+          if (sessionUserExists != null)
+          {
+            _admincontext.TbmSessionUsers.RemoveRange(sessionUserExists);
+            await _admincontext.SaveChangesAsync();
+          }
+          List<TbmSessionUser> sessionUserNew = new List<TbmSessionUser>();
+          var klcDistinctUserBySession = tbKlcDataMasters.Where(w => w.SessionId == ts.SessionId).Select(d => new
+          {
+            d.SessionId,
+            d.UserId,
+            d.RegistrationStatus
+          }).Distinct().ToList();
+          foreach (var suMaster in klcDistinctUserBySession)
+          {
+            sessionUserNew.Add(new TbmSessionUser
+            {
+              SessionId = suMaster.SessionId,
+              UserId = suMaster.UserId,
+              RegistrationStatus = suMaster.RegistrationStatus
+            });
+          }
+          _admincontext.TbmSessionUsers.AddRange(sessionUserNew);
+          await _admincontext.SaveChangesAsync();
+        }
+
+        //Update DataStart DateEnd For All Session
         foreach (TbKlcDataMaster ts in tbKlcDataMastersGroupsBySessionId)
         {
           TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
@@ -509,116 +493,59 @@ namespace Ema.Ijoins.Api.Services
             await _usercontext.SaveChangesAsync();
           }
 
-          //TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
-          //_userIjoinsService.CreateSession(new Session
-          //{
-          //  CourseId = tbmSession.CourseId,
-          //  CourseName = tbmSession.CourseName,
-          //  CourseNameTh = tbmSession.CourseNameTh,
-          //  SessionId = tbmSession.SessionId,
-          //  SessionName = tbmSession.SessionName,
-          //  StartDateTime = tbmSession.StartDateTime,
-          //  EndDateTime = tbmSession.EndDateTime,
-          //  CourseOwnerEmail = tbmSession.CourseOwnerEmail,
-          //  CourseOwnerContactNo = tbmSession.CourseOwnerContactNo,
-          //  Venue = tbmSession.Venue,
-          //  Instructor = tbmSession.Instructor,
-          //  CourseCreditHoursInit = tbmSession.CourseCreditHours,
-          //  PassingCriteriaExceptionInit = tbmSession.PassingCriteriaException,
-          //  CourseCreditHours = tbmSession.CourseCreditHours,
-          //  PassingCriteriaException = tbmSession.PassingCriteriaException,
-          //  IsCancel = '0'
-          //});
-
           List<VSegmentGenQr> tbmSegments = await _admincontext.VSegmentGenQrs.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+          List<TbmUserSegment> userSegments = new List<TbmUserSegment>();
           foreach (VSegmentGenQr se in tbmSegments)
           {
-
-            if (!TbmUserSegmentExists(se.StartDateTime.Value, se.EndDateTime.Value, se.SessionId))
+            userSegments.Add(new TbmUserSegment
             {
-              TbmUserSegment tbmUserSegment = new TbmUserSegment
-              {
-                SessionId = se.SessionId,
-                //SegmentNo = se.SegmentNo,
-                SegmentName = se.SegmentName,
-                StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
-                EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
-                StartTime = se.StartDateTime.Value.ToString("HHmm"),
-                EndTime = se.EndDateTime.Value.ToString("HHmm"),
-                StartDateTime = se.StartDateTime.Value,
-                EndDateTime = se.EndDateTime.Value,
-                Venue = se.Venue,
-                Createdatetime = DateTime.Now
-              };
-              _usercontext.TbmUserSegments.Add(tbmUserSegment);
-              await _usercontext.SaveChangesAsync();
-            }
-            else
-            {
-              TbmUserSegment tbmUserSegment = await _usercontext.TbmUserSegments.Where(
-                w =>
-                w.SessionId == se.SessionId &&
-                w.StartDateTime == se.StartDateTime &&
-                w.EndDateTime == se.EndDateTime
-              )
-                .FirstOrDefaultAsync();
-              //tbmUserSegment.SegmentNo = se.SegmentNo;
-              tbmUserSegment.SegmentName = se.SegmentName;
-              tbmUserSegment.StartDate = se.StartDateTime.Value.ToString("yyyyMMdd");
-              tbmUserSegment.EndDate = se.EndDateTime.Value.ToString("yyyyMMdd");
-              tbmUserSegment.StartTime = se.StartDateTime.Value.ToString("HHmm");
-              tbmUserSegment.EndTime = se.EndDateTime.Value.ToString("HHmm");
-              tbmUserSegment.StartDateTime = se.StartDateTime.Value;
-              tbmUserSegment.EndDateTime = se.EndDateTime.Value;
-              tbmUserSegment.Venue = se.Venue;
-              _usercontext.Entry(tbmUserSegment).State = EntityState.Modified;
-              await _usercontext.SaveChangesAsync();
-            }
-
-            //_userIjoinsService.CreateSegment(new Segment
-            //{
-            //  SessionId = se.SessionId,
-            //  //SegmentNo = se.SegmentNo,
-            //  SegmentName = se.SegmentName,
-            //  StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
-            //  EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
-            //  StartTime = se.StartDateTime.Value.ToString("HHmm"),
-            //  EndTime = se.EndDateTime.Value.ToString("HHmm"),
-            //  StartDateTime = se.StartDateTime.Value,
-            //  EndDateTime = se.EndDateTime.Value,
-            //  Venue = se.Venue,
-            //  Createdatetime = DateTime.Now
-            //});
-
+              SessionId = se.SessionId,
+              //SegmentNo = se.SegmentNo,
+              SegmentName = se.SegmentName,
+              StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
+              EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
+              StartTime = se.StartDateTime.Value.ToString("HHmm"),
+              EndTime = se.EndDateTime.Value.ToString("HHmm"),
+              StartDateTime = se.StartDateTime.Value,
+              EndDateTime = se.EndDateTime.Value,
+              Venue = se.Venue,
+              Createdatetime = DateTime.Now
+            });
           }
+          _usercontext.TbmUserSegments.AddRange(userSegments);
+          await _usercontext.SaveChangesAsync();
 
-          List<TbmSessionUser> tbmSessionUsers = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync();
-          foreach (TbmSessionUser su in tbmSessionUsers)
+
+          var sessionUserExists = (
+                                from su in await _usercontext.TbmUserSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync()
+                                where tbKlcDataMasters.Where(w => w.SessionId == ts.SessionId).Select(x => x.UserId).Contains(su.UserId)
+                                select su
+                                ).ToList();
+
+          if (sessionUserExists != null)
           {
-            if (su.RegistrationStatus == "Enrolled")
-            {
-              if (!TbmUserSessionUsersExists(su.SessionId, su.UserId))
-              {
-                TbmUserSessionUser tbmUserSessionUser = new TbmUserSessionUser
-                {
-                  SessionId = su.SessionId,
-                  UserId = su.UserId
-                };
-                _usercontext.TbmUserSessionUsers.Add(tbmUserSessionUser);
-                await _usercontext.SaveChangesAsync();
-              }
-
-              //_userIjoinsService.CreateSessionUser(new SessionUser
-              //{
-              //  SessionId = su.SessionId,
-              //  UserId = su.UserId
-              //});
-            }
+            _usercontext.TbmUserSessionUsers.RemoveRange(sessionUserExists);
+            await _usercontext.SaveChangesAsync();
           }
+          List<TbmUserSessionUser> sessionUserNew = new List<TbmUserSessionUser>();
+          var klcDistinctUserBySession = tbKlcDataMasters.Where(w => w.SessionId == ts.SessionId).Select(d => new
+          {
+            d.SessionId,
+            d.UserId,
+            d.RegistrationStatus
+          }).Distinct().ToList();
+          foreach (var suMaster in klcDistinctUserBySession)
+          {
+            if (suMaster.RegistrationStatus == "Enrolled")
+              sessionUserNew.Add(new TbmUserSessionUser
+              {
+                SessionId = suMaster.SessionId,
+                UserId = suMaster.UserId,
+              });
+          }
+          _usercontext.TbmUserSessionUsers.AddRange(sessionUserNew);
+          await _usercontext.SaveChangesAsync();
         }
-
-
-
 
 
         var klcFileImport = await _admincontext.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
@@ -680,6 +607,28 @@ namespace Ema.Ijoins.Api.Services
         };
       }
     }
+
+    private void AddUpdateNewSessionFromKlc(IEnumerable<TbKlcDataMaster> tbKlcDataMasters, KlcFileImportRequest tbmKlcFileImport)
+    {
+
+    }
+    private void AddNewSegmentFromKlc()
+    {
+
+    }
+    private void RemoveOldDataAndSaveNewSessionUserFromKlc()
+    {
+
+    }
+    private void UpdateDataStartDateEndForAllSession()
+    {
+
+    }
+    private void InitialDataForIjoinSessionAndSessionUser()
+    {
+
+    }
+
 
     private bool TbmCourseTypeExists(string CourseType)
     {
