@@ -19,12 +19,12 @@ const tableHead = [
     align: 'center',
     minWidth: 150
   },
-  {
-    id: 'importMessage',
-    label: 'Import Message',
-    align: 'center',
-    minWidth: 150
-  },
+  // {
+  //   id: 'importMessage',
+  //   label: 'Import Message',
+  //   align: 'center',
+  //   minWidth: 150
+  // },
   {
     id: 'createdatetime',
     label: 'Create Datetime',
