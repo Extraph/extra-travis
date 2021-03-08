@@ -13,7 +13,7 @@
       "image": "rattawitdev/multi-server-web",
       "hostname": "apiweb",
       "essential": false,
-      "memory": 128
+      "memory": 512
     },
     {
       "name": "servermobile",
