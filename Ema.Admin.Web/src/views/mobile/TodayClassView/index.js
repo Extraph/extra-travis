@@ -53,7 +53,7 @@ const TodayClass = (props) => {
   const addDay = useSelector((state) => state.selected.addDay);
 
   const onSearchSubmit = (term) => {
-    console.log(addDay);
+    // console.log(addDay);
     dispatch(
       fetchToday({
         CourseId: term,
@@ -68,7 +68,7 @@ const TodayClass = (props) => {
 
   useEffect(() => {
     dispatch(selectEditFrom('today'));
-    console.log(addDay);
+    // console.log(addDay);
     dispatch(
       fetchToday({
         CourseId: '',
@@ -78,7 +78,7 @@ const TodayClass = (props) => {
     setOpenSnackbar(true);
   }, [addDay, dispatch]);
 
-  console.log(today);
+  // console.log(today);
 
   return (
     <Page className={classes.root} title="Today Class">

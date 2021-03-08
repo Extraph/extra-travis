@@ -173,13 +173,22 @@ const CompanyAssignmentView = () => {
       errorList.push('Please choose company.');
     }
 
+    if (newData.isDefault === undefined) {
+      newData = { ...newData, isDefault: '0' };
+    }
+
     if (errorList.length < 1) {
       //no error
       await adminIJoin
         .post('/UserCompany', { ...newData, userId: userAssign.userId })
         .then((res) => {
+          // console.log(res.data);
           let dataToAdd = [...data];
-          dataToAdd.push(newData);
+          dataToAdd.push({
+            ...newData,
+            id: res.data.id,
+            userId: userAssign.userId
+          });
           setData(dataToAdd);
           resolve();
           setErrorMessages([]);
@@ -188,7 +197,7 @@ const CompanyAssignmentView = () => {
         .catch((error) => {
           if (error.response.status === 409) {
             // throw new Error(`${err.config.url} not found`);
-            setErrorMessages([`${newData.companyId} company already exists.`]);
+            setErrorMessages([`Company already exists.`]);
           } else {
             setErrorMessages(['Cannot add data. Server error!']);
           }

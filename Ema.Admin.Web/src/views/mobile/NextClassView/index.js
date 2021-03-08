@@ -63,7 +63,7 @@ const NextClass = (props) => {
     setOpenSnackbar(true);
   }, [dispatch]);
 
-  console.log(sevenday);
+  // console.log(sevenday);
 
   return (
     <Page className={classes.root} title="Next Classes">

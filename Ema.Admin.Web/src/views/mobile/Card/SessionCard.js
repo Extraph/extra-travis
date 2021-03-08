@@ -177,11 +177,10 @@ const SessionCard = ({ className, cardData, ...rest }) => {
         <IconButton onClick={handleCreditHourClick}>
           <QueryBuilder className={classes.iconAction} />
         </IconButton>
-        {roleName !== 'Instructor' && (
-          <IconButton onClick={handleAddClick}>
-            <GroupAdd className={classes.iconAction} />
-          </IconButton>
-        )}
+
+        <IconButton onClick={handleAddClick}>
+          <GroupAdd className={classes.iconAction} />
+        </IconButton>
       </CardActions>
     </Card>
   );

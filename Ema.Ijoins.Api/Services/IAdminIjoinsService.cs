@@ -767,7 +767,7 @@ namespace Ema.Ijoins.Api.Services
             select s
             );
 
-      for (int i = 1; i <= 6; i++)
+      for (int i = 1; i <= 16; i++)
       {
         DateTime date = DateTime.Now.AddDays(i);
         DateTime.TryParseExact(date.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);

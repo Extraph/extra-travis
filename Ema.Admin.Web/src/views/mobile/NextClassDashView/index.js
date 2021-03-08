@@ -69,7 +69,7 @@ const NextClassDash = (props) => {
     setOpenSnackbar(true);
   }, [dispatch]);
 
-  console.log(daydash);
+  // console.log(daydash);
 
   return (
     <Page className={classes.root} title="Next Classes Dashboard">

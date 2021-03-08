@@ -23,15 +23,18 @@ import { useNavigate } from 'react-router-dom';
 import AlertMessage from 'src/components/AlertMessage';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import ParticipantList from './ParticipantList';
+import ParticipantNextList from './ParticipantNextList';
 import { selectSessionUser } from 'src/actions/selected';
 import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
-    minHeight: '100%',
+    height: '100%',
     paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3)
+    paddingTop: theme.spacing(3),
+    position: 'relative',
+    minHeight: 500
   },
   content: {
     padding: 0
@@ -79,8 +82,10 @@ const ParticipantListView = (props) => {
   };
 
   const handleEditNavigate = (row) => {
-    dispatch(selectSessionUser(row));
-    navigate('/app/participant/edit');
+    if (roleName !== 'Instructor') {
+      dispatch(selectSessionUser(row));
+      navigate('/app/participant/edit');
+    }
   };
 
   useEffect(() => {
@@ -99,38 +104,43 @@ const ParticipantListView = (props) => {
   // console.log(userRegis);
 
   let participantRegis = [];
-  for (let parti of participant) {
-    let partiChkIn = { ...parti, checkInDateTime: '', checkOutDateTime: '' };
+  if (editFrom === 'today') {
+    for (let parti of participant) {
+      let partiChkIn = { ...parti, checkInDateTime: '', checkOutDateTime: '' };
 
-    for (const regis of userRegis) {
-      if (parti.userId === regis.userId) {
-        partiChkIn = {
-          ...partiChkIn,
-          registrationStatus:
-            regis.isCheckOut === '1' ? 'Check-Out' : 'Check-In'
-        };
-
-        if (partiChkIn.registrationStatus === 'Check-In')
+      for (const regis of userRegis) {
+        if (parti.userId === regis.userId) {
           partiChkIn = {
             ...partiChkIn,
-            checkInDateTime: moment(regis.checkInDateTime).format('hh:mm A')
+            registrationStatus:
+              regis.isCheckOut === '1' ? 'Check-Out' : 'Check-In'
           };
 
-        if (partiChkIn.registrationStatus === 'Check-Out') {
-          partiChkIn = {
-            ...partiChkIn,
-            checkInDateTime: moment(regis.checkInDateTime).format('hh:mm A'),
-            checkOutDateTime: moment(regis.checkOutDateTime).format('hh:mm A')
-          };
+          if (partiChkIn.registrationStatus === 'Check-In')
+            partiChkIn = {
+              ...partiChkIn,
+              checkInDateTime: moment(regis.checkInDateTime).format('hh:mm A')
+            };
+
+          if (partiChkIn.registrationStatus === 'Check-Out') {
+            partiChkIn = {
+              ...partiChkIn,
+              checkInDateTime: moment(regis.checkInDateTime).format('hh:mm A'),
+              checkOutDateTime: moment(regis.checkOutDateTime).format('hh:mm A')
+            };
+          }
         }
       }
-    }
 
-    participantRegis = [...participantRegis, partiChkIn];
+      participantRegis = [...participantRegis, partiChkIn];
+    }
   }
 
-  console.log(participantRegis);
-  console.log(participant);
+  // console.log(participantRegis);
+  // console.log(participant);
+
+  const auth = useSelector((state) => state.auth);
+  const { roleName } = auth.authenticated;
 
   return (
     <Page className={classes.root} title="Participant">
@@ -157,10 +167,25 @@ const ParticipantListView = (props) => {
                 <Card elevation={5}>
                   <CardContent className={classes.content}>
                     <PerfectScrollbar>
-                      <ParticipantList
-                        tableData={participantRegis}
-                        onTableNavigate={handleEditNavigate}
-                      />
+                      {editFrom === 'today' ? (
+                        <ParticipantList
+                          tableData={
+                            editFrom === 'today'
+                              ? participantRegis
+                              : participant
+                          }
+                          onTableNavigate={handleEditNavigate}
+                        />
+                      ) : (
+                        <ParticipantNextList
+                          tableData={
+                            editFrom === 'today'
+                              ? participantRegis
+                              : participant
+                          }
+                          onTableNavigate={handleEditNavigate}
+                        />
+                      )}
                     </PerfectScrollbar>
                   </CardContent>
                   <CardActions className={classes.actions}></CardActions>
@@ -174,14 +199,17 @@ const ParticipantListView = (props) => {
           )}
         </Box>
 
-        <Box mb={3}>
-          <Typography color="textSecondary" gutterBottom variant="h5">
-            {`* จำนวนคนที่ Check-In แล้วทั้งหมด (${userRegisIn.length})`}
-          </Typography>
-          <Typography color="textSecondary" gutterBottom variant="h5">
-            {`* จำนวนคนที่ Check-Out แล้วทั้งหมด (${userRegisOut.length})`}
-          </Typography>
-        </Box>
+        {editFrom === 'today' && (
+          <Box mb={3}>
+            <Typography color="textSecondary" gutterBottom variant="h5">
+              {`* จำนวนคนที่ Check-In แล้วทั้งหมด (${userRegisIn.length})`}
+            </Typography>
+            <Typography color="textSecondary" gutterBottom variant="h5">
+              {`* จำนวนคนที่ Check-Out แล้วทั้งหมด (${userRegisOut.length})`}
+            </Typography>
+          </Box>
+        )}
+
         <Box>
           <Fab
             color="secondary"
@@ -191,14 +219,16 @@ const ParticipantListView = (props) => {
           >
             <ArrowBackIos />
           </Fab>
-          <Fab
-            color="primary"
-            className={classes.add}
-            component={RouterLink}
-            to={'/app/participant/add'}
-          >
-            <Add />
-          </Fab>
+          {roleName !== 'Instructor' && (
+            <Fab
+              color="primary"
+              className={classes.add}
+              component={RouterLink}
+              to={'/app/participant/add'}
+            >
+              <Add />
+            </Fab>
+          )}
         </Box>
       </Container>
       {errmsg && (
