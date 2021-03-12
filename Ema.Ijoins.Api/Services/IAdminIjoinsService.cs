@@ -41,12 +41,10 @@ namespace Ema.Ijoins.Api.Services
   {
     private readonly adminijoin_databaseContext _admincontext;
     private readonly userijoin_databaseContext _usercontext;
-    private readonly UserIjoinsService _userIjoinsService;
-    public AdminIjoinsService(adminijoin_databaseContext admincontext, userijoin_databaseContext usercontext, UserIjoinsService userIjoinsService)
+    public AdminIjoinsService(adminijoin_databaseContext admincontext, userijoin_databaseContext usercontext)
     {
       _admincontext = admincontext;
       _usercontext = usercontext;
-      _userIjoinsService = userIjoinsService;
     }
     public async Task<object> UploadFileKlc(IFormFile file)
     {

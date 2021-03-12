@@ -25,14 +25,7 @@ namespace Ema.IjoinsChkInOut.Api
     public void ConfigureServices(IServiceCollection services)
     {
 
-      services.Configure<UserIJoinDatabaseSettings>(Configuration.GetSection(nameof(UserIJoinDatabaseSettings)));
-
-      services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
-
-
       services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
-
-      services.AddScoped<UserIjoinsServiceOld>();
 
       services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 

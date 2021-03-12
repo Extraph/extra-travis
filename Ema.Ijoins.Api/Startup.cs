@@ -32,35 +32,20 @@ namespace Ema.Ijoins.Api
     public void ConfigureServices(IServiceCollection services)
     {
 
-      //services.AddCors(options =>
-      //{
-      //  options.AddDefaultPolicy(
-      //      builder =>
-      //      {
-      //        builder.WithOrigins("http://localhost:3000", "http://localhost:5000");
-      //      });
-      //});
-
       services.AddControllers();
       services.AddSwaggerGen(c =>
       {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ema.Ijoins.Api", Version = "v1" });
       });
-
-      services.Configure<UserIJoinDatabaseSettings>(Configuration.GetSection(nameof(UserIJoinDatabaseSettings)));
-
+      
       services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-      services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
-
+      
       //var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
       //services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(connectionString));
-
       services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:adminIJoinDbConnection"]));
       services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
 
-      services.AddScoped<UserIjoinsService>();
-
+      
       services.AddScoped<IAdminIjoinsService, AdminIjoinsService>();
 
       services.AddScoped<IUserService, UserService>();
