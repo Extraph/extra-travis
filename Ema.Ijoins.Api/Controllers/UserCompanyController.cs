@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 
 namespace Ema.Ijoins.Api.Controllers
 {
@@ -13,9 +13,9 @@ namespace Ema.Ijoins.Api.Controllers
   [ApiController]
   public class UserCompanyController : BaseController
   {
-    private readonly ema_databaseContext _context;
+    private readonly adminijoin_databaseContext _context;
 
-    public UserCompanyController(ema_databaseContext context)
+    public UserCompanyController(adminijoin_databaseContext context)
     {
       _context = context;
     }

@@ -9,7 +9,7 @@ using System.Text;
 using Ema.Ijoins.Api.Entities;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.Models;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,10 +30,10 @@ namespace Ema.Ijoins.Api.Services
             new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
         };
 
-    private readonly ema_databaseContext _context;
+    private readonly adminijoin_databaseContext _context;
     private readonly AppSettings _appSettings;
 
-    public UserService(ema_databaseContext context, IOptions<AppSettings> appSettings)
+    public UserService(adminijoin_databaseContext context, IOptions<AppSettings> appSettings)
     {
       _context = context;
       _appSettings = appSettings.Value;

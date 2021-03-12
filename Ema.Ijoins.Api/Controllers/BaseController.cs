@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 
 namespace Ema.Ijoins.Api.Controllers
 {

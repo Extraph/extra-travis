@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 using ExcelDataReader;
 using System.IO;
 using OfficeOpenXml;

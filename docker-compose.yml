@@ -58,7 +58,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./Ema.Database/dbscript.sql :/docker-entrypoint-initdb.d/dbscript.sql
+      - ./Ema.Database/adminijoin.sql :/docker-entrypoint-initdb.d/adminijoin.sql
     environment:
       POSTGRES_USER: 'ema_user'
       POSTGRES_PASSWORD: 'magical_password'

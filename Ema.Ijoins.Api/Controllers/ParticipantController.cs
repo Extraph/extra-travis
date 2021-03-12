@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 using Ema.Ijoins.Api.Services;
 using Ema.Ijoins.Api.Models;
 

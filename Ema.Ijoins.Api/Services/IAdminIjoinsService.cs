@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Ema.Ijoins.Api.Helpers;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
+using Ema.Ijoins.Api.EfUserModels;
 using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Services;
 using System.Globalization;
@@ -38,16 +39,18 @@ namespace Ema.Ijoins.Api.Services
 
   public class AdminIjoinsService : IAdminIjoinsService
   {
-    private readonly ema_databaseContext _context;
+    private readonly adminijoin_databaseContext _admincontext;
+    private readonly userijoin_databaseContext _usercontext;
     private readonly UserIjoinsService _userIjoinsService;
-    public AdminIjoinsService(ema_databaseContext context, UserIjoinsService userIjoinsService)
+    public AdminIjoinsService(adminijoin_databaseContext admincontext, userijoin_databaseContext usercontext, UserIjoinsService userIjoinsService)
     {
-      _context = context;
+      _admincontext = admincontext;
+      _usercontext = usercontext;
       _userIjoinsService = userIjoinsService;
     }
     public async Task<object> UploadFileKlc(IFormFile file)
     {
-      using var transaction = _context.Database.BeginTransaction();
+      using var transaction = _admincontext.Database.BeginTransaction();
       try
       {
         if (file == null || file.Length == 0) return new { Message = "file not selected" };
@@ -71,8 +74,8 @@ namespace Ema.Ijoins.Api.Services
             Status = "upload success",
             ImportBy = "รัฐวิชญ์"
           };
-          _context.TbmKlcFileImports.Add(attachFiles);
-          await _context.SaveChangesAsync();
+          _admincontext.TbmKlcFileImports.Add(attachFiles);
+          await _admincontext.SaveChangesAsync();
           await transaction.CreateSavepointAsync("UploadFileSuccess");
         }
 
@@ -81,15 +84,15 @@ namespace Ema.Ijoins.Api.Services
                                                           .Distinct()
                                                           .ToList();
 
-        var tbmCourseTypes = await _context.TbmCourseTypes.ToListAsync();
+        var tbmCourseTypes = await _admincontext.TbmCourseTypes.ToListAsync();
 
         List<TbKlcDataMaster> tbKlcDatasInvalid = Utility.ValidateData(tbKlcDatas, tbmCourseTypes);
 
         string strMessage = "";
         try
         {
-          _context.TbKlcDataMasters.AddRange(tbKlcDatas);
-          await _context.SaveChangesAsync();
+          _admincontext.TbKlcDataMasters.AddRange(tbKlcDatas);
+          await _admincontext.SaveChangesAsync();
         }
         catch (System.Exception e)
         {
@@ -124,14 +127,15 @@ namespace Ema.Ijoins.Api.Services
 
     public async Task<object> ImportKlcData(KlcFileImportRequest tbmKlcFileImport)
     {
-      using var transaction = _context.Database.BeginTransaction();
+      using var transactionAdmin = _admincontext.Database.BeginTransaction();
+      using var transactionUser = _usercontext.Database.BeginTransaction();
 
       try
       {
-        await transaction.CreateSavepointAsync("BeginImport");
+        await transactionAdmin.CreateSavepointAsync("BeginImport");
+        await transactionUser.CreateSavepointAsync("BeginImport"); 
 
-
-        IEnumerable<TbKlcDataMaster> tbKlcDataMasters = await _context.TbKlcDataMasters.Where(w => w.FileId == tbmKlcFileImport.Id).ToListAsync();
+        IEnumerable<TbKlcDataMaster> tbKlcDataMasters = await _admincontext.TbKlcDataMasters.Where(w => w.FileId == tbmKlcFileImport.Id).ToListAsync();
 
 
         var tbKlcDataMastersGroupsBySessionId =
@@ -145,20 +149,22 @@ namespace Ema.Ijoins.Api.Services
 
         foreach (TbKlcDataMaster ts in tbKlcDataMastersGroupsBySessionId)
         {
-          TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
-          if (tbmSession != null) _context.TbmSegments.RemoveRange(await _context.TbmSegments.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+          TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
+          if (tbmSession != null) _admincontext.TbmSegments.RemoveRange(await _admincontext.TbmSegments.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
 
-          if (tbmSession != null) _userIjoinsService.RemoveSegmentUser(new Segment { SessionId = tbmSession.SessionId });
+          if (tbmSession != null) _usercontext.TbmUserSegments.RemoveRange(await _usercontext.TbmUserSegments.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+          //_userIjoinsService.RemoveSegmentUser(new Segment { SessionId = tbmSession.SessionId });
 
           if (tbmKlcFileImport.ImportType == "Upload session and participants")
           {
-            if (tbmSession != null) _context.TbmSessionUsers.RemoveRange(await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
-            if (tbmSession != null) _context.TbmSessionUserHis.RemoveRange(await _context.TbmSessionUserHis.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+            if (tbmSession != null) _admincontext.TbmSessionUsers.RemoveRange(await _admincontext.TbmSessionUsers.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+            if (tbmSession != null) _admincontext.TbmSessionUserHis.RemoveRange(await _admincontext.TbmSessionUserHis.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
 
-            if (tbmSession != null) _userIjoinsService.RemoveSessionUser(new SessionUser { SessionId = tbmSession.SessionId });
+            if (tbmSession != null) _usercontext.TbmUserSessionUsers.RemoveRange(await _usercontext.TbmUserSessionUsers.Where(w => w.SessionId == tbmSession.SessionId).ToListAsync());
+            //_userIjoinsService.RemoveSessionUser(new SessionUser { SessionId = tbmSession.SessionId });
           }
 
-          await _context.SaveChangesAsync();
+          await _admincontext.SaveChangesAsync();
         }
 
 
@@ -169,29 +175,29 @@ namespace Ema.Ijoins.Api.Services
           //if (!TbmCourseTypeExists(klcDataMaster.CourseType))
           //{
           //  TbmCourseType tbmCourseType = new TbmCourseType { CourseType = klcDataMaster.CourseType, CourseId = klcDataMaster.CourseId };
-          //  _context.TbmCourseTypes.Add(tbmCourseType);
-          //  await _context.SaveChangesAsync();
+          //  _admincontext.TbmCourseTypes.Add(tbmCourseType);
+          //  await _admincontext.SaveChangesAsync();
           //  CourseTypeId = tbmCourseType.Id;
           //}
           //else
           //{
-          //  TbmCourseType tbmCourseType = await _context.TbmCourseTypes.Where(w => w.CourseType == klcDataMaster.CourseType).FirstOrDefaultAsync();
+          //  TbmCourseType tbmCourseType = await _admincontext.TbmCourseTypes.Where(w => w.CourseType == klcDataMaster.CourseType).FirstOrDefaultAsync();
           //  CourseTypeId = tbmCourseType.Id;
           //}
 
           if (!TbmCourseExists(klcDataMaster.CourseId))
           {
             TbmCourse tbmCourse = new TbmCourse { CourseId = klcDataMaster.CourseId, CourseName = klcDataMaster.CourseName, CourseNameTh = klcDataMaster.CourseNameTh };
-            _context.TbmCourses.Add(tbmCourse);
-            await _context.SaveChangesAsync();
+            _admincontext.TbmCourses.Add(tbmCourse);
+            await _admincontext.SaveChangesAsync();
           }
           else
           {
-            TbmCourse tbmCourse = await _context.TbmCourses.Where(w => w.CourseId == klcDataMaster.CourseId).FirstOrDefaultAsync();
+            TbmCourse tbmCourse = await _admincontext.TbmCourses.Where(w => w.CourseId == klcDataMaster.CourseId).FirstOrDefaultAsync();
             tbmCourse.CourseName = klcDataMaster.CourseName;
             tbmCourse.CourseNameTh = klcDataMaster.CourseNameTh;
-            _context.Entry(tbmCourse).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _admincontext.Entry(tbmCourse).State = EntityState.Modified;
+            await _admincontext.SaveChangesAsync();
           }
 
           if (!TbmSessionExists(klcDataMaster.SessionId))
@@ -220,12 +226,12 @@ namespace Ema.Ijoins.Api.Services
               CourseCreditHours = klcDataMaster.CourseCreditHours,
               PassingCriteriaException = klcDataMaster.PassingCriteriaException
             };
-            _context.TbmSessions.Add(tbmSession);
-            await _context.SaveChangesAsync();
+            _admincontext.TbmSessions.Add(tbmSession);
+            await _admincontext.SaveChangesAsync();
           }
           else
           {
-            TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == klcDataMaster.SessionId).FirstOrDefaultAsync();
+            TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == klcDataMaster.SessionId).FirstOrDefaultAsync();
             tbmSession.FileId = klcDataMaster.FileId;
             tbmSession.CourseType = klcDataMaster.CourseType;
 
@@ -250,8 +256,8 @@ namespace Ema.Ijoins.Api.Services
             tbmSession.IsCancel = '0';
             tbmSession.UpdateBy = "Admin Uploader";
             tbmSession.UpdateDatetime = DateTime.Now;
-            _context.Entry(tbmSession).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _admincontext.Entry(tbmSession).State = EntityState.Modified;
+            await _admincontext.SaveChangesAsync();
           }
 
           if (!TbmSegmentExists(klcDataMaster.StartDateTime, klcDataMaster.EndDateTime, klcDataMaster.SessionId))
@@ -272,12 +278,12 @@ namespace Ema.Ijoins.Api.Services
               EndDateTime = klcDataMaster.EndDateTime,
               Venue = klcDataMaster.Venue,
             };
-            _context.TbmSegments.Add(tbmSegment);
-            await _context.SaveChangesAsync();
+            _admincontext.TbmSegments.Add(tbmSegment);
+            await _admincontext.SaveChangesAsync();
           }
           else
           {
-            TbmSegment tbmSegment = await _context.TbmSegments.Where(
+            TbmSegment tbmSegment = await _admincontext.TbmSegments.Where(
               w =>
               w.SessionId == klcDataMaster.SessionId &&
               w.StartDateTime == klcDataMaster.StartDateTime &&
@@ -294,15 +300,15 @@ namespace Ema.Ijoins.Api.Services
             tbmSegment.EndTime = klcDataMaster.EndDateTime.ToString("HHmm");
 
             tbmSegment.Venue = klcDataMaster.Venue;
-            _context.Entry(tbmSegment).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _admincontext.Entry(tbmSegment).State = EntityState.Modified;
+            await _admincontext.SaveChangesAsync();
           }
 
           if (!TbmRegistrationStatusExists(klcDataMaster.RegistrationStatus))
           {
             TbmRegistrationStatus tbmRegistrationStatus = new TbmRegistrationStatus { RegistrationStatus = klcDataMaster.RegistrationStatus };
-            _context.TbmRegistrationStatuses.Add(tbmRegistrationStatus);
-            await _context.SaveChangesAsync();
+            _admincontext.TbmRegistrationStatuses.Add(tbmRegistrationStatus);
+            await _admincontext.SaveChangesAsync();
           }
 
           if (!TbmSessionUsersExists(klcDataMaster.SessionId, klcDataMaster.UserId))
@@ -313,16 +319,16 @@ namespace Ema.Ijoins.Api.Services
               UserId = klcDataMaster.UserId,
               RegistrationStatus = klcDataMaster.RegistrationStatus
             };
-            _context.TbmSessionUsers.Add(tbmSessionUser);
-            await _context.SaveChangesAsync();
+            _admincontext.TbmSessionUsers.Add(tbmSessionUser);
+            await _admincontext.SaveChangesAsync();
           }
           else
           {
-            TbmSessionUser tbmSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == klcDataMaster.SessionId && w.UserId == klcDataMaster.UserId).FirstOrDefaultAsync();
+            TbmSessionUser tbmSessionUser = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == klcDataMaster.SessionId && w.UserId == klcDataMaster.UserId).FirstOrDefaultAsync();
             tbmSessionUser.RegistrationStatus = klcDataMaster.RegistrationStatus;
             tbmSessionUser.UpdateDatetime = DateTime.Now;
-            _context.Entry(tbmSessionUser).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _admincontext.Entry(tbmSessionUser).State = EntityState.Modified;
+            await _admincontext.SaveChangesAsync();
           }
         }
 
@@ -330,74 +336,178 @@ namespace Ema.Ijoins.Api.Services
 
         foreach (TbKlcDataMaster ts in tbKlcDataMastersGroupsBySessionId)
         {
-          TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
+          TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
           if (tbmSession != null)
           {
-            List<TbmSegment> tbmSegments = await _context.TbmSegments.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+            List<TbmSegment> tbmSegments = await _admincontext.TbmSegments.Where(w => w.SessionId == ts.SessionId).ToListAsync();
 
             DateTime minStartDate = tbmSegments.OrderBy(o => o.StartDateTime).FirstOrDefault().StartDateTime;
             DateTime maxEndDate = tbmSegments.OrderByDescending(o => o.EndDateTime).FirstOrDefault().EndDateTime;
             tbmSession.StartDateTime = minStartDate;
             tbmSession.EndDateTime = maxEndDate;
-            _context.Entry(tbmSession).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _admincontext.Entry(tbmSession).State = EntityState.Modified;
+            await _admincontext.SaveChangesAsync();
           }
         }
 
         //Initial Data For Ijoin Session and Session User!!!!!
         foreach (TbKlcDataMaster ts in tbKlcDataMastersGroupsBySessionId)
         {
-          TbmSession tbmSession = await _context.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
-          _userIjoinsService.CreateSession(new Session
+          TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
+          if (!TbmUserSessionExists(tbmSession.SessionId))
           {
-            CourseId = tbmSession.CourseId,
-            CourseName = tbmSession.CourseName,
-            CourseNameTh = tbmSession.CourseNameTh,
-            SessionId = tbmSession.SessionId,
-            SessionName = tbmSession.SessionName,
-            StartDateTime = tbmSession.StartDateTime,
-            EndDateTime = tbmSession.EndDateTime,
-            CourseOwnerEmail = tbmSession.CourseOwnerEmail,
-            CourseOwnerContactNo = tbmSession.CourseOwnerContactNo,
-            Venue = tbmSession.Venue,
-            Instructor = tbmSession.Instructor,
-            CourseCreditHoursInit = tbmSession.CourseCreditHours,
-            PassingCriteriaExceptionInit = tbmSession.PassingCriteriaException,
-            CourseCreditHours = tbmSession.CourseCreditHours,
-            PassingCriteriaException = tbmSession.PassingCriteriaException,
-            IsCancel = '0'
-          });
+            TbmUserSession tbmuserSession = new TbmUserSession
+            {
+              CourseId = tbmSession.CourseId,
+              CourseName = tbmSession.CourseName,
+              CourseNameTh = tbmSession.CourseNameTh,
+              SessionId = tbmSession.SessionId,
+              SessionName = tbmSession.SessionName,
+              StartDateTime = tbmSession.StartDateTime,
+              EndDateTime = tbmSession.EndDateTime,
+              CourseOwnerEmail = tbmSession.CourseOwnerEmail,
+              CourseOwnerContactNo = tbmSession.CourseOwnerContactNo,
+              Venue = tbmSession.Venue,
+              Instructor = tbmSession.Instructor,
+              CourseCreditHoursInit = tbmSession.CourseCreditHours,
+              PassingCriteriaExceptionInit = tbmSession.PassingCriteriaException,
+              CourseCreditHours = tbmSession.CourseCreditHours,
+              PassingCriteriaException = tbmSession.PassingCriteriaException,
+              IsCancel = '0',
+              Createdatetime = DateTime.Now
+            };
+            _usercontext.TbmUserSessions.Add(tbmuserSession);
+            await _usercontext.SaveChangesAsync();
+          }
+          else
+          {
+            TbmUserSession tbmUserSession = await _usercontext.TbmUserSessions.Where(w => w.SessionId == tbmSession.SessionId).FirstOrDefaultAsync();
+            tbmUserSession.CourseId = tbmSession.CourseId;
+            tbmUserSession.CourseName = tbmSession.CourseName;
+            tbmUserSession.CourseNameTh = tbmSession.CourseNameTh;
+            tbmUserSession.SessionId = tbmSession.SessionId;
+            tbmUserSession.SessionName = tbmSession.SessionName;
+            tbmUserSession.StartDateTime = tbmSession.StartDateTime;
+            tbmUserSession.EndDateTime = tbmSession.EndDateTime;
+            tbmUserSession.CourseOwnerEmail = tbmSession.CourseOwnerEmail;
+            tbmUserSession.CourseOwnerContactNo = tbmSession.CourseOwnerContactNo;
+            tbmUserSession.Venue = tbmSession.Venue;
+            tbmUserSession.Instructor = tbmSession.Instructor;
+            tbmUserSession.CourseCreditHoursInit = tbmSession.CourseCreditHours;
+            tbmUserSession.PassingCriteriaExceptionInit = tbmSession.PassingCriteriaException;
+            tbmUserSession.CourseCreditHours = tbmSession.CourseCreditHours;
+            tbmUserSession.PassingCriteriaException = tbmSession.PassingCriteriaException;
+            tbmUserSession.IsCancel = '0';
+            tbmUserSession.UpdateBy = "Admin Uploader";
+            tbmUserSession.UpdateDatetime = DateTime.Now;
+            _usercontext.Entry(tbmUserSession).State = EntityState.Modified;
+            await _usercontext.SaveChangesAsync();
+          }
 
-          List<VSegmentGenQr> tbmSegments = await _context.VSegmentGenQrs.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+          //TbmSession tbmSession = await _admincontext.TbmSessions.Where(w => w.SessionId == ts.SessionId).FirstOrDefaultAsync();
+          //_userIjoinsService.CreateSession(new Session
+          //{
+          //  CourseId = tbmSession.CourseId,
+          //  CourseName = tbmSession.CourseName,
+          //  CourseNameTh = tbmSession.CourseNameTh,
+          //  SessionId = tbmSession.SessionId,
+          //  SessionName = tbmSession.SessionName,
+          //  StartDateTime = tbmSession.StartDateTime,
+          //  EndDateTime = tbmSession.EndDateTime,
+          //  CourseOwnerEmail = tbmSession.CourseOwnerEmail,
+          //  CourseOwnerContactNo = tbmSession.CourseOwnerContactNo,
+          //  Venue = tbmSession.Venue,
+          //  Instructor = tbmSession.Instructor,
+          //  CourseCreditHoursInit = tbmSession.CourseCreditHours,
+          //  PassingCriteriaExceptionInit = tbmSession.PassingCriteriaException,
+          //  CourseCreditHours = tbmSession.CourseCreditHours,
+          //  PassingCriteriaException = tbmSession.PassingCriteriaException,
+          //  IsCancel = '0'
+          //});
+
+          List<VSegmentGenQr> tbmSegments = await _admincontext.VSegmentGenQrs.Where(w => w.SessionId == ts.SessionId).ToListAsync();
           foreach (VSegmentGenQr se in tbmSegments)
           {
-            _userIjoinsService.CreateSegment(new Segment
+
+            if (!TbmUserSegmentExists(se.StartDateTime.Value, se.EndDateTime.Value, se.SessionId))
             {
-              SessionId = se.SessionId,
-              //SegmentNo = se.SegmentNo,
-              SegmentName = se.SegmentName,
-              StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
-              EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
-              StartTime = se.StartDateTime.Value.ToString("HHmm"),
-              EndTime = se.EndDateTime.Value.ToString("HHmm"),
-              StartDateTime = se.StartDateTime.Value,
-              EndDateTime = se.EndDateTime.Value,
-              Venue = se.Venue,
-              Createdatetime = DateTime.Now
-            });
+              TbmUserSegment tbmUserSegment = new TbmUserSegment
+              {
+                SessionId = se.SessionId,
+                //SegmentNo = se.SegmentNo,
+                SegmentName = se.SegmentName,
+                StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
+                EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
+                StartTime = se.StartDateTime.Value.ToString("HHmm"),
+                EndTime = se.EndDateTime.Value.ToString("HHmm"),
+                StartDateTime = se.StartDateTime.Value,
+                EndDateTime = se.EndDateTime.Value,
+                Venue = se.Venue,
+                Createdatetime = DateTime.Now
+              };
+              _usercontext.TbmUserSegments.Add(tbmUserSegment);
+              await _usercontext.SaveChangesAsync();
+            }
+            else
+            {
+              TbmUserSegment tbmUserSegment = await _usercontext.TbmUserSegments.Where(
+                w =>
+                w.SessionId == se.SessionId &&
+                w.StartDateTime == se.StartDateTime &&
+                w.EndDateTime == se.EndDateTime
+              )
+                .FirstOrDefaultAsync();
+              //tbmUserSegment.SegmentNo = se.SegmentNo;
+              tbmUserSegment.SegmentName = se.SegmentName;
+              tbmUserSegment.StartDate = se.StartDateTime.Value.ToString("yyyyMMdd");
+              tbmUserSegment.EndDate = se.EndDateTime.Value.ToString("yyyyMMdd");
+              tbmUserSegment.StartTime = se.StartDateTime.Value.ToString("HHmm");
+              tbmUserSegment.EndTime = se.EndDateTime.Value.ToString("HHmm");
+              tbmUserSegment.StartDateTime = se.StartDateTime.Value;
+              tbmUserSegment.EndDateTime = se.EndDateTime.Value;
+              tbmUserSegment.Venue = se.Venue;
+              _usercontext.Entry(tbmUserSegment).State = EntityState.Modified;
+              await _usercontext.SaveChangesAsync();
+            }
+
+            //_userIjoinsService.CreateSegment(new Segment
+            //{
+            //  SessionId = se.SessionId,
+            //  //SegmentNo = se.SegmentNo,
+            //  SegmentName = se.SegmentName,
+            //  StartDate = se.StartDateTime.Value.ToString("yyyyMMdd"),
+            //  EndDate = se.EndDateTime.Value.ToString("yyyyMMdd"),
+            //  StartTime = se.StartDateTime.Value.ToString("HHmm"),
+            //  EndTime = se.EndDateTime.Value.ToString("HHmm"),
+            //  StartDateTime = se.StartDateTime.Value,
+            //  EndDateTime = se.EndDateTime.Value,
+            //  Venue = se.Venue,
+            //  Createdatetime = DateTime.Now
+            //});
 
           }
 
-          List<TbmSessionUser> tbmSessionUsers = await _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync();
+          List<TbmSessionUser> tbmSessionUsers = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToListAsync();
           foreach (TbmSessionUser su in tbmSessionUsers)
           {
             if (su.RegistrationStatus == "Enrolled")
             {
-              _userIjoinsService.CreateSessionUser(new SessionUser
+              if (!TbmUserSessionUsersExists(su.SessionId, su.UserId))
               {
-                SessionId = su.SessionId,
-                UserId = su.UserId
-              });
+                TbmUserSessionUser tbmUserSessionUser = new TbmUserSessionUser
+                {
+                  SessionId = su.SessionId,
+                  UserId = su.UserId
+                };
+                _usercontext.TbmUserSessionUsers.Add(tbmUserSessionUser);
+                await _usercontext.SaveChangesAsync();
+              }
+
+              //_userIjoinsService.CreateSessionUser(new SessionUser
+              //{
+              //  SessionId = su.SessionId,
+              //  UserId = su.UserId
+              //});
             }
           }
         }
@@ -406,25 +516,26 @@ namespace Ema.Ijoins.Api.Services
 
 
 
-        var klcFileImport = await _context.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
+        var klcFileImport = await _admincontext.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
         klcFileImport.ImportTotalrecords = tbKlcDataMasters.Count().ToString();
         klcFileImport.Status = "import success";
         klcFileImport.ImportType = tbmKlcFileImport.ImportType;
-        _context.Entry(klcFileImport).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        _admincontext.Entry(klcFileImport).State = EntityState.Modified;
+        await _admincontext.SaveChangesAsync();
 
 
         List<TbKlcDataMasterHi> klcDataMasterHi = Utility.MoveDataKlcUploadToHis(tbKlcDataMasters.ToList());
-        _context.TbKlcDataMasterHis.AddRange(klcDataMasterHi);
-        await _context.SaveChangesAsync();
-        _context.TbKlcDataMasters.RemoveRange(tbKlcDataMasters.ToList());
-        await _context.SaveChangesAsync();
+        _admincontext.TbKlcDataMasterHis.AddRange(klcDataMasterHi);
+        await _admincontext.SaveChangesAsync();
+        _admincontext.TbKlcDataMasters.RemoveRange(tbKlcDataMasters.ToList());
+        await _admincontext.SaveChangesAsync();
 
 
 
-        await transaction.CommitAsync();
+        await transactionAdmin.CommitAsync();
+        await transactionUser.CommitAsync();
 
-        var tbmKlcFileImports = await _context.TbmKlcFileImports.OrderByDescending(o => o.Createdatetime).ToListAsync();
+        var tbmKlcFileImports = await _admincontext.TbmKlcFileImports.OrderByDescending(o => o.Createdatetime).ToListAsync();
         tbmKlcFileImports.ForEach(w => { w.TbKlcDataMasters = null; w.TbKlcDataMasterHis = null; w.TbmSessions = null; });
 
         return new
@@ -436,11 +547,12 @@ namespace Ema.Ijoins.Api.Services
       }
       catch (System.Exception e)
       {
-        await transaction.RollbackToSavepointAsync("BeginImport");
+        await transactionAdmin.RollbackToSavepointAsync("BeginImport");
+        await transactionUser.RollbackToSavepointAsync("BeginImport");
 
         try
         {
-          using var contextEx = new ema_databaseContext();
+          using var contextEx = new adminijoin_databaseContext();
           var klcFileImport = await contextEx.TbmKlcFileImports.FindAsync(tbmKlcFileImport.Id);
           klcFileImport.Status = "import failed";
           klcFileImport.ImportMessage = e.Message;
@@ -466,19 +578,19 @@ namespace Ema.Ijoins.Api.Services
 
     private bool TbmCourseTypeExists(string CourseType)
     {
-      return _context.TbmCourseTypes.Any(e => e.CourseType.ToLower() == CourseType.ToLower());
+      return _admincontext.TbmCourseTypes.Any(e => e.CourseType.ToLower() == CourseType.ToLower());
     }
     private bool TbmCourseExists(string CourseId)
     {
-      return _context.TbmCourses.Any(e => e.CourseId == CourseId);
+      return _admincontext.TbmCourses.Any(e => e.CourseId == CourseId);
     }
     public bool TbmSessionExists(string SessionId)
     {
-      return _context.TbmSessions.Any(e => e.SessionId == SessionId);
+      return _admincontext.TbmSessions.Any(e => e.SessionId == SessionId);
     }
     private bool TbmSegmentExists(DateTime StartDateTime, DateTime EndDateTime, string SessionId)
     {
-      return _context.TbmSegments.Any(
+      return _admincontext.TbmSegments.Any(
         e =>
        e.SessionId == SessionId
       && e.StartDateTime == StartDateTime
@@ -487,30 +599,53 @@ namespace Ema.Ijoins.Api.Services
     }
     private bool TbmRegistrationStatusExists(String RegistrationStatus)
     {
-      return _context.TbmRegistrationStatuses.Any(e => e.RegistrationStatus == RegistrationStatus);
+      return _admincontext.TbmRegistrationStatuses.Any(e => e.RegistrationStatus == RegistrationStatus);
     }
     public bool TbmSessionUsersExists(string SessionId, string UserId)
     {
-      return _context.TbmSessionUsers.Any(
+      return _admincontext.TbmSessionUsers.Any(
         e =>
          e.SessionId == SessionId
       && e.UserId == UserId
       );
     }
 
+    public bool TbmUserSessionExists(string SessionId)
+    {
+      return _usercontext.TbmUserSessions.Any(e => e.SessionId == SessionId);
+    }
+    private bool TbmUserSegmentExists(DateTime StartDateTime, DateTime EndDateTime, string SessionId)
+    {
+      return _usercontext.TbmUserSegments.Any(
+        e =>
+       e.SessionId == SessionId
+      && e.StartDateTime == StartDateTime
+      && e.EndDateTime == EndDateTime
+      );
+    }
+    public bool TbmUserSessionUsersExists(string SessionId, string UserId)
+    {
+      return _usercontext.TbmUserSessionUsers.Any(
+        e =>
+         e.SessionId == SessionId
+      && e.UserId == UserId
+      );
+    }
+
+
     public async Task<List<ModelSessionsQR>> GetSessions(TbmSession tbmSession, string userId)
     {
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
 
-      var tbmSessions = await _context.TbmSessions
+      var tbmSessions = await _admincontext.TbmSessions
         .Where(
                 w => w.EndDateTime >= StartDay
                 && w.SessionId.Contains(tbmSession.SessionId)
               )
         .OrderByDescending(o => o.StartDateTime).ToListAsync();
 
-      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbUserCompanies = await _admincontext.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
       var tbmSessionsCompanies = (
             from s in tbmSessions
             where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
@@ -523,12 +658,13 @@ namespace Ema.Ijoins.Api.Services
       foreach (TbmSession session in tbmSessionsCompanies.ToList())
       {
 
-        List<VSegmentGenQr> vSegmentGenQrs = await _context.VSegmentGenQrs.Where(w => w.SessionId == session.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
+        List<VSegmentGenQr> vSegmentGenQrs = await _admincontext.VSegmentGenQrs.Where(w => w.SessionId == session.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
 
         segmentsQRs.Add(new ModelSessionsQR
         {
           FileId = session.FileId,
-          CourseTypeId = session.FileId,
+          CourseType = session.CourseType,
+          CompanyId = session.CompanyId,
           CompanyCode = session.CompanyCode,
           CourseId = session.CourseId,
           CourseName = session.CourseName,
@@ -561,13 +697,13 @@ namespace Ema.Ijoins.Api.Services
     {
       List<ModelNextSixDayDash> retNextSixDayDash = new List<ModelNextSixDayDash>();
       CultureInfo enUS = new CultureInfo("en-US");
-      var session = await _context.TbmSessions.Where(
+      var session = await _admincontext.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
         && w.EndDateTime >= DateTime.Now
         ).OrderBy(o => o.StartDateTime).ToListAsync();
 
-      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbUserCompanies = await _admincontext.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
       var tbmSessionsCompanies = (
             from s in session
             where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
@@ -598,7 +734,7 @@ namespace Ema.Ijoins.Api.Services
 
       string today = DateTime.Now.AddDays(tbmSession.AddDay).ToString("yyyyMMdd");
 
-      var session = await _context.TbmSessions.Where(
+      var session = await _admincontext.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
         && w.StartDateTime <= EndDay
@@ -611,7 +747,7 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
 
-      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbUserCompanies = await _admincontext.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
       var tbmSessionsCompanies = (
             from s in session
             where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
@@ -620,7 +756,7 @@ namespace Ema.Ijoins.Api.Services
 
       foreach (TbmSession sessionItem in tbmSessionsCompanies.ToList())
       {
-        var segment = await _context.TbmSegments.Where(
+        var segment = await _admincontext.TbmSegments.Where(
         w => w.SessionId == sessionItem.SessionId &&
           w.StartDate == today &&
           w.EndDate == today
@@ -642,7 +778,7 @@ namespace Ema.Ijoins.Api.Services
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "11PM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime EndDay);
       DateTime nextSevenDate = DateTime.Now.AddDays(7);
 
-      var session = await _context.TbmSessions.Where(
+      var session = await _admincontext.TbmSessions.Where(
         w =>
         w.IsCancel == '0'
         && (w.EndDateTime > EndDay && w.StartDateTime <= nextSevenDate)
@@ -654,7 +790,7 @@ namespace Ema.Ijoins.Api.Services
         )
         ).OrderBy(o => o.StartDateTime).ToListAsync();
 
-      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbUserCompanies = await _admincontext.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
       var tbmSessionsCompanies = (
             from s in session
             where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
@@ -666,23 +802,23 @@ namespace Ema.Ijoins.Api.Services
     public async Task<TbmSession> UpdateSession(TbmSession tbmSession)
     {
       tbmSession.UpdateDatetime = DateTime.Now;
-      _context.Entry(tbmSession).State = EntityState.Modified;
+      _admincontext.Entry(tbmSession).State = EntityState.Modified;
       try
       {
-        await _context.SaveChangesAsync();
+        await _admincontext.SaveChangesAsync();
       }
       catch (DbUpdateConcurrencyException)
       {
         throw;
       }
 
-      var retSession = await _context.TbmSessions.Where(w => w.SessionId == tbmSession.SessionId).FirstOrDefaultAsync();
+      var retSession = await _admincontext.TbmSessions.Where(w => w.SessionId == tbmSession.SessionId).FirstOrDefaultAsync();
 
       return retSession;
     }
     public async Task<List<TbmSessionUser>> GetParticipant(TbmSessionUser tbmSessionUser)
     {
-      return await _context.TbmSessionUsers
+      return await _admincontext.TbmSessionUsers
           .Where(
                  w => w.SessionId == tbmSessionUser.SessionId
                  && w.UserId.Contains(tbmSessionUser.UserId)
@@ -691,46 +827,46 @@ namespace Ema.Ijoins.Api.Services
     }
     public async Task<TbmSessionUser> AddParticipant(TbmSessionUser tbmSessionUser)
     {
-      _context.TbmSessionUsers.Add(tbmSessionUser);
+      _admincontext.TbmSessionUsers.Add(tbmSessionUser);
       try
       {
-        await _context.SaveChangesAsync();
+        await _admincontext.SaveChangesAsync();
       }
       catch (DbUpdateException)
       {
         throw;
       }
 
-      var retSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
+      var retSessionUser = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
 
       return retSessionUser;
     }
     public async Task<TbmSessionUser> UpdateParticipant(TbmSessionUser tbmSessionUser)
     {
       tbmSessionUser.UpdateDatetime = DateTime.Now;
-      _context.Entry(tbmSessionUser).State = EntityState.Modified;
+      _admincontext.Entry(tbmSessionUser).State = EntityState.Modified;
       try
       {
-        await _context.SaveChangesAsync();
+        await _admincontext.SaveChangesAsync();
       }
       catch (DbUpdateConcurrencyException)
       {
         throw;
       }
 
-      var retSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
+      var retSessionUser = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
 
       return retSessionUser;
     }
     public async Task<object> DeleteParticipant(TbmSessionUser tbmSessionUser)
     {
-      var chkSessionUser = await _context.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
+      var chkSessionUser = await _admincontext.TbmSessionUsers.Where(w => w.SessionId == tbmSessionUser.SessionId && w.UserId == tbmSessionUser.UserId).FirstOrDefaultAsync();
       if (chkSessionUser == null)
       {
         return new { Success = false, Message = "NotFound" };
       }
-      _context.TbmSessionUsers.Remove(chkSessionUser);
-      await _context.SaveChangesAsync();
+      _admincontext.TbmSessionUsers.Remove(chkSessionUser);
+      await _admincontext.SaveChangesAsync();
 
       return new { Success = true };
     }
@@ -741,7 +877,7 @@ namespace Ema.Ijoins.Api.Services
       CultureInfo enUS = new CultureInfo("en-US");
       DateTime.TryParseExact(DateTime.Now.ToString("yyyyMMdd") + " " + "01AM", "yyyyMMdd hhtt", enUS, DateTimeStyles.None, out DateTime StartDay);
 
-      var tbmSessions = await _context.TbmSessions
+      var tbmSessions = await _admincontext.TbmSessions
         .Where(
                 w =>
                 //w.EndDateTime >= StartDay && 
@@ -749,7 +885,7 @@ namespace Ema.Ijoins.Api.Services
               )
         .OrderByDescending(o => o.StartDateTime).ToListAsync();
 
-      var tbUserCompanies = await _context.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
+      var tbUserCompanies = await _admincontext.TbUserCompanies.Where(w => w.UserId == userId).ToListAsync();
       var tbmSessionsCompanies = (
             from s in tbmSessions
             where tbUserCompanies.Select(x => x.CompanyId).Contains(s.CompanyId)
@@ -760,15 +896,15 @@ namespace Ema.Ijoins.Api.Services
     }
     public async Task<List<ModelReport>> GetReport(TbmSession tbmSession)
     {
-      var sessionData = await _context.TbmSessions
+      var sessionData = await _admincontext.TbmSessions
           .Where(
                  w => w.SessionId == tbmSession.SessionId
                 )
           .FirstOrDefaultAsync();
 
-      var segmentData = await _context.VSegmentGenQrs.Where(w => w.SessionId == tbmSession.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
+      var segmentData = await _admincontext.VSegmentGenQrs.Where(w => w.SessionId == tbmSession.SessionId).OrderBy(o => o.StartDateTime).ToListAsync();
 
-      var tbmSessionUsers = await _context.TbmSessionUsers
+      var tbmSessionUsers = await _admincontext.TbmSessionUsers
           .Where(
                  w => w.SessionId == tbmSession.SessionId
                 )
@@ -784,7 +920,8 @@ namespace Ema.Ijoins.Api.Services
         string FinalTrainingStatus = "";
         DateTime CheckInDateTime = DateTime.MinValue;
         DateTime CheckOutDateTime = DateTime.MinValue;
-        var userRegistrations = await _userIjoinsService.GetUserRegistration(new UserRegistration { SessionId = su.SessionId, UserId = su.UserId });
+        var userRegistrations = await _usercontext.TbUserRegistrations.Where(w => w.SessionId == su.SessionId && w.UserId == su.UserId).ToListAsync();
+          //await _userIjoinsService.GetUserRegistration(new UserRegistration { SessionId = su.SessionId, UserId = su.UserId });
 
         List<ModelSegmentReport> segmentReports = new List<ModelSegmentReport>();
 
@@ -805,31 +942,31 @@ namespace Ema.Ijoins.Api.Services
 
             segmentReports.Add(new ModelSegmentReport
             {
-              CheckInDateTime = userRegis.IsCheckIn == '1' ? userRegis.CheckInDateTime.ToLocalTime().ToString("hh:mm tt") : "",
-              CheckOutDateTime = userRegis.IsCheckOut == '1' ? userRegis.CheckOutDateTime.ToLocalTime().ToString("hh:mm tt") : "",
+              CheckInDateTime = userRegis.IsCheckIn == '1' ? userRegis.CheckInDatetime.ToString("hh:mm tt") : "",
+              CheckOutDateTime = userRegis.IsCheckOut == '1' ? userRegis.CheckOutDatetime.ToString("hh:mm tt") : "",
               StartDateTime = sg.StartDateTime.Value.ToString("dd'/'MM'/'yyyy"),
               EndDateTime = sg.EndDateTime.Value.ToString("dd'/'MM'/'yyyy")
             });
 
-            if (userRegis.CheckInDateTime.ToLocalTime() < sg.StartDateTime)
+            if (userRegis.CheckInDatetime < sg.StartDateTime)
             {
               CheckInDateTime = sg.StartDateTime.Value;
             }
             else
             {
-              CheckInDateTime = userRegis.CheckInDateTime.ToLocalTime();
+              CheckInDateTime = userRegis.CheckInDatetime;
             }
 
-            if (userRegis.CheckOutDateTime.ToLocalTime() > sg.EndDateTime)
+            if (userRegis.CheckOutDatetime > sg.EndDateTime)
             {
               CheckOutDateTime = sg.EndDateTime.Value;
             }
             else
             {
-              CheckOutDateTime = userRegis.CheckOutDateTime.ToLocalTime();
+              CheckOutDateTime = userRegis.CheckOutDatetime;
             }
 
-            if (userRegis.CheckInDateTime != DateTime.MinValue && userRegis.CheckOutDateTime != DateTime.MinValue)
+            if (userRegis.CheckInDatetime != DateTime.MinValue && userRegis.CheckOutDatetime != DateTime.MinValue)
             {
               TimeSpan ts = CheckOutDateTime - CheckInDateTime;
               if (ts.TotalMinutes > 0)
@@ -948,17 +1085,17 @@ namespace Ema.Ijoins.Api.Services
 
     public async Task<List<TbmCompany>> GetUserCompany(string userId)
     {
-      var tbUserCompanies = await _context.TbUserCompanies
+      var tbUserCompanies = await _admincontext.TbUserCompanies
           .Where(
                  w => w.UserId == userId
                 )
           .OrderByDescending(o => o.IsDefault)
           .ToListAsync();
 
-      var tbmCompanies = await _context.TbmCompanies.ToListAsync();
+      var tbmCompanies = await _admincontext.TbmCompanies.ToListAsync();
 
       //var tbmCompanies = (
-      //      from c in _context.TbmCompanies
+      //      from c in _admincontext.TbmCompanies
       //      where tbUserCompanies.Select(x => x.CompanyId).Contains(c.CompanyId)
       //      select c
       //      );
@@ -1149,12 +1286,12 @@ namespace Ema.Ijoins.Api.Services
   //  }
 
   //#region Move To His After 30 Day On Board Wait For Production Maybe When Gen Report Complete Trigger
-  //List<TbmSession> tbmSessions = await _context.TbmSessions.Where(w => w.EndDateTime <= DateTime.Now.AddDays(-60)).ToListAsync();
+  //List<TbmSession> tbmSessions = await _admincontext.TbmSessions.Where(w => w.EndDateTime <= DateTime.Now.AddDays(-60)).ToListAsync();
   //tbmSessions.ForEach(ts =>
   //{
   //  List<TbmSessionUserHi> tbmSessionUserHis = new List<TbmSessionUserHi>();
 
-  //  List<TbmSessionUser> tbmSessionUsers = _context.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToList();
+  //  List<TbmSessionUser> tbmSessionUsers = _admincontext.TbmSessionUsers.Where(w => w.SessionId == ts.SessionId).ToList();
 
   //  tbmSessionUsers.ForEach(tsu =>
   //  {
@@ -1168,10 +1305,10 @@ namespace Ema.Ijoins.Api.Services
   //      UpdateDatetime = tsu.UpdateDatetime
   //    });
   //  });
-  //  _context.TbmSessionUserHis.AddRange(tbmSessionUserHis);
-  //  _context.TbmSessionUsers.RemoveRange(tbmSessionUsers);
+  //  _admincontext.TbmSessionUserHis.AddRange(tbmSessionUserHis);
+  //  _admincontext.TbmSessionUsers.RemoveRange(tbmSessionUsers);
   //});
-  //await _context.SaveChangesAsync();
+  //await _admincontext.SaveChangesAsync();
   //#endregion
 
 }

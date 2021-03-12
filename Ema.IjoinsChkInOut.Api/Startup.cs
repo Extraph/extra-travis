@@ -6,8 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Ema.IjoinsChkInOut.Api.Models;
+using Ema.IjoinsChkInOut.Api.EfUserModels;
 using Ema.IjoinsChkInOut.Api.Services;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Ema.IjoinsChkInOut.Api
 {
@@ -28,7 +29,12 @@ namespace Ema.IjoinsChkInOut.Api
 
       services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
 
-      services.AddScoped<UserIjoinsService>();
+
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
+
+      services.AddScoped<UserIjoinsServiceOld>();
+
+      services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 
       services.AddControllers();
       services.AddSwaggerGen(c =>

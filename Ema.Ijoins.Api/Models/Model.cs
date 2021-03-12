@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 using Ema.Ijoins.Api.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -47,8 +47,9 @@ namespace Ema.Ijoins.Api.Models
   public class ModelSessionsQR
   {
     public int FileId { get; set; }
-    public int CourseTypeId { get; set; }
+    public string CourseType { get; set; }
     public string CourseId { get; set; }
+    public int CompanyId { get; set; }
     public string CompanyCode { get; set; }
     public string CourseName { get; set; }
     public string CourseNameTh { get; set; }

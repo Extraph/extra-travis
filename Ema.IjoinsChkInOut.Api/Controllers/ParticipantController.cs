@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Ema.IjoinsChkInOut.Api.Services;
-using Ema.IjoinsChkInOut.Api.Models;
+using Ema.IjoinsChkInOut.Api.EfUserModels;
 
 
 namespace Ema.IjoinsChkInOut.Api.Controllers
@@ -14,21 +14,21 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
   public class ParticipantController : ControllerBase
   {
 
-    private readonly UserIjoinsService _userIjoinsService;
-    public ParticipantController(UserIjoinsService userIjoinsService)
+    private readonly IUserIjoinsService _userIjoinsService;
+    public ParticipantController(IUserIjoinsService userIjoinsService)
     {
       _userIjoinsService = userIjoinsService;
     }
 
     [HttpPost("Add")]
-    public async Task<ActionResult> AddParticipant(SessionUser suIn)
+    public async Task<ActionResult> AddParticipant(TbmUserSessionUser suIn)
     {
       await _userIjoinsService.CreateSessionUser(suIn);
       return Ok();
     }
 
     [HttpPost("Delete")]
-    public async Task<ActionResult> DeleteParticipant(SessionUser suIn)
+    public async Task<ActionResult> DeleteParticipant(TbmUserSessionUser suIn)
     {
       await _userIjoinsService.RemoveSessionUser(suIn);
       return Ok();

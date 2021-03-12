@@ -8,7 +8,7 @@ using System.IO;
 using Ema.Ijoins.Api.Helpers;
 using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Services;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
 
 namespace Ema.Ijoins.Api.Controllers
 {

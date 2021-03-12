@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Ema.IjoinsChkInOut.Api.Services;
 using Ema.IjoinsChkInOut.Api.Models;
 using Ema.IjoinsChkInOut.Api.Helpers;
+using Ema.IjoinsChkInOut.Api.EfUserModels;
 
 
 namespace Ema.IjoinsChkInOut.Api.Controllers
@@ -15,14 +16,14 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
   public class UserRegistrationController : ControllerBase
   {
 
-    private readonly UserIjoinsService _userIjoinsService;
-    public UserRegistrationController(UserIjoinsService userIjoinsService)
+    private readonly IUserIjoinsService _userIjoinsService;
+    public UserRegistrationController(IUserIjoinsService userIjoinsService)
     {
       _userIjoinsService = userIjoinsService;
     }
 
     [HttpPost]
-    public async Task<ActionResult<List<UserRegistration>>> GetUserRegistration(UserRegistration urIn)
+    public async Task<ActionResult<List<TbUserRegistration>>> GetUserRegistration(TbUserRegistration urIn)
     {
       var userRegistrations = await _userIjoinsService.GetUserRegistration(urIn);
 
@@ -36,9 +37,9 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
 
 
     [HttpPost("CheckIn")]
-    public async Task<ActionResult> CheckIn(UserRegistration urIn)
+    public async Task<ActionResult> CheckIn(TbUserRegistration urIn)
     {
-      urIn.CheckInDateTime = DateTime.Now;
+      urIn.CheckInDatetime = DateTime.Now;
       urIn.CheckInDate = Utility.GetStryyyyMMddNow();
       urIn.CheckInTime = int.Parse(Utility.GetStrHHmmNow());
       urIn.IsCheckIn = '1';
@@ -47,9 +48,9 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
     }
 
     [HttpPost("CheckOut")]
-    public async Task<ActionResult> CheckOut(UserRegistration urIn)
+    public async Task<ActionResult> CheckOut(TbUserRegistration urIn)
     {
-      urIn.CheckOutDateTime = DateTime.Now;
+      urIn.CheckOutDatetime = DateTime.Now;
       urIn.CheckOutDate = Utility.GetStryyyyMMddNow();
       urIn.CheckOutTime = int.Parse(Utility.GetStrHHmmNow());
       urIn.IsCheckOut = '1';

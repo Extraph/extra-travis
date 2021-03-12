@@ -11,7 +11,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.Features;
-using Ema.Ijoins.Api.EfModels;
+using Ema.Ijoins.Api.EfAdminModels;
+using Ema.Ijoins.Api.EfUserModels;
 using Ema.Ijoins.Api.Services;
 using Ema.Ijoins.Api.Models;
 using Ema.Ijoins.Api.Helpers;
@@ -52,10 +53,11 @@ namespace Ema.Ijoins.Api
 
       services.AddSingleton<IUserIJoinDatabaseSettings>(sp => sp.GetRequiredService<IOptions<UserIJoinDatabaseSettings>>().Value);
 
-      var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-      services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(connectionString));
+      //var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+      //services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(connectionString));
 
-      //services.AddDbContext<ema_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:appDbConnection"]));
+      services.AddDbContext<adminijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:adminIJoinDbConnection"]));
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
 
       services.AddScoped<UserIjoinsService>();
 
@@ -70,7 +72,7 @@ namespace Ema.Ijoins.Api
         options.MultipartBodyLengthLimit = 268435456;
       });
 
-      
+
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

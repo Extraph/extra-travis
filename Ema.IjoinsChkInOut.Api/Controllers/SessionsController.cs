@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Ema.IjoinsChkInOut.Api.Services;
 using Ema.IjoinsChkInOut.Api.Models;
+using Ema.IjoinsChkInOut.Api.EfUserModels;
 
 
 namespace Ema.IjoinsChkInOut.Api.Controllers
@@ -14,14 +15,14 @@ namespace Ema.IjoinsChkInOut.Api.Controllers
   public class SessionsController : ControllerBase
   {
 
-    private readonly UserIjoinsService _userIjoinsService;
-    public SessionsController(UserIjoinsService userIjoinsService)
+    private readonly IUserIjoinsService _userIjoinsService;
+    public SessionsController(IUserIjoinsService userIjoinsService)
     {
       _userIjoinsService = userIjoinsService;
     }
 
     [HttpPost("Update")]
-    public async Task<ActionResult> UpdateSession(Session sIn)
+    public async Task<ActionResult> UpdateSession(TbmUserSession sIn)
     {
       await _userIjoinsService.UpdateSession(sIn);
       return Ok();

@@ -31,7 +31,7 @@ const styles = (theme) => ({
     padding: 0
   },
   boxQr: {
-    height: 1120,
+    height: 1122,
     padding: theme.spacing(5),
     paddingTop: theme.spacing(35),
     margin: theme.spacing(0)
