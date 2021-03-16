@@ -64,10 +64,8 @@ services:
 
   adminijoin_db:
     image: postgres:latest
-    ports:
-      - '5432:5432'
     volumes:
-      - ./Ema.Database/adminijoin.sql :/docker-entrypoint-initdb.d/adminijoin.sql
+      - ./Ema.Database/adminijoin.sql:/docker-entrypoint-initdb.d/adminijoin.sql
     environment:
       POSTGRES_USER: 'adminijoin_user'
       POSTGRES_PASSWORD: 'adminijoin_password'
@@ -77,10 +75,8 @@ services:
 
   userijoin_db:
     image: postgres:latest
-    ports:
-      - '5433:5432'
     volumes:
-      - ./Ema.Database/userijoin.sql :/docker-entrypoint-initdb.d/userijoin.sql
+      - ./Ema.Database/userijoin.sql:/docker-entrypoint-initdb.d/userijoin.sql
     environment:
       POSTGRES_USER: 'userijoin_user'
       POSTGRES_PASSWORD: 'userijoin_password'

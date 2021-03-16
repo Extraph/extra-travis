@@ -5,7 +5,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./adminijoin.sql :/docker-entrypoint-initdb.d/adminijoin.sql
+      - ./adminijoin.sql:/docker-entrypoint-initdb.d/adminijoin.sql
     environment:
       POSTGRES_USER: 'adminijoin_user'
       POSTGRES_PASSWORD: 'adminijoin_password'
@@ -16,16 +16,16 @@ services:
     ports:
       - '5433:5432'
     volumes:
-      - ./userijoin.sql :/docker-entrypoint-initdb.d/userijoin.sql
+      - ./userijoin.sql:/docker-entrypoint-initdb.d/userijoin.sql
     environment:
       POSTGRES_USER: 'userijoin_user'
       POSTGRES_PASSWORD: 'userijoin_password'
       POSTGRES_DB: 'userijoin_database'
 
-  mongodb_container:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    ports:
-      - 27017:27017
+  # mongodb_container:
+  #   image: mongo:latest
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: rootpassword
+  #   ports:
+  #     - 27017:27017
