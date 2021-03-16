@@ -35,29 +35,42 @@ namespace Ema.IjoinsChkInOut.Api
 
       services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
-      var envAwsAccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY");
-      var envAwsAccessSecret = Environment.GetEnvironmentVariable("AWS_ACCESS_SECRET");
-      var envAwsBucket = Environment.GetEnvironmentVariable("AWS_BUCKET");
-      services.Configure<AWSSetting>(
-      options =>
-      {
-        options.AccessKey = envAwsAccessKey;
-        options.AccessSecret = envAwsAccessSecret;
-        options.Bucket = envAwsBucket;
-      });
-
+      // var envAwsAccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY");
+      // var envAwsAccessSecret = Environment.GetEnvironmentVariable("AWS_ACCESS_SECRET");
+      // var envAwsBucket = Environment.GetEnvironmentVariable("AWS_BUCKET");
       // services.Configure<AWSSetting>(
       // options =>
       // {
-      //   options.AccessKey = Configuration["AWSSetting:AccessKey"];
-      //   options.AccessSecret = Configuration["AWSSetting:AccessSecret"];
-      //   options.Bucket = Configuration["AWSSetting:Bucket"];
+      //   options.AccessKey = envAwsAccessKey;
+      //   options.AccessSecret = envAwsAccessSecret;
+      //   options.Bucket = envAwsBucket;
       // });
 
-      var connectionUserString = Environment.GetEnvironmentVariable("DB_USER_CONNECTION_STRING");
-      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(connectionUserString));
+      services.Configure<AWSSetting>(
+      options =>
+      {
+        options.AccessKey = Configuration["AWSSetting:AccessKey"];
+        options.AccessSecret = Configuration["AWSSetting:AccessSecret"];
+        options.Bucket = Configuration["AWSSetting:Bucket"];
+      });
 
-      // services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:userIJoinDbConnection"]));
+
+
+      var userPgHost = Environment.GetEnvironmentVariable("DB_USER_PGHOST");
+      var userPgPort = Environment.GetEnvironmentVariable("DB_USER_PGPORT");
+      var userPgDatabase = Environment.GetEnvironmentVariable("DB_USER_PGDATABASE");
+      var userPgUser = Environment.GetEnvironmentVariable("DB_USER_PGUSER");
+      var userPgPassword = Environment.GetEnvironmentVariable("DB_USER_PGPASSWORD");
+
+      // var userPgHost = Configuration["ConnectionStrings:userPgHost"];
+      // var userPgPort = Configuration["ConnectionStrings:userPgPort"];
+      // var userPgDatabase = Configuration["ConnectionStrings:userPgDatabase"];
+      // var userPgUser = Configuration["ConnectionStrings:userPgUser"];
+      // var userPgPassword = Configuration["ConnectionStrings:userPgPassword"];
+
+      services.AddDbContext<userijoin_databaseContext>(options => options.UseNpgsql(string.Format("Server={0};Port={1};Database={2};Username={3};Password={4}", userPgHost, userPgPort, userPgDatabase, userPgUser, userPgPassword)));
+
+
 
       services.AddScoped<IUserIjoinsService, UserIjoinsService>();
 

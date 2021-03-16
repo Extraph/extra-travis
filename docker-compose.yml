@@ -28,8 +28,21 @@ services:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
     environment:
-      DB_ADMIN_CONNECTION_STRING: 'host=adminijoin_db;port=5432;database=adminijoin_database;username=adminijoin_user;password=adminijoin_password'
-      DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
+      # DB_ADMIN_CONNECTION_STRING: 'host=adminijoin_db;port=5432;database=adminijoin_database;username=adminijoin_user;password=adminijoin_password'
+      # DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
+
+      DB_ADMIN_PGHOST: 'adminijoin_db'
+      DB_ADMIN_PGPORT: '5432'
+      DB_ADMIN_PGDATABASE: 'adminijoin_database'
+      DB_ADMIN_PGUSER: 'adminijoin_user'
+      DB_ADMIN_PGPASSWORD: 'adminijoin_password'
+
+      DB_USER_PGHOST: 'userijoin_db'
+      DB_USER_PGPORT: '5432'
+      DB_USER_PGDATABASE: 'userijoin_database'
+      DB_USER_PGUSER: 'userijoin_user'
+      DB_USER_PGPASSWORD: 'userijoin_password'
+
       AWS_ACCESS_KEY: 'AKIA2L3MPKZVCWVCUPGO'
       AWS_ACCESS_SECRET: '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'
       AWS_BUCKET: 'ema-cms-bucket'
@@ -44,7 +57,14 @@ services:
       dockerfile: Dockerfile
       context: ./Ema.IjoinsChkInOut.Api
     environment:
-      DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
+      # DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
+
+      DB_USER_PGHOST: 'userijoin_db'
+      DB_USER_PGPORT: '5432'
+      DB_USER_PGDATABASE: 'userijoin_database'
+      DB_USER_PGUSER: 'userijoin_user'
+      DB_USER_PGPASSWORD: 'userijoin_password'
+
       AWS_ACCESS_KEY: 'AKIA2L3MPKZVCWVCUPGO'
       AWS_ACCESS_SECRET: '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'
       AWS_BUCKET: 'ema-cms-bucket'
