@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-user-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: postgres-user
+  ports:
+    - port: 5432
+      targetPort: 5432

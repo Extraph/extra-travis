@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-cluster-ip-service
+  name: postgres-admin-cluster-ip-service
 spec:
   type: ClusterIP
   selector:
-    component: postgres
+    component: postgres-admin
   ports:
     - port: 5432
       targetPort: 5432

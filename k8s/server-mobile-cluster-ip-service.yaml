@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-mobile-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: server-mobile
+  ports:
+    - port: 5050
+      targetPort: 5050

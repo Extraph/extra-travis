@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-web-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server-web
+  template:
+    metadata:
+      labels:
+        component: server-web
+    spec:
+      containers:
+        - name: server-web
+          image: rattawitdev/multi-server-web
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_ADMIN_PGHOST
+              value: postgres-admin-cluster-ip-service
+            - name: DB_ADMIN_PGPORT
+              value: '5432'
+            - name: DB_ADMIN_PGDATABASE
+              value: adminijoin_database
+            - name: DB_ADMIN_PGUSER
+              value: adminijoin_user
+            - name: DB_ADMIN_PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: adminpgpassword
+                  key: ADMINPGPASSWORD
+            - name: DB_USER_PGHOST
+              value: postgres-user-cluster-ip-service
+            - name: DB_USER_PGPORT
+              value: '5432'
+            - name: DB_USER_PGDATABASE
+              value: userijoin_database
+            - name: DB_USER_PGUSER
+              value: userijoin_user
+            - name: DB_USER_PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: userpgpassword
+                  key: USERPGPASSWORD
