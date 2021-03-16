@@ -2,12 +2,7 @@
 
 --dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=5433;Database=userijoin_database;Username=userijoin_user;Password=userijoin_password" Npgsql.EntityFrameworkCore.PostgreSQL -o EfUserModels -f
 
---ALTER DATABASE userijoin_database SET timezone TO 'Asia/Bangkok';
-
-
-ALTER DATABASE userijoin_database SET timezone TO 'Asia/Bangkok';
-
-
+ALTER DATABASE userijoin_database SET "TimeZone" TO 'Asia/Bangkok';
 
 CREATE TABLE public."TBM_USER_SESSION"
 (
@@ -40,12 +35,12 @@ TABLESPACE pg_default;
 ALTER TABLE public."TBM_USER_SESSION"
     OWNER to userijoin_user;
 
-CREATE INDEX "idx_TBM_SESSION_course_id"
+CREATE INDEX "idx_TBM_USER_SESSION_course_id"
     ON public."TBM_USER_SESSION" USING btree
     (course_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
 
-CREATE INDEX "idx_TBM_SESSION_session_id"
+CREATE INDEX "idx_TBM_USER_SESSION_session_id"
     ON public."TBM_USER_SESSION" USING btree
     (session_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
@@ -77,7 +72,7 @@ TABLESPACE pg_default;
 ALTER TABLE public."TBM_USER_SEGMENT"
     OWNER to userijoin_user;
 
-CREATE INDEX "fki_fk_TBM_SESSION_session_id"
+CREATE INDEX "fki_fk_TBM_USER_SESSION_session_id"
     ON public."TBM_USER_SEGMENT" USING btree
     (session_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
@@ -101,17 +96,17 @@ TABLESPACE pg_default;
 ALTER TABLE public."TBM_USER_SESSION_USER"
     OWNER to userijoin_user;
 
-CREATE INDEX "fki_TBM_SESSION_USER_user_id"
+CREATE INDEX "fki_TBM_USER_SESSION_USER_user_id"
     ON public."TBM_USER_SESSION_USER" USING btree
     (user_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
 
-CREATE INDEX "fki_fk_TBM_SESSION_id"
+CREATE INDEX "fki_fk_TBM_USER_SESSION_id"
     ON public."TBM_USER_SESSION_USER" USING btree
     (session_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
-CREATE INDEX "idx_TBM_SESSION_USER_session_user_id"
+CREATE INDEX "idx_TBM_USER_SESSION_USER_session_user_id"
     ON public."TBM_USER_SESSION_USER" USING btree
     (
         user_id COLLATE pg_catalog."default" ASC NULLS LAST,

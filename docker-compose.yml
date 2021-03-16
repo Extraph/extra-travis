@@ -22,22 +22,18 @@ services:
   apiweb:
     image: ijoin/apiweb:latest
     depends_on:
-      - 'adminijoin_db'
-      - 'userijoin_db'
+      - 'ijoin_db'
     build:
       dockerfile: Dockerfile
       context: ./Ema.Ijoins.Api
     environment:
-      # DB_ADMIN_CONNECTION_STRING: 'host=adminijoin_db;port=5432;database=adminijoin_database;username=adminijoin_user;password=adminijoin_password'
-      # DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
-
-      DB_ADMIN_PGHOST: 'adminijoin_db'
+      DB_ADMIN_PGHOST: 'ijoin_db'
       DB_ADMIN_PGPORT: '5432'
       DB_ADMIN_PGDATABASE: 'adminijoin_database'
       DB_ADMIN_PGUSER: 'adminijoin_user'
       DB_ADMIN_PGPASSWORD: 'adminijoin_password'
 
-      DB_USER_PGHOST: 'userijoin_db'
+      DB_USER_PGHOST: 'ijoin_db'
       DB_USER_PGPORT: '5432'
       DB_USER_PGDATABASE: 'userijoin_database'
       DB_USER_PGUSER: 'userijoin_user'
@@ -52,14 +48,12 @@ services:
   apimobile:
     image: ijoin/apimobile:latest
     depends_on:
-      - 'userijoin_db'
+      - 'ijoin_db'
     build:
       dockerfile: Dockerfile
       context: ./Ema.IjoinsChkInOut.Api
     environment:
-      # DB_USER_CONNECTION_STRING: 'host=userijoin_db;port=5432;database=userijoin_database;username=userijoin_user;password=userijoin_password'
-
-      DB_USER_PGHOST: 'userijoin_db'
+      DB_USER_PGHOST: 'ijoin_db'
       DB_USER_PGPORT: '5432'
       DB_USER_PGDATABASE: 'userijoin_database'
       DB_USER_PGUSER: 'userijoin_user'
@@ -82,24 +76,15 @@ services:
     networks:
       - ijoin-api
 
-  adminijoin_db:
+  ijoin_db:
     image: postgres:latest
     volumes:
-      - ./Ema.Database/adminijoin.sql:/docker-entrypoint-initdb.d/adminijoin.sql
+      - ./Ema.Database/initialijoin.sql:/docker-entrypoint-initdb.d/initialijoin.sql
+    ports:
+      - '5432:5432'
     environment:
-      POSTGRES_USER: 'adminijoin_user'
-      POSTGRES_PASSWORD: 'adminijoin_password'
-      POSTGRES_DB: 'adminijoin_database'
-    networks:
-      - ijoin-api
-
-  userijoin_db:
-    image: postgres:latest
-    volumes:
-      - ./Ema.Database/userijoin.sql:/docker-entrypoint-initdb.d/userijoin.sql
-    environment:
-      POSTGRES_USER: 'userijoin_user'
-      POSTGRES_PASSWORD: 'userijoin_password'
-      POSTGRES_DB: 'userijoin_database'
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'root'
+      POSTGRES_DB: 'root'
     networks:
       - ijoin-api
