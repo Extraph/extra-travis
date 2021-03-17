@@ -6,20 +6,20 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      component: server-web
+      component: serverweb
   template:
     metadata:
       labels:
-        component: server-web
+        component: serverweb
     spec:
       containers:
-        - name: server-web
-          image: rattawitdev/multi-server-web
+        - name: serverweb
+          image: rattawitdev/multi-server-web-k8s
           ports:
             - containerPort: 5000
           env:
             - name: DB_ADMIN_PGHOST
-              value: postgres-admin-cluster-ip-service
+              value: postgres-cluster-ip-service
             - name: DB_ADMIN_PGPORT
               value: '5432'
             - name: DB_ADMIN_PGDATABASE
@@ -27,12 +27,9 @@ spec:
             - name: DB_ADMIN_PGUSER
               value: adminijoin_user
             - name: DB_ADMIN_PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: adminpgpassword
-                  key: ADMINPGPASSWORD
+              value: adminijoin_password
             - name: DB_USER_PGHOST
-              value: postgres-user-cluster-ip-service
+              value: postgres-cluster-ip-service
             - name: DB_USER_PGPORT
               value: '5432'
             - name: DB_USER_PGDATABASE
@@ -40,7 +37,4 @@ spec:
             - name: DB_USER_PGUSER
               value: userijoin_user
             - name: DB_USER_PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: userpgpassword
-                  key: USERPGPASSWORD
+              value: userijoin_password

@@ -1,37 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-admin-deployment
+  name: postgres-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      component: postgres-admin
+      component: postgres
   template:
     metadata:
       labels:
-        component: postgres-admin
+        component: postgres
     spec:
       volumes:
-        - name: postgres-admin-storage
+        - name: postgres-storage
           persistentVolumeClaim:
             claimName: database-persistent-volume-claim
       containers:
-        - name: postgres-admin
+        - name: postgres
           image: postgres
           ports:
             - containerPort: 5432
           volumeMounts:
-            - name: postgres-admin-storage
+            - name: postgres-storage
               mountPath: /var/lib/postgresql/data
-              subPath: postgresadmin
+              subPath: postgres
           env:
             - name: POSTGRES_DB
-              value: adminijoin_database
+              value: root
             - name: POSTGRES_USER
-              value: adminijoin_user
+              value: root
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: adminpgpassword
-                  key: ADMINPGPASSWORD
+              value: root
