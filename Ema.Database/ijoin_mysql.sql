@@ -322,3 +322,92 @@ CREATE TABLE adminijoin_database.TBM_SESSION_USER_HIS
 
 -- ALTER TABLE adminijoin_database.v_Segment_Gen_Qr"
 --     OWNER TO adminijoin_user;
+
+
+
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+----------------------------------------------------------------
+
+
+
+
+
+CREATE TABLE userijoin_database.TBM_USER_SESSION
+(
+    course_id varchar(500) NOT NULL,
+    course_name varchar(500) NOT NULL,
+    course_name_th varchar(500) DEFAULT NULL,
+    session_id varchar(500) NOT NULL,
+    session_name varchar(500) DEFAULT NULL,
+    start_date_time datetime NOT NULL,
+    end_date_time datetime NOT NULL,
+    course_owner_email varchar(500) NOT NULL,
+    course_owner_contact_no varchar(500) DEFAULT NULL,
+    venue varchar(500) DEFAULT NULL,
+    instructor varchar(500) DEFAULT NULL,
+    course_credit_hours_init varchar(500) DEFAULT NULL,
+    passing_criteria_exception_init varchar(500) DEFAULT NULL,
+    course_credit_hours varchar(500) DEFAULT NULL,
+    passing_criteria_exception varchar(500) DEFAULT NULL,
+    is_cancel CHAR(1) NOT NULL DEFAULT '0',
+    cover_photo_name varchar(500) DEFAULT NULL,
+    cover_photo_url varchar(500) DEFAULT NULL,
+    createdatetime datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_by varchar(500) DEFAULT NULL,
+    update_datetime datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (session_id),
+    KEY idx_course_id (course_id),
+    KEY idx_session_id (session_id)
+);
+
+CREATE TABLE userijoin_database.TBM_USER_SEGMENT
+(
+    session_id varchar(500) NOT NULL,
+    segment_name varchar(500) DEFAULT NULL,
+    start_date varchar(500) NOT NULL,
+    end_date varchar(500) NOT NULL,
+    start_time varchar(500) NOT NULL,
+    end_time varchar(500) NOT NULL,
+    start_date_time datetime NOT NULL,
+    end_date_time datetime NOT NULL,
+    venue varchar(500) DEFAULT NULL,
+    createdatetime datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (session_id, start_date_time, end_date_time),
+    CONSTRAINT fk_TBM_USER_SESSION_TBM_USER_SEGMENT_session_id FOREIGN KEY (session_id) REFERENCES userijoin_database.TBM_USER_SESSION (session_id) 
+);
+
+CREATE TABLE userijoin_database.TBM_USER_SESSION_USER
+(
+    session_id varchar(500) NOT NULL,
+    user_id varchar(500) NOT NULL,
+    PRIMARY KEY (session_id, user_id),
+    KEY idx_session_id (user_id),
+    KEY idx_session_id_user_id (session_id,user_id),
+    CONSTRAINT fk_TBM_SESSION_TBM_SESSION_USER_session_id FOREIGN KEY (session_id) REFERENCES userijoin_database.TBM_USER_SESSION (session_id)
+);
+
+CREATE TABLE userijoin_database.TB_USER_REGISTRATION
+(
+    id int NOT NULL AUTO_INCREMENT,
+    session_id varchar(500) NOT NULL,
+    user_id varchar(500) NOT NULL,
+    start_date_qr varchar(500) DEFAULT NULL,
+    is_check_in CHAR(1) NOT NULL DEFAULT '0',
+    is_check_out CHAR(1) NOT NULL DEFAULT '0',
+    check_in_datetime datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    check_in_date varchar(500) DEFAULT NULL,
+    check_in_time int NOT NULL,
+    check_out_datetime datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    check_out_date varchar(500) DEFAULT NULL,
+    check_out_time int NOT NULL,
+    check_in_by varchar(500) DEFAULT NULL,
+    check_out_by varchar(500) DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY idx_check_in_datetime (check_in_datetime),
+    KEY idx_check_in_date (check_in_date),
+    KEY idx_session_id (session_id),
+    KEY idx_user_id (user_id),
+    KEY idx_com (check_in_date,check_in_datetime)
+)
