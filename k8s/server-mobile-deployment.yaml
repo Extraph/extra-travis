@@ -16,7 +16,7 @@ spec:
         - name: servermobile
           image: rattawitdev/multi-server-mobile-k8s
           ports:
-            - containerPort: 5050
+            - containerPort: 80
           env:
             - name: DB_USER_PGHOST
               value: postgres-cluster-ip-service

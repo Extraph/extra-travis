@@ -8,4 +8,4 @@ spec:
     component: servermobile
   ports:
     - port: 5050
-      targetPort: 5050
+      targetPort: 80

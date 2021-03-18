@@ -16,7 +16,7 @@ spec:
         - name: serverweb
           image: rattawitdev/multi-server-web-k8s
           ports:
-            - containerPort: 5000
+            - containerPort: 80
           env:
             - name: DB_ADMIN_PGHOST
               value: postgres-cluster-ip-service

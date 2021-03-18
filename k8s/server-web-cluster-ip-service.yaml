@@ -8,4 +8,4 @@ spec:
     component: serverweb
   ports:
     - port: 5000
-      targetPort: 5000
+      targetPort: 80
