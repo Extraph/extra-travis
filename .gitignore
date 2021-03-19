@@ -45,6 +45,8 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+docker-compose.yml
+deploy.sh
 
 # content below from: https://github.com/github/gitignore/blob/main/Global/Windows.gitignore
 # Windows thumbnail cache files
