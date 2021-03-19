@@ -1,4 +1,6 @@
 # globs
+deploy.sh
+docker-compose.yml
 Makefile.in
 *.userprefs
 *.usertasks
