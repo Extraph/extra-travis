@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+  namespace: ema-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: 190738351372.dkr.ecr.ap-southeast-1.amazonaws.com/multi-client-k8s:latest
+          ports:
+            - containerPort: 3000

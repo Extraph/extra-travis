@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-web-deployment
+  namespace: ema-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: serverweb
+  template:
+    metadata:
+      labels:
+        component: serverweb
+    spec:
+      containers:
+        - name: serverweb
+          image: 190738351372.dkr.ecr.ap-southeast-1.amazonaws.com/multi-server-web-k8s:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: DB_ADMIN_PGHOST
+              value: postgres-cluster-ip-service
+            - name: DB_ADMIN_PGPORT
+              value: '5432'
+            - name: DB_ADMIN_PGDATABASE
+              value: adminijoin_database
+            - name: DB_ADMIN_PGUSER
+              value: adminijoin_user
+            - name: DB_ADMIN_PGPASSWORD
+              value: adminijoin_password
+            - name: DB_USER_PGHOST
+              value: postgres-cluster-ip-service
+            - name: DB_USER_PGPORT
+              value: '5432'
+            - name: DB_USER_PGDATABASE
+              value: userijoin_database
+            - name: DB_USER_PGUSER
+              value: userijoin_user
+            - name: DB_USER_PGPASSWORD
+              value: userijoin_password
