@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ema.ContentData.Domain", "E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.IjoinsChkInOut.Api", "Ema.IjoinsChkInOut.Api\Ema.IjoinsChkInOut.Api.csproj", "{72E8D1EE-A035-4120-B618-06369E550EE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ema.IJoin.MySql.Api", "Ema.IJoin.MySql.Api\Ema.IJoin.MySql.Api.csproj", "{A188B7F5-10E7-45B2-9051-AEFCB4AB5643}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{72E8D1EE-A035-4120-B618-06369E550EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72E8D1EE-A035-4120-B618-06369E550EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72E8D1EE-A035-4120-B618-06369E550EE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A188B7F5-10E7-45B2-9051-AEFCB4AB5643}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A188B7F5-10E7-45B2-9051-AEFCB4AB5643}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A188B7F5-10E7-45B2-9051-AEFCB4AB5643}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A188B7F5-10E7-45B2-9051-AEFCB4AB5643}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,6 +79,7 @@ Global
 		{6A5979D9-D3B2-42A8-87C8-7BB72CDAF0A9} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
 		{3DEC8171-6740-4297-BABF-87008C3EA0B0} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
 		{72E8D1EE-A035-4120-B618-06369E550EE6} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
+		{A188B7F5-10E7-45B2-9051-AEFCB4AB5643} = {1852245D-39D6-4E4E-8CA4-021CEB7B3A3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6D0FE000-2E4A-4B10-9E44-A897CC7C3B79}

@@ -1,6 +1,7 @@
 -- dotnet tool install --global dotnet-ef
--- dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=3306;Database=adminijoin_database;Username=root;Password=password" MySql.EntityFrameworkCore -o EfAdminModels -f;
--- dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=3306;Database=userijoin_database;Username=root;Password=password" MySql.EntityFrameworkCore -o EfUserModels -f;
+
+-- dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=3306;Database=adminijoin_database;Username=root;Password=password" MySql.Data.EntityFrameworkCore -o EfAdminModels -f;
+-- dotnet ef dbcontext scaffold "Server=127.0.0.1;Port=3306;Database=userijoin_database;Username=root;Password=password" MySql.Data.EntityFrameworkCore -o EfUserModels -f;
 
 DROP DATABASE `adminijoin_database`;
 DROP DATABASE `userijoin_database`;
